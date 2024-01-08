@@ -10,22 +10,6 @@
                           # francesco.checchi@lshtm_ac.uk 
 
 
-# #...............................................................................   
-# ### Function to compute deaths due to each epidemic-prone infection during
-#     # the projection period, for all age groups: one bootstrap run
-# #...............................................................................
-# 
-# f_d_epid <- function(pars_i = pars_i, diseases_in = diseases_in) {
-# 
-#   #.........................................
-#   ## Implement SIR model
-#   
-#   
-#   
-#   
-#     
-# }
-
 
 #...............................................................................   
 ### Function to implement one run of a Susceptible-Infectious-Recovered model
@@ -144,15 +128,17 @@ f_seir <- function(disease = "diphtheria", scenario = "central",
     
     # Set starting compartment sizes
     initial_conditions$I <- 1e-6 # 1 per million per age group infected
-    initial_conditions$S <- unlist(susc[[disease]][[scenario]][rmonth, ages] - 
+    initial_conditions$S <- unlist(s_list[[disease]][[scenario]][rmonth, ages] - 
       initial_conditions$I)
     initial_conditions$R <- 1 - initial_conditions$I - initial_conditions$S
     
-    # Set starting relative proportions of susceptibles / not susceptibles to
-      # severe disease
-    initial_vd$S
-#######
-        
+    # Set starting proportion protected against severe disease, out of all
+      # susceptible to infection
+    initial_prop_vd$S <- initial_conditions$S
+    initial_prop_vd$Vd <- unlist(vd_list[[disease]][[scenario]][rmonth, ages])
+    initial_prop_vd$prop_vd <- initial_prop_vd$Vd / (initial_prop_vd$Vd +
+      initial_prop_vd$S)
+    
     # Prepare the population to model as affected by the epidemic
     model_population <- epidemics::population(
       name = "Gaza",
@@ -209,17 +195,20 @@ f_seir <- function(disease = "diphtheria", scenario = "central",
     }
      
   #...................................      
-  ## Compute cumulative severe cases and deaths, by sub-period
+  ## Compute cumulative deaths, by sub-period
     
     # Add proportion of severe cases and CFR values
     out <- merge(out, p_sev_sim, by = c("age_group", "subperiod"), all.x = TRUE)
     out <- merge(out, cfr_sim, by = c("age_group", "subperiod"), all.x = TRUE)
     
+    # Add proportion protected against severe disease among those susceptible
+      # to infection
+    out <- merge(out, initial_prop_vd[, c("age_group", "prop_vd")], 
+      by = "age_group", all.x = TRUE)
+    
     # Multiply to obtain deaths
-    out$deaths <- out$infected * out$p_sev * out$cfr
+    out$deaths <- out$infected * out$p_sev * (1 - out$prop_vd) * out$cfr
 
-### need to correct for protection against disease    
-        
     # Return result
     return(out)
 }
