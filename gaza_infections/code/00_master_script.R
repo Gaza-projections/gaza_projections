@@ -139,21 +139,21 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
         # if scenario is optimistic
         if (j == "best") {
           x <- s
-          x[, ages] <- runif((ncol(s) - 1) * nrow(s), 0, 0.20)
+          x[, ages] <- 0.20
           s_modelled[[i]][[j]] <- x
         }  
         
         # if scenario is central
         if (j == "central") {
           x <- s
-          x[, ages] <- runif((ncol(s) - 1) * nrow(s), 0.20, 0.50)
+          x[, ages] <- 0.40
           s_modelled[[i]][[j]] <- x
         }  
         
         # if scenario is pessimistic
         if (j == "worst") {
           x <- s
-          x[, ages] <- runif((ncol(s) - 1) * nrow(s), 0.50, 1)
+          x[, ages] <- 0.60
           s_modelled[[i]][[j]] <- x
         }  
           
@@ -171,21 +171,21 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
         # if scenario is optimistic
         if (j == "best") {
           x <- vd
-          x[, ages] <- runif((ncol(vd) - 1) * nrow(vd), 0.80, 1.00)
+          x[, ages] <- 0.40
           vd_modelled[[i]][[j]] <- x
         }  
         
         # if scenario is central
         if (j == "central") {
           x <- vd
-          x[, ages] <- runif((ncol(vd) - 1) * nrow(vd), 0.50, 0.80)
+          x[, ages] <- 0.30
           vd_modelled[[i]][[j]] <- x
         }  
         
         # if scenario is pessimistic
         if (j == "worst") {
           x <- vd
-          x[, ages] <- runif((ncol(vd) - 1) * nrow(vd), 0.20, 0.50)
+          x[, ages] <- 0.20
           vd_modelled[[i]][[j]] <- x
         }  
           
@@ -200,7 +200,7 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
     s[, ages] <- 0
     
     # Nested list that will hold all of them
-    susc <- list()
+    s_list <- list()
     
     # For each disease...
     for (i in diseases$disease) {
@@ -209,7 +209,7 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
       if (i %in% 
           diseases[which(diseases$immunity_source == "model"), "disease"]) {
         for (j in scenarios) {
-          susc[[i]][[j]] <- s_modelled[[i]][[j]] + vd_modelled[[i]][[j]]
+          s_list[[i]][[j]] <- s_modelled[[i]][[j]] + vd_modelled[[i]][[j]]
         }
       }
       
@@ -228,20 +228,22 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
           s[k, ages] <- x
         }
         for (j in scenarios) {
-          susc[[i]][[j]] <- s
+          s_list[[i]][[j]] <- s
         }
       }
     }  
     
     
   #...................................      
-  ## Populate proportions vaccine-protected from severe disease
+  ## Populate proportions not protected from infection but 
+    # (vaccine-)protected from severe disease
+    
     # Generate structure of each disease-scenario dataframe
-    v <- data.frame(month = 1:6)
-    v[, ages] <- 0
+    vd <- data.frame(month = 1:6)
+    vd[, ages] <- 0
     
     # Nested list that will hold all of them
-    vprot <- list()
+    vd_list <- list()
     
     # For each disease...
     for (i in diseases$disease) {
@@ -250,7 +252,7 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
       if (i %in% 
           diseases[which(diseases$immunity_source == "model"), "disease"]) {
         for (j in scenarios) {
-          vprot[[i]][[j]] <- vprot_modelled[[i]][[j]]
+          vd_list[[i]][[j]] <- vd_modelled[[i]][[j]]
         }
       }
       
@@ -259,7 +261,7 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
       if (i %in% 
           diseases[which(diseases$immunity_source == "assumed"), "disease"]) {
         for (j in scenarios) {
-          vprot[[i]][[j]] <- v
+          vd_list[[i]][[j]] <- vd
         }
       }
     }  
@@ -274,7 +276,7 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
       "digaale_svy.rds", sep=""))), error = function (e) {"file not found"})
     
     # If the data are not found, download them and save them
-    if (digaale[1] == "file not found") {
+    if ("file not found" %in% digaale) {
       digaale <- 
         socialmixr::get_survey("https://zenodo.org/doi/10.5281/zenodo.5226280")
       write_rds(digaale, paste(dir_path, 'inputs/', "digaale_svy.rds", sep=""))
@@ -285,7 +287,7 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
       "digaale_pop.rds", sep=""))), error = function (e) {"file not found"})
     
     # If the data are not found, download them and save them
-    if (digaale_pop[1] == "file not found") {
+    if ("file not found" %in% digaale_pop) {
       digaale_pop <- 
         read.csv("https://zenodo.org/records/7071876/files/espicc_somaliland_digaale_survey_population.csv?download=1")
       write_rds(digaale_pop, paste(dir_path, 'inputs/', 
@@ -338,7 +340,7 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
   ## Prepare objects for SEIR models, for any epidemic disease
     # and scenario
     
-    # Prepare a generic timeline
+    # Initialise a generic timeline
     timeline <- data.frame(date = as_date(date_start:date_end), 
       time = 0:(date_end - date_start), time_epid = 0, 
       subperiod = "subperiod1")
@@ -352,23 +354,22 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
       )
       names(time_periods) <- c("start", "end_subperiod1", "end_subperiod2")
       
-    # Prepare the demography vector
+    # Prepare the demography vector (age-specific population)
     demography_vector <- pop
     names(demography_vector) <- rownames(contact_matrix)
 
-    # Dataframe of model compartment sizes, by age (as proportions, not numbers)
+    # Initialise dataframe of model compartment sizes, by age (as proportions)
       # compliant with 'epidemics' package
     initial_conditions <- matrix(0, nrow = length(ages), ncol = 5,
       dimnames = list(rownames(contact_matrix), c("S", "E", "I", "R", "V")))
     initial_conditions <- as.data.frame.matrix(initial_conditions)
         
-    # Data frame of relative proportions of each age group who are
-        # susceptible to infection and not protected against severe disease,
-        # versus susceptible to infection but protected against severe disease
-        # due to vaccination: from immunity analysis
-    initial_vd <- data.frame(age_group = rownames(contact_matrix), S = NA, 
-      Vd = NA)  
-    
+    # Initialise dataframe of proportions of each age group who are
+        # protected against severe disease (Vd), out of all who are susceptible
+        # to infection (Vd + S): from immunity analysis
+    initial_prop_vd <- data.frame(age_group = rownames(contact_matrix), S = NA, 
+      Vd = NA, prop_vd = NA)  
+
 
 #...............................................................................  
 ### ENDS
