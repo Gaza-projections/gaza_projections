@@ -15,18 +15,64 @@
 ### Function to implement one run of a Susceptible-Infectious-Recovered model
     # during the projection period, for all ages, an infection and a scenario,
     # tracking cumulative infection attack rate and deaths over period
+    # uses Epiverse-TRACE 'epidemics' package
 #...............................................................................
 
 f_seir <- function(disease = "diphtheria", scenario = "central",
   initial_conditions = initial_conditions, timeline = timeline,
   contact_matrix = contact_matrix, demography_vector = demography_vector,
-  see = see, epidemic_pars = epidemic_pars) {
+  see_data = see_data, epidemic_pars = epidemic_pars, diseases = diseases) {
 
   #...................................      
-  ## Pick random starting date for epidemic
+  ## Identify the right expert elicitation distributions to sample from
+    
+    # Decide which exemplar disease to refer to, based on 
+      # route of transmission of disease being modelled
+    route <- diseases[which(diseases$disease == disease), "route"]
+    exemplar <- diseases[which(diseases$route == route & 
+      diseases$exemplar == "Y"), "disease"]
+      
+    # Grab relevant SEE distributions
+      # probability of an outbreak of the disease
+      see_p <- see_data[["p"]][[disease]]
+      
+      # R0 of exemplar disease, by sub-period
+      see_r0 <- see_data[["r0"]][[exemplar]]
+      
+      # proportion of severe cases for exemplar disease, by sub-period
+      see_prop_sev <- see_data[["prop_sev"]][[exemplar]]
+
+      # CFR of severe cases for exemplar disease, by sub-period
+      see_cfr <- see_data[["cfr"]][[exemplar]]
+      
+
+  #...................................      
+  ## Decide whether an outbreak will occur during the projection period
+    
+    # Sample a probability of outbreak occurrence
+    p <- see_p #####HOW TO SAMPLE
+    
+    # Sample from a binomial distribution; if 1, outbreak occurs; if 0, end here  
+    y <- rbinom(1, 1, prob = p)
   
-    # Select random starting day within the projection period
-      # select random starting day
+  if (y == 0) {
+    
+    # Return output with 0 deaths
+    out <- expand.grid(rownames(initial_conditions), 
+      c("subperiod1", "subperiod2") )
+    colnames(out) <- c("age_group", "subperiod")
+    out$deaths <- 0
+    return(out[, c("age_group", "subperiod", "deaths")])
+
+  }
+  
+    
+  if (y == 1) {    
+  #...................................      
+  ## Select random starting date for epidemic
+  
+    # Sample random starting day within the projection period
+      # sample random starting day
       epid_start <- sample(timeline$time, 1)
       
       # update in timeline
@@ -46,21 +92,29 @@ f_seir <- function(disease = "diphtheria", scenario = "central",
       time_end_subperiod2 <- max(timeline$time) - max(epid_start,
         time_periods["end_subperiod1"] + 1)
 
-      
+            
   #...................................      
   ## Select random subperiod-specific value of R0 from elicited EDF
 
     # Create dataframe to hold simulated values
     r0_sim <- data.frame(subperiod = c("subperiod1", "subperiod2"), r0 = NA)
     
+    # Sample a random quantile which will apply to both subperiod ECDFs
+    q <- runif(1, 0, 1)
+    
     # For each sub-period...
     for (i in c("subperiod1", "subperiod2")) { 
       
-      # sample an elicited value of R0
-      x <- see[[disease]][[scenario]][[i]][["r0"]]
+      # get elicited value of the exemplar R0, at the sampled ECDF quantile
+      x <- see_r0[[i]] ####TO DO
+      
+      # compute where in the R0 range this falls, as a proportion
+      pos <- 
+      
+      x <- see_data[[disease]][[scenario]][[i]][["r0"]]
       r0_sim[which(r0_sim$subperiod == i), "r0"] <- x#################
     }  
-# TO DO - NEED TO SAMPLE SEE, with same quantile for both subperiods
+# TO DO - NEED TO SAMPLE see_data, with same quantile for both subperiods
 
     
   #...................................      
@@ -83,8 +137,8 @@ f_seir <- function(disease = "diphtheria", scenario = "central",
     # For each sub-period...
     for (i in c("subperiod1", "subperiod2")) {   
       # sample an elicited value of proportion of severe cases
-      x <- see[[disease]][[scenario]][[i]][["p_sev"]] #################### 
-# TO DO - NEED TO SAMPLE SEE, with same quantile for both subperiods
+      x <- see_data[[disease]][[scenario]][[i]][["p_sev"]] #################### 
+# TO DO - NEED TO SAMPLE see_data, with same quantile for both subperiods
         
       # use this sampled value to scale all the age-specific values  
       p_sev_sim[which(p_sev_sim$subperiod == i), "p_sev"] <- 
@@ -109,8 +163,8 @@ f_seir <- function(disease = "diphtheria", scenario = "central",
       
     for (i in c("subperiod1", "subperiod2")) {   
       # sample an elicited value of proportion of severe cases
-      x <- see[[disease]][[scenario]][[i]][["cfr"]] #################### 
-# TO DO - NEED TO SAMPLE SEE, with same quantile for both subperiods
+      x <- see_data[[disease]][[scenario]][[i]][["cfr"]] #################### 
+# TO DO - NEED TO SAMPLE see_data, with same quantile for both subperiods
         
       # use this sampled value to scale all the age-specific values  
       cfr_sim[which(cfr_sim$subperiod == i), "cfr"] <- 
@@ -210,7 +264,8 @@ f_seir <- function(disease = "diphtheria", scenario = "central",
     out$deaths <- out$infected * out$p_sev * (1 - out$prop_vd) * out$cfr
 
     # Return result
-    return(out)
+    return(out[, c("age_group", "subperiod", "deaths")])
+  }
 }
 
 

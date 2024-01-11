@@ -126,6 +126,7 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
       "disease"])
            
     
+######TO DELETE################################################    
   #...................................      
   ## Create dummy input datasets (just for developing code)
     # Proportion unprotected from infection and severe disease 
@@ -192,7 +193,23 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
       }
     }  
 
+    # Dummy empirical distributions of R0, by period
+      # dummy empirical distributions of R0 for measles, by period
+      r0_measles <- data.frame(r0 = seq(5, 15, 0.5))
+      r0_measles$p <- dnorm(r0_measles$r0, 10, 2)
+      r0_measles$p_cum <- cumsum(r0_measles$p) / sum(r0_measles$p)
+  
+      # dummy empirical distributions of R0 for cholera, by period
+      r0_cholera <- data.frame(r0 = seq(4, 10, 0.5))
+      r0_cholera$p <- dnorm(r0_cholera$r0, 6, 1)
+      r0_cholera$p_cum <- cumsum(r0_cholera$p) / sum(r0_cholera$p)
+      
+      # overall
+      
     
+    
+#################################################################
+        
   #...................................      
   ## Populate proportions susceptible to infection values
     # Generate structure of each disease-scenario dataframe
