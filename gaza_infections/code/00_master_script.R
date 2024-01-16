@@ -102,11 +102,18 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
   #...................................      
   ## Read in or set other parameters
 
+    # Identify number of simulation runs
+    runs <- as.integer(gen_pars[which(gen_pars$parameter == "runs"), 
+      "value_gen"])
+    
     # Identify start and end dates of projection period
     date_start <- dmy(gen_pars[which(gen_pars$parameter == "date_start"), 
       "value_gen"])
     date_end <- dmy(gen_pars[which(gen_pars$parameter == "date_end"), 
       "value_gen"])
+    
+    # Identify subperiods
+    subperiods <- c("subperiod1", "subperiod2")
     
     # Identify scenarios
     scenarios <- c("central", "worst", "best")
@@ -124,91 +131,24 @@ source(paste(dir_path, "code/00_specify_functions.R", sep =""))
     # Identify epidemic-prone diseases
     diseases_epid <- unique(diseases[which(diseases$category == "epidemic"), 
       "disease"])
-           
     
-######TO DELETE################################################    
-  #...................................      
-  ## Create dummy input datasets (just for developing code)
-    # Proportion unprotected from infection and severe disease 
-      # - from immunity model
-    s <- data.frame(month = 1:6)
-    s[, ages] <- 0
-    s_modelled <- list()
-    for (i in diseases[which(diseases$immunity_source == "model"), "disease"]) {
-      for (j in scenarios) {
-        
-        # if scenario is optimistic
-        if (j == "best") {
-          x <- s
-          x[, ages] <- 0.20
-          s_modelled[[i]][[j]] <- x
-        }  
-        
-        # if scenario is central
-        if (j == "central") {
-          x <- s
-          x[, ages] <- 0.40
-          s_modelled[[i]][[j]] <- x
-        }  
-        
-        # if scenario is pessimistic
-        if (j == "worst") {
-          x <- s
-          x[, ages] <- 0.60
-          s_modelled[[i]][[j]] <- x
-        }  
-          
-      }
-    }  
+    # Identify exemplar diseases and diseases they represent       
+    exemplars <- diseases[which(diseases$exemplar == "Y"), "disease"]
+    list_exemplars <- list()
+    for (e in exemplars) {
+      x <- diseases[which(diseases$disease == e), "route"]
+      list_exemplars[[e]] <- diseases[which(diseases$route == x), "disease"]
+    }
+    
+    
+    
+#...............................................................................  
+### Creating dummy data
+#...............................................................................
 
-    # Proportion unprotected from infection but protected against severe disease 
-      # - from immunity model
-    vd <- data.frame(month = 1:6)
-    vd[, ages] <- 0  
-    vd_modelled <- list()
-    for (i in diseases[which(diseases$immunity_source == "model"), "disease"]) {
-      for (j in scenarios) {
-        
-        # if scenario is optimistic
-        if (j == "best") {
-          x <- vd
-          x[, ages] <- 0.40
-          vd_modelled[[i]][[j]] <- x
-        }  
-        
-        # if scenario is central
-        if (j == "central") {
-          x <- vd
-          x[, ages] <- 0.30
-          vd_modelled[[i]][[j]] <- x
-        }  
-        
-        # if scenario is pessimistic
-        if (j == "worst") {
-          x <- vd
-          x[, ages] <- 0.20
-          vd_modelled[[i]][[j]] <- x
-        }  
-          
-      }
-    }  
+source(paste(dir_path, "code/00_create_dummy_data.R", sep =""))
 
-    # Dummy empirical distributions of R0, by period
-      # dummy empirical distributions of R0 for measles, by period
-      r0_measles <- data.frame(r0 = seq(5, 15, 0.5))
-      r0_measles$p <- dnorm(r0_measles$r0, 10, 2)
-      r0_measles$p_cum <- cumsum(r0_measles$p) / sum(r0_measles$p)
-  
-      # dummy empirical distributions of R0 for cholera, by period
-      r0_cholera <- data.frame(r0 = seq(4, 10, 0.5))
-      r0_cholera$p <- dnorm(r0_cholera$r0, 6, 1)
-      r0_cholera$p_cum <- cumsum(r0_cholera$p) / sum(r0_cholera$p)
-      
-      # overall
-      
-    
-    
-#################################################################
+
         
   #...................................      
   ## Populate proportions susceptible to infection values

@@ -39,9 +39,6 @@ f_seir <- function(disease = "diphtheria", scenario = "central",
       # R0 of exemplar disease, by sub-period
       see_r0 <- see_data[["r0"]][[exemplar]]
       
-      # proportion of severe cases for exemplar disease, by sub-period
-      see_prop_sev <- see_data[["prop_sev"]][[exemplar]]
-
       # CFR of severe cases for exemplar disease, by sub-period
       see_cfr <- see_data[["cfr"]][[exemplar]]
       
