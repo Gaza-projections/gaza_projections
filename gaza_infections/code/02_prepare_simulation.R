@@ -19,9 +19,9 @@
 
     # Simulated epidemic parameters dataframe
       # initialise
-      sim_pars <- expand.grid(disease = diseases$disease, 
+      sim_pars <- expand.grid(disease = diseases_epid, 
         parameter = c("pu", "r0", "tau", "pre_tau", "pd", "cfr", "w", "rr_r0", 
-          "rr_cfr"),
+          "rr_cfr", "r0_base", "cfr_base"),
         subperiod = c("overall", subperiods)
       )
     
@@ -43,12 +43,13 @@
       # select needed parameters
       ranges <- epidemic_pars[, c("disease", "parameter", "value_gen")]
       ranges <- subset(ranges, parameter %in% c("r0_min", "r0_max",
-        "cfr_min", "cfr_max", "pd_min", "pd_max"))
+        "cfr_min", "cfr_max", "pd_min", "pd_max", "r0_base_min", "r0_base_max",
+        "cfr_base_min", "cfr_base_max"))
       
       # transform to wide version
       ranges$which_value <- substr(ranges$parameter, nchar(ranges$parameter) - 2,
         nchar(ranges$parameter))
-      ranges$parameter <- sub("\\_.*", "", ranges$parameter)
+      ranges$parameter <- sub("\\_m.*", "", ranges$parameter)
       ranges <- reshape(ranges, direction = "wide", 
         idvar = c("disease", "parameter"), timevar = "which_value")
       colnames(ranges) <- c("disease", "parameter", "max", "min")
