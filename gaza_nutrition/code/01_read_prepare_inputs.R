@@ -24,7 +24,37 @@
     # Read dataframe
     df_wt <- data.frame(readxl::read_excel(filename, sheet = "for_r"))
 
+  #...................................      
+  ## Read data on [tr]ucks arriving into Gaza
 
+    # Identify file name
+    filename <- paste(dir_path, 'inputs/', "gaza_calories.dta", sep="")
+    
+    # Read dataframe
+    df_tr <- data.frame(haven::read_dta(filename))
+    
+# Calculate total calories entering Gaza for each day
+trucks_data$total_kcal_14 <- trucks_data$food_truck * mt_truck_14 * people_mt * calories
+trucks_data$total_kcal_16 <- trucks_data$food_truck * mt_truck_16 * people_mt * calories
+
+# Calculate calories per person per day for each day
+trucks_data$kcal_person_day_14 <- trucks_data$total_kcal_14 / population
+trucks_data$kcal_person_day_16 <- trucks_data$total_kcal_16 / population
+
+# Print the result
+print(trucks_data$kcal_person_day_14)
+print(trucks_data$kcal_person_day_16)
+
+# Calculate monthly average calories
+monthly_avg_kcal <- aggregate(cbind(kcal_person_day_14, kcal_person_day_16) ~ month_year, trucks_data, mean, na.rm = TRUE)
+
+# Print the result
+print(monthly_avg_kcal)
+
+
+
+
+    
   #...................................      
   ## Read data from a 2020 survey of NCDs, containing [ad]ult BMI and diet intake
 
@@ -67,7 +97,6 @@
     # Read intake to date values
     todate_pars <- data.frame(readxl::read_excel(filename, sheet = "to_date"))
 
-      
   #...................................      
   ## Read in or set other parameters
 
@@ -134,7 +163,17 @@
     df_wt_m <- df_wt[complete.cases(df_wt[, x]), x]
 #    df_wt_m <- subset(df_wt_m, special == FALSE)
 
-
+    
+  #...................................      
+  ## Prepare the 2023- truck and food assistance dataset
+    
+    # Select and rename relevant columns
+    df_tr <- df_tr[, c("date", "total_truck", "food_truck")]
+    colnames(df_tr) <- c("date", "n_trucks", "n_trucks_food")
+    
+    # Fix date formats
+    df_tr$date <- dmy(df_tr$date)
+    
   #...................................      
   ## Prepare the 2020 adult NCD survey dataset
     
@@ -152,7 +191,23 @@
     df_ad$age_cat <- cut(df_ad$age, breaks = c(40, 50, 60, 70, 80, 120), 
       include.lowest = TRUE, right = FALSE)
     
+  #...................................      
+  ## Prepare the 2019 growth monitoring child dataset
+  
+    # Keep and rename needed columns
+    df_gm <- df_gm[, c("sex", "age_m", "wt", "ht")]
+    colnames(df_gm) <- c("sex", "age_mths", "weight", "height")
     
+    # Check for missingness and remove missing observations
+    prop.table(table(complete.cases(df_gm)))
+    df_gm <- df_gm[complete.cases(df_gm), ]
+    
+    # Check for ages outside limits
+    range(df_gm$age_mths) # none, all OK
+    
+    # Recode gender
+    df_gm$sex <- ifelse(df_gm$sex == 1, "m", "f")
+
 #...............................................................................  
 ### ENDS
 #...............................................................................

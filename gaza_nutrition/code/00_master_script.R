@@ -76,7 +76,7 @@
     
   #...................................      
   ## Estimate caloric intake deficit and weight loss among adults
-  source(paste(dir_path, "code/", "03_estimate_wt_loss.r", sep="") )
+  source(paste(dir_path, "code/", "04_estimate_wt_loss.r", sep="") )
     
     
     
