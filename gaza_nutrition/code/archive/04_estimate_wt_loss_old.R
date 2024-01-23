@@ -15,57 +15,33 @@
 #...............................................................................
 
   #...................................      
-  ## Add variables to survey dataset
-  
-    # Estimate baseline fat mass in adults surveyed
-    df_ad$f_start <- apply(df_ad, 1, f_fat)
-
-    # Resting metabolic rate per day
-    df_ad$rmr <- NA
+  ## Initialise new columns of NCD survey dataframe
     
-    # Weight per day of adults (set to starting value at the beginning)
-    df_ad$wt_now <- df_ad$weight
+    # Value of caloric intake for each month to date in adult survey data
+    df_ad$duration <- NA
+    df_ad[, paste("intake_month", 1:months_todate, sep = "_")] <- NA
     
-    # Change in intake per day
-    df_ad$change_intake <- NA
-
-  #...................................      
-  ## Initialise objects required for weight change model
-    
-    # Timeline
-    timeline <- data.frame(date = as.Date(date_crisis : date_end), prop = NA)
-    timeline$period <- "to_date"
-    timeline[which(timeline$date %in% as.Date(date_start:(date_mid - 1))),
-      "period"] <- names(subperiods)[1]
-    timeline[which(timeline$date %in% as.Date(date_mid:date_end)),
-      "period"] <- names(subperiods)[2]
-    timeline$scenario_intake <- NA
-    timeline$day <- 1:nrow(timeline)
-    
-    # Proportion of intake that can be met from non-aid sources (to date)
-    x <- timeline[which(timeline$period == "to_date"), "date"]
-    prop <- matrix(NA, nrow = nrow(df_ad), ncol = length(x) )
-    colnames(prop) <- x
-        
-    # Intake reduction per day in timeline
-    change_intake <- matrix(NA, nrow = nrow(df_ad), ncol = nrow(timeline) )
-    colnames(change_intake) <- timeline$date
-
-    # Weight per day in timeline
-    wt_now <- matrix(NA, nrow = nrow(df_ad), ncol = nrow(timeline) )
-    colnames(wt_now) <- timeline$date
-    
+    # Intake reduction and weight loss
+    for (i in c("to_date", names(subperiods)) ) {
+      df_ad[, paste("intake_reduction", i, sep = "_")] <- NA
+      df_ad[, paste("percent_wt_loss", i, sep = "_")] <- NA
+    }
+    df_ad$intake_reduction <- NA
+    df_ad$percent_wt_loss <- NA
     
   #...................................      
   ## Initialise or read other objects 
     
+    # Read model of weight loss as a function of dietary intake
+    fit <- read_rds(paste(dir_path, "outputs/", "wt_loss_model.rds", sep=""))  
+    
     # Read estimates of caloric intake from food aid to date, per run
     if (!exists("aid_to_date") ) {aid_to_date <- read_rds(paste(dir_path, 
       "outputs/", "out_food_aid_to_date.rds", sep=""))}
-    aid_to_date <- aid_to_date[order(aid_to_date$run, aid_to_date$date), ]
+    aid_to_date <- aid_to_date[order(aid_to_date$run, aid_to_date$month), ]
     
     # Output columns of interest
-    out_cols <- c(grep("change_intake_", colnames(df_ad), value = TRUE),
+    out_cols <- c(grep("intake_reduction_", colnames(df_ad), value = TRUE),
         grep("percent_wt_loss_", colnames(df_ad), value = TRUE) )
     
     # Initialise output of each run
@@ -78,8 +54,8 @@
     pb <- txtProgressBar(min = 1, max = max(runs$run), style = 3)
     
 #...............................................................................  
-### Estimating intake reduction and weight loss
-  # by scenario and day in the timeline, for each simulation run
+### Estimating weight loss as percent of starting weight and intake reduction
+  # by scenario and period, for each simulation run
 #...............................................................................
   
 for (run_i in 1:nrow(runs)) {  
@@ -94,115 +70,103 @@ for (run_i in 1:nrow(runs)) {
     rx <- runs[run_i, "rx"]
       # rx is the extent along the positive-negative spectrum, so 1-rx = inverse  
     
-    # Select random food aid quantities per month to date; add to timeline
-    aid <- aid_to_date[which(aid_to_date$run == run_i), c("date", "aid")]
-    timeline <- merge(timeline, aid, by = "date", all.x = TRUE)
+    # Select random food aid quantities per month to date
+    aid <- as.vector(aid_to_date[which(aid_to_date$run == run_i), "aid"])
     
-    # Select random proportions coming from different non-aid sources
-      # select values by month
-      todate_pars$prop <- todate_pars$min + 
-        (1 - rx) * (todate_pars$max - todate_pars$min)
+    # Select random proportions coming from different non-aid sources, per month
+    todate_pars$prop <- todate_pars$min + 
+      (1 - rx) * (todate_pars$max - todate_pars$min)
     
-      # sum contributions from stocks and agriculture
-      x <- aggregate(todate_pars$prop, 
-        by = list(month_start = todate_pars$month_start), FUN = sum)
-      colnames(x) <- c("month_start", "prop")
-      
-      # transfer to the daily timeline
-      for (i in 1:nrow(x)) {
-        if (i < nrow(x)) {
-          timeline[which(timeline$date %in% 
-            as.Date(as.Date(x[i, "month_start"]) :
-            as.Date(x[i+1, "month_start"] - 1))), "prop"] <- x[i, "prop"]
-        }
-        
-        if (i == nrow(x)) {
-          timeline[which(timeline$date %in% 
-            as.Date(as.Date(x[i, "month_start"]) :
-            as.Date(date_start - 1))), "prop"] <- x[i, "prop"]
-        }  
-      }
-    
-    # Select random scenario values of food intake during projection subperiods
+    # Select random scenario values of food intake
     scenario_pars$intake <- intake_target * (scenario_pars$min + (1 - rx) * 
       (scenario_pars$max - scenario_pars$min) )
   
   #...................................      
-  ## Figure out intake for period to date
+  ## Figure out intake and weight loss for period to date
+    
+    # Compute total non-aid proportion by month (may be > 1)
+    prop <- aggregate(todate_pars$prop, by = list(month = todate_pars$month), 
+      FUN = sum)$x
     
     # Compute intake per month in period to date
+    for (i in 1:months_todate) {
       # intake is either the baseline or the sum of food aid and other sources,
         # whichever is lower
-      # first compute proportion of baseline intake met by stocks or agri
-      x <- df_ad$intake_baseline %*% t(timeline$prop)
+      df_ad[, paste("intake_month", i, sep = "_")] <- pmin(aid[i] + 
+        df_ad$intake_baseline * prop[i], df_ad$intake_baseline)
+    }
+    
+    # Compute overall mean intake reduction to date
+    df_ad$intake_reduction <- df_ad$intake_baseline - 
+      rowSums(df_ad[, grep("intake_month", colnames(df_ad))]) / months_todate
+    
+      # store value
+      df_ad$intake_reduction_to_date <- df_ad$intake_reduction 
+    
+    # Estimate percent weight reduction to date from prediction and its SE
+      # set months of duration
+      df_ad$duration <- months_todate
       
-      # then add food aid
-      x <- sweep(x, 2, timeline$aid, "+")
+      # predict
+      x <- predict(fit, newdata = df_ad, se.fit = TRUE)
       
-      # then work out the minimum between baseline intake and current intake
-      x <- pmin(x, df_ad$intake_baseline)
-
-    # Compute intake reduction per day
-    change_intake <- sweep(x, 1, df_ad$intake_baseline, "-")
+      # sample from prediction interval
+      df_ad$percent_wt_loss <- exp(qnorm(rx, mean = x$fit, sd = x$se.fit)) *
+        months_todate
+      
+      # store prediction
+      df_ad$percent_wt_loss_to_date <- df_ad$percent_wt_loss
 
   #...................................      
-  ## Estimate daily evolution of weight to date based on mechanistic model
-  for (i  in 1:nrow(subset(timeline, period == "to_date"))) {
-      
-    # Update resting metabolic date
-    df_ad$rmr <- apply(df_ad, 1, f_rmr)
-    
-    # Update change in intake
-    df_ad$change_intake <- change_intake[, i]
-      
-    # Update instantaneous weight
-    df_ad$wt_now <- df_ad$wt_now + apply(df_ad, 1, f_hall)
-    
-    # Store new end-of-day weight
-    wt_now[, i] <- df_ad$wt_now
-          
-    }  
-    
-  #...................................      
-  ## Figure out intake and weight loss by scenario
+  ## Figure out intake and weight loss by scenario...
     
   for (i in scenarios) {
     
-    # Compute food intake per day during each projection subperiod
-    for (j in subperiods) {
-      timeline[which(timeline$period == names(subperiods)[subperiods == j] ),
-        "scenario_intake"] <-
-        scenario_pars[which(scenario_pars$scenario == i & 
-          scenario_pars$period == j), "intake"]
-    }
+    #...and projection subperiod:
     
-    # Compute food intake change, given baseline intake
-    days <- timeline[which(timeline$period != "to_date"), "day"]
-    change_intake[,  days] <- rep(-df_ad$intake_baseline, length(days))
-    change_intake[,  days] <- sweep(change_intake[,  days], 2, 
-      timeline[which(timeline$day %in% days), "scenario_intake"], "+")
-
-    # Estimate daily evolution of weight to date based on mechanistic model
-    for (j  in days) {
+    for (j in names(subperiods) ) {
+      
+      # figure out total time of exposure to projection period (midpoint)
+      months_project <- ifelse(j == "subperiod1", 1.5, 4.5)
+      
+      # set months of exposure
+      df_ad$duration <- months_todate + months_project
+    
+      # compute mean intake reduction at midpoint, weighted by period durations
+      if (j == "subperiod1") {
+        df_ad$intake_reduction <-(df_ad$intake_reduction_to_date * months_todate 
+          + (df_ad$intake_baseline - 
+              scenario_pars[which(scenario_pars$scenario == i 
+              & scenario_pars$period == subperiods[[j]]), "intake"]) *  
+            months_project) / (months_todate + months_project)
+      }
+      
+      if (j == "subperiod2") {
+      df_ad$intake_reduction <-(df_ad$intake_reduction_to_date * months_todate +
+        (df_ad$intake_baseline - scenario_pars[which(scenario_pars$scenario == i 
+          & scenario_pars$period == subperiods[["subperiod1"]]), "intake"])* 3 +
+        (df_ad$intake_baseline - scenario_pars[which(scenario_pars$scenario == i 
+          & scenario_pars$period == subperiods[["subperiod2"]]), "intake"]) *  
+          1.5) / (months_todate + months_project)
+      }
+      
+        # store value
+        df_ad[, paste("intake_reduction", j, sep = "_")] <- 
+          df_ad$intake_reduction
         
-      # Update resting metabolic date
-      df_ad$rmr <- apply(df_ad, 1, f_rmr)
+      # predict
+      x <- predict(fit, newdata = df_ad, se.fit = TRUE)
       
-      # Update change in intake
-      df_ad$change_intake <- change_intake[, j]
-        
-      # Update instantaneous weight
-      df_ad$wt_now <- df_ad$wt_now + apply(df_ad, 1, f_hall)
+      # sample from prediction interval
+      df_ad$percent_wt_loss <- exp(qnorm(rx, mean = x$fit, sd = x$se.fit)) *
+        (months_todate + months_project)
       
-      # Store new end-of-day weight
-      wt_now[, j] <- df_ad$wt_now
-            
-      }  
-  }
+      # store prediction
+      df_ad[, paste("percent_wt_loss", j, sep = "_")] <- 
+        df_ad$percent_wt_loss
       
-      
-            
-
+    } 
+    
     # Output results of run, for this scenario
       # compute medians by age group
       out_i <- aggregate(df_ad[, out_cols], by = list(age_cat = df_ad$age_cat),

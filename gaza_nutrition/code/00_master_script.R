@@ -19,14 +19,15 @@
     anthro,      # To compute anthropometric scores
     betareg,     # To fit beta regression
     flextable,   # To write tables in .docx format
-    haven,       # Read Stata datasets
-    mgcv,        # To fit GAM models
+    gamlss,      # To fit generalised additive models
     ggplot2,     # Data visualization
     ggpubr,      # Arranging multiple plots into a single plot
     glmmTMB,     # For fitting generalised linear mixed models
     gtools,      # Assist various programming tasks
+    haven,       # Read Stata datasets
     lubridate,   # Makes it easier to work with dates and times
     MASS,        # For various statistical functions
+    mgcv,        # To fit GAM models    
     parameters,  # Extract model fit parameters
     ranger,      # Random forest fitting
     readxl,      # Read Excel files
@@ -70,14 +71,25 @@
   ## Read and prepare inputs
   source(paste(dir_path, "code/", "01_read_prepare_inputs.r", sep="") )
     
+  # #...................................      
+  # ## Fit model of weight loss as a function of caloric intake deficit
+  # source(paste(dir_path, "code/", "02_fit_wt_loss_model.r", sep="") )
+ 
   #...................................      
-  ## Fit model of weight loss as a function of caloric intake deficit
-  source(paste(dir_path, "code/", "02_fit_wt_loss_model.r", sep="") )
+  ## Specify functions for weight change model
+  source(paste(dir_path, "code/", "02_specify_wt_functions.r", sep="") )
+    
+  #...................................      
+  ## Estimate caloric intake from food aid from crisis start to date
+  source(paste(dir_path, "code/", "03_estimate_food_aid.r", sep="") )
     
   #...................................      
   ## Estimate caloric intake deficit and weight loss among adults
   source(paste(dir_path, "code/", "04_estimate_wt_loss.r", sep="") )
     
+  #...................................      
+  ## Estimate prevalence of acute malnutrition among children
+  source(paste(dir_path, "code/", "05_project_gam_sam.r", sep="") )
     
     
     

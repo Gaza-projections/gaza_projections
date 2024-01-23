@@ -33,34 +33,12 @@
     # Read dataframe
     df_tr <- data.frame(haven::read_dta(filename))
     
-# Calculate total calories entering Gaza for each day
-trucks_data$total_kcal_14 <- trucks_data$food_truck * mt_truck_14 * people_mt * calories
-trucks_data$total_kcal_16 <- trucks_data$food_truck * mt_truck_16 * people_mt * calories
-
-# Calculate calories per person per day for each day
-trucks_data$kcal_person_day_14 <- trucks_data$total_kcal_14 / population
-trucks_data$kcal_person_day_16 <- trucks_data$total_kcal_16 / population
-
-# Print the result
-print(trucks_data$kcal_person_day_14)
-print(trucks_data$kcal_person_day_16)
-
-# Calculate monthly average calories
-monthly_avg_kcal <- aggregate(cbind(kcal_person_day_14, kcal_person_day_16) ~ month_year, trucks_data, mean, na.rm = TRUE)
-
-# Print the result
-print(monthly_avg_kcal)
-
-
-
-
-    
   #...................................      
   ## Read data from a 2020 survey of NCDs, containing [ad]ult BMI and diet intake
 
     # Identify file name
     filename <- paste(dir_path, 'inputs/', 
-      "gaza_survey2020_kcal_bmi.dta", sep="")
+      "gaza_survey2020_kcal_bmi_wt_ht_wc.dta", sep="")
     
     # Read dataframe
     df_ad <- data.frame(haven::read_dta(filename))
@@ -107,13 +85,22 @@ print(monthly_avg_kcal)
       # dataframe of runs, sorted ascendingly
       runs <- data.frame(run = 1:x, rx = sort(runif(x)) )
       
-    # Identify start and end dates of crisis and projection period
-    date_crisis <- dmy(gen_pars[which(gen_pars$parameter == "date_crisis"), 
-      "value_gen"])
-    date_start <- dmy(gen_pars[which(gen_pars$parameter == "date_start"), 
-      "value_gen"])
-    date_end <- dmy(gen_pars[which(gen_pars$parameter == "date_end"), 
-      "value_gen"])
+    # Identify start and end dates of crisis and projection periods
+      # crisis start
+      date_crisis <- dmy(gen_pars[which(gen_pars$parameter == "date_crisis"), 
+        "value_gen"])
+      
+      # start of projection period
+      date_start <- dmy(gen_pars[which(gen_pars$parameter == "date_start"), 
+        "value_gen"])
+      
+      # start of subperiod 2
+      date_mid <- dmy(gen_pars[which(gen_pars$parameter == "date_mid"), 
+        "value_gen"])      
+      
+      # end of projection period
+      date_end <- dmy(gen_pars[which(gen_pars$parameter == "date_end"), 
+        "value_gen"])
     
     # Identify number of months to date
     months_todate <- max(todate_pars$month)
@@ -128,6 +115,15 @@ print(monthly_avg_kcal)
     # Identify age groups
     ages <- grep("value_a", colnames(gen_pars), value = TRUE)
     ages <- gsub("value_a", "", ages)
+    
+    # Identify target (recommended) caloric intake per day
+    intake_target <- as.integer(gen_pars[
+      which(gen_pars$parameter == "intake_target"),"value_gen"])
+    
+    # Identify total population of Gaza
+    pop <- as.integer(gen_pars[
+      which(gen_pars$parameter == "pop"),"value_gen"])
+    
     
 #...............................................................................  
 ### Preparing datasets for analysis
@@ -165,7 +161,7 @@ print(monthly_avg_kcal)
 
     
   #...................................      
-  ## Prepare the 2023- truck and food assistance dataset
+  ## Prepare the 2023- trucking dataset
     
     # Select and rename relevant columns
     df_tr <- df_tr[, c("date", "total_truck", "food_truck")]
@@ -178,18 +174,22 @@ print(monthly_avg_kcal)
   ## Prepare the 2020 adult NCD survey dataset
     
     # Select necessary variables
-    df_ad <- df_ad[, c("DEM04", "DEM06", "BMI", "energy")]
+    df_ad <- df_ad[, c("DEM04", "DEM06", "HT_avg", "WT_avg", "BMI", "energy")]
 
     # Rename variables
-    colnames(df_ad) <- c("gender", "age", "bmi_baseline", "intake_baseline")
+    colnames(df_ad) <- c("gender", "age", "height", "weight", "bmi_baseline",
+      "intake_baseline")
     
     # Check missingness and delete missing records
     prop.table(table(complete.cases(df_ad)))
     df_ad <- df_ad[complete.cases(df_ad), ]    
         
     # Add age categories
-    df_ad$age_cat <- cut(df_ad$age, breaks = c(40, 50, 60, 70, 80, 120), 
+    df_ad$age_cat <- cut(df_ad$age, breaks = c(40, 50, 60, 70, 120), 
       include.lowest = TRUE, right = FALSE)
+    
+    # Recode gender
+    df_ad$gender <- ifelse(df_ad$gender == 1, "m", "f")
     
   #...................................      
   ## Prepare the 2019 growth monitoring child dataset

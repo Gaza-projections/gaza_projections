@@ -126,8 +126,8 @@ for (run_i in 1:nrow(runs)) {
      
       # reduce weight of all children (= weight loss in adults +- uncertainty,
         # with uncertainty sampled based on value of rx for run)
-      df_sub$weight_ij <- df_sub$weight * out_all[which(out_all$run == run_i &
-          out_all$scenario == i), j] * rr
+      df_sub$weight_ij <- df_sub$weight *
+        (1 - out_all[which(out_all$run == run_i & out_all$scenario == i), j]*rr)
        
       # compute anthropometric indices and flags
       x <- with(df_sub,
@@ -147,7 +147,7 @@ for (run_i in 1:nrow(runs)) {
       
     }
   }
-}  # close run_i loop
+} # close run_i loop
 close(pb)      
     
     
@@ -161,10 +161,11 @@ close(pb)
     # Compute median and 95% percentile intervals of all estimated quantities    
     agg <- aggregate(out[, c("sam", "gam")], 
       by = out[, c("scenario", "period")],
-      FUN = function(x) {quantile(x, c(0.50, 0.025, 0.975))})
+      FUN = function(x) {quantile(x, c(0.50, 0.025, 0.975), na.rm = TRUE)})
 
     # Output percentile intervals
-    write.csv(agg, paste(dir_path, "outputs/","out_gam_sam.csv", sep=""))
+    write.csv(agg, paste(dir_path, "outputs/","out_gam_sam.csv", sep=""),
+      row.names = FALSE)
     
   #...................................      
   ## Visualise, by scenario and period
