@@ -349,6 +349,12 @@ close(pb)
   #...................................      
   ## Compute distribution of runs by age group and overall
     
+    # Write raw output
+    write_rds(out_age,
+      paste(dir_path,"outputs/", "out_wt_loss_age_all_runs.rds", sep=""))
+    write_rds(out_daily, 
+      paste(dir_path,"outputs/","out_wt_loss_daily_all_runs.rds", sep=""))
+
     # Compute median and 95% percentile intervals of all estimated quantities
     for(i in c("percent_wt_loss", "change_intake")) 
      {out_age[, i] <- as.numeric(out_age[, i])}
@@ -390,10 +396,10 @@ close(pb)
       colour =scenario, fill = scenario)) +
       geom_line() +
       geom_ribbon(aes(ymin = percent_wt_loss_lci, ymax = percent_wt_loss_uci),
-        alpha = 0.2, linetype = "21") +
+        alpha = 0.1, colour = NA) +
       theme_bw() +
-      scale_colour_manual(values = palette_cb[c(4, 12, 8)]) +
-      scale_fill_manual(values = palette_cb[c(4, 12, 8)]) +
+      scale_colour_manual(values = palette_cb[c(4, 8, 12)]) +
+      scale_fill_manual(values = palette_cb[c(4, 8, 12)]) +
       scale_x_date(breaks = "1 month", date_labels = "%b-%Y") +
       scale_y_continuous("cumulative weight loss as percent of baseline",
         labels = percent, breaks = seq(-0.5, 0.5, by = 0.05)) +

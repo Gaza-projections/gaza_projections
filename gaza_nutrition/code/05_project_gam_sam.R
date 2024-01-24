@@ -158,6 +158,10 @@ close(pb)
   #...................................      
   ## Compute average and uncertainty of runs, by scenario and period
     
+    # Output raw simulation runs
+    write_rds(out, paste(dir_path, "outputs/","out_gam_sam_all_runs.rds", 
+      sep=""))
+
     # Compute median and 95% percentile intervals of all estimated quantities    
     agg <- aggregate(out[, c("sam", "gam")], 
       by = out[, c("scenario", "period")],
