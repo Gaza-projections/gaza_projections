@@ -21,16 +21,13 @@
 f_seir <- function(disease = "diphtheria", scenario = "escalation",
   initial_conditions = initial_conditions, timeline_ui = timeline_ui,
   contact_matrix = contact_matrix, demography_vector = demography_vector,
-  sim_pars = sim_pars) {
+  sim_pars_u = sim_pars_u) {
 
   #...................................      
   ## Decide whether an outbreak will occur during the projection period
     
     # Sample from a binomial distribution of probability of an outbreak
-    x <- sim_pars[which(sim_pars$disease == disease &
-      sim_pars$subperiod == "overall" & sim_pars$parameter == "pu"), 
-      "value_gen"]
-    y <- rbinom(1, 1, prob = x)
+    y <- rbinom(1, 1, prob = mean(timeline_ui$pu) )
   
     # If 0, no outbreak: end function here
     if (y == 0) {
@@ -50,26 +47,28 @@ if (y == 1) {
       
     # Sample random starting day within the projection period
       # sample random starting day
-      time_epid_start <- timeline_ui[which(timeline_ui$time == 
-        as.integer(runif(1, 0, 1) * max(timeline_ui$time))), "time"]
+      time_epid_start <- unique(timeline_ui[which(timeline_ui$time == 
+        as.integer(runif(1, 0, 1) * max(timeline_ui$time))), "time"])
       
       # update in timeline
       timeline_ui$time_epid <- timeline_ui$time - time_epid_start + 1
       timeline_ui[which(timeline_ui$time_epid < 0), "time_epid"] <- 0
       
       # accordingly, the starting month out of 1-6 is...
-      rmonth <- timeline_ui[which(timeline_ui$time_epid == 1), "month"]
+      rmonth <- unique(timeline_ui[which(timeline_ui$time_epid == 1), "month"])
     
       #...and the number of days to simulate in subperiods 1 and 2 are
-      time_end_subperiod1 <- 0
-      if (time_epid_start <= time_periods["end_subperiod1"]) 
-        {time_end_subperiod1 <- timeline_ui[which(timeline_ui$time == 
-        time_periods["end_subperiod1"]), "time_epid"] }
-      time_end_subperiod2 <- max(timeline_ui$time) - max(time_epid_start,
-        time_periods["end_subperiod1"] + 1) + 1
+      days_subperiod1 <- max(0, max(timeline_ui[which(timeline_ui$subperiod == 
+          "subperiod1"), "time"]) - time_epid_start)
+      days_subperiod2 <- min(max(timeline_ui$time) - 
+          max(timeline_ui[which(timeline_ui$subperiod== "subperiod1"), "time"]), 
+          max(timeline_ui$time) - time_epid_start)
 
   ## Set starting compartment sizes, based on susceptibility model
     
+    # Get starting susceptibility by age
+    x <- timeline_ui[which(timeline_ui$time)]
+      
     # Set starting compartment sizes
     initial_conditions$I <- 1e-6 # 1 per million per age group infected
     initial_conditions$S <- unlist(si_list[[disease]][[scenario]][rmonth, ages]- 
@@ -91,19 +90,16 @@ if (y == 1) {
 
     # Recognise parameters for the disease, specific to the subperiod
       # basic reproduction number
-      r0 <- sim_pars[which(sim_pars$disease == disease & 
-        sim_pars$subperiod == "subperiod1" & sim_pars$parameter == "r0"),
-          "value_gen"]
+      r0 <- mean(timeline_ui[which(timeline_ui$subperiod == "subperiod1"), 
+        "r0"])
 
       # infectiousness period
-      tau <- sim_pars[which(sim_pars$disease == disease & 
-        sim_pars$subperiod == "subperiod1" & sim_pars$parameter == "tau"),
-          "value_gen"]
+      tau <- mean(timeline_ui[which(timeline_ui$subperiod == "subperiod1"), 
+        "tau"])
       
       # pre-infectiousness period
-      pre_tau <- sim_pars[which(sim_pars$disease == disease & 
-        sim_pars$subperiod == "subperiod1" & sim_pars$parameter == "pre_tau"),
-          "value_gen"]
+      pre_tau <- mean(timeline_ui[which(timeline_ui$subperiod == "subperiod1"), 
+        "pre_tau"])
       
     # Run SEIR model to end of sub-period 1
     run_subperiod1 <- epidemics::model_default_cpp(
@@ -111,7 +107,7 @@ if (y == 1) {
       transmissibility = r0 / tau,
       infectiousness_rate = 1 / pre_tau,
       recovery_rate = 1 / tau,
-      time_end = time_end_subperiod1,
+      time_end = days_subperiod1,
       increment = 1
     )
     
@@ -129,19 +125,16 @@ if (y == 1) {
 
     # Recognise parameters for the disease, specific to the subperiod
       # basic reproduction number
-      r0 <- sim_pars[which(sim_pars$disease == disease & 
-        sim_pars$subperiod == "subperiod2" & sim_pars$parameter == "r0"),
-          "value_gen"]
+      r0 <- mean(timeline_ui[which(timeline_ui$subperiod == "subperiod2"), 
+        "r0"])
 
       # infectiousness period
-      tau <- sim_pars[which(sim_pars$disease == disease & 
-        sim_pars$subperiod == "subperiod2" & sim_pars$parameter == "tau"),
-          "value_gen"]
+      tau <- mean(timeline_ui[which(timeline_ui$subperiod == "subperiod2"), 
+        "tau"])
       
       # pre-infectiousness period
-      pre_tau <- sim_pars[which(sim_pars$disease == disease & 
-        sim_pars$subperiod == "subperiod2" & sim_pars$parameter == "pre_tau"),
-          "value_gen"]
+      pre_tau <- mean(timeline_ui[which(timeline_ui$subperiod == "subperiod2"), 
+        "pre_tau"])
       
     # Run epidemic till the end of sub-period 2
     run_subperiod2 <- epidemics::model_default_cpp(
@@ -149,12 +142,12 @@ if (y == 1) {
       transmissibility = r0 / tau,
       infectiousness_rate = 1 / pre_tau,
       recovery_rate = 1 / tau,
-      time_end = time_end_subperiod2,
+      time_end = days_subperiod2,
       increment = 1
     )
       
   #...................................      
-  ## Assemble output into a timeline of susceptibles, population, new infections
+  ## Assemble output into a timeline of susceptibles and new infections
 
     # Collect subperiod 1
     run_full <- subset(run_subperiod1, compartment == "susceptible")
@@ -166,11 +159,11 @@ if (y == 1) {
     x <- subset(run_subperiod2, compartment == "susceptible")
     x <- merge(x, new_infections(run_subperiod2),
       by = c("time", "demography_group"), all.x = TRUE)
-    x$time <- x$time + time_end_subperiod1 + 1
+    x$time <- x$time + days_subperiod1 + 1
     x$subperiod <- "subperiod2"
     run_full <- rbind(run_full, x)
     
-    # Add population and fix time
+    # Add to timeline
     run_full <- merge(run_full, data.frame(demography_group =
       names(demography_vector), pop = demography_vector), 
       by = "demography_group", all.x = TRUE)
@@ -178,66 +171,22 @@ if (y == 1) {
     run_full$time_epid <- run_full$time
     run_full <- merge(run_full, timeline_ui[, c("time_epid", "month")], 
       by = "time_epid", all.x = TRUE)    
-    
+#####HERE    
   #...................................      
   ## Compute symptomatic cases and deaths
     
     # Symptomatic cases
-      # identify proportion of symptomatic cases
-      pd <- sim_pars[which(sim_pars$disease == disease & 
-        sim_pars$parameter == "pd"), c("subperiod", "value_gen")]
-      colnames(pd) <- c("subperiod", "pd")
-      run_full <- merge(run_full, pd, by = "subperiod", all.x = TRUE)
-      
-      # compute symptomatic cases
-      run_full$symptomatic <- run_full$new_infections * run_full$pd
+    timeline_ui$symptomatic <- timeline_ui$new_infections * timeline_ui$pd
     
-    # Compute deaths
-      # identify and merge in CFR by age group
-      cfr <- sim_pars[which(sim_pars$disease == disease & 
-        sim_pars$parameter == "cfr" & sim_pars$subperiod %in% subperiods),
-        c("subperiod", grep("value_a", colnames(sim_pars), value = TRUE))]
-      cfr <- reshape(cfr, direction = "long",
-        varying = list(colnames(cfr)[colnames(cfr) != "subperiod"]),
-        timevar = "age", v.names = "cfr",
-        idvar = "subperiod",
-        times = colnames(cfr)[colnames(cfr) != "subperiod"]
-      )
-      cfr$age <- gsub("value_a", "", cfr$age)
-      x <- data.frame(demography_group = names(demography_vector),
-        age = ages )
-      cfr <- merge(cfr, x, by = "age", all.x = TRUE)
-      run_full <- merge(run_full, cfr, by = c("demography_group", "subperiod"), 
-        all.x = TRUE)
-      
-      # compute proportion susceptible to severe disease, adjusted for
-        # instantaneous susceptibility
-        
-        # identify susceptibility to disease, reshape and add dates
-        x <- sd_list[[disease]][[scenario]]
-        x <- reshape(x, direction = "long",
-          varying = list(colnames(x)[colnames(x) != "month"]),
-          timevar = "age", v.names = "sd",
-          idvar = "month",
-          times = colnames(x)[colnames(x) != "month"]
-        )
-####CHECK THAT THIS RESHAPE WORKS WITH REAL VALUES
-        # add to run output
-        x <- merge(x, data.frame(demography_group =
-          names(demography_vector), age = ages), 
-          by = "age", all.x = TRUE)        
-        run_full <- merge(run_full, x, by = c("demography_group", "month",
-          "age"), all.x = TRUE)
-        
-      # Compute deaths
-      run_full$deaths <- run_full$symptomatic * run_full$cfr * run_full$sd /
-        (run_full$value / run_full$pop)
+    # Compute deaths, adjusted for changing susceptibility to infection/disease
+    timeline_ui$deaths <- timeline_ui$symptomatic * timeline_ui$cfr * 
+      timeline_ui$sd / (timeline_ui$susceptibles / timeline_ui$pop)
         
   #...................................      
   ## Collect and return results
     # Aggregate by sub-period
-    out <- aggregate(run_full[, c("new_infections", "symptomatic", "deaths")],
-      by = run_full[, c("subperiod", "age")], FUN = sum, na.rm = TRUE)
+    out <- aggregate(timeline_ui[, c("new_infections", "symptomatic", "deaths")],
+      by = timeline_ui[, c("subperiod", "age")], FUN = sum, na.rm = TRUE)
     
     # Return results      
     return(out)

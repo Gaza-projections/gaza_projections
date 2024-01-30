@@ -98,34 +98,39 @@
 #...............................................................................
 
 # (run loop starts here)    
-for (i in 1:max(runs$run)) {
+for (run_i in 1:max(runs$run)) {
 
   #...................................      
   ## Preparatory steps
 
     # Update progress bar
-    setTxtProgressBar(pb, i)
+    setTxtProgressBar(pb, run_i)
   
     # Identify random number from [0,1]
-    rx <- runs[i, "rx"]
+    rx <- runs[run_i, "rx"]
       # rx is the extent along the positive-negative spectrum, so 1-rx = inverse  
 
+    # Initialise fresh version of parameters dataframe
+    sim_pars_run_i <- sim_pars
+    
   #...................................      
   ## Generate random parameter values for exemplar diseases at baseline
     # (common to all scenarios and subperiods)
       
   for (e in exemplars) {
-    # R0
+    # R0 at baseline
     x <- ranges[which(ranges$disease == e & ranges$parameter == "r0_base"), 
       c("min", "max")]
-    sim_pars[which(sim_pars$disease == e & sim_pars$parameter == "r0_base"), 
-      "value_gen"] <- x$min + rx * (x$max - x$min)
+    sim_pars_run_i[which(sim_pars_run_i$disease == e & 
+      sim_pars_run_i$parameter == "r0_base"), "value_gen"] <- 
+      x$min + rx * (x$max - x$min)
     
-    # CFR
+    # CFR at baseline
     x <- ranges[which(ranges$disease == e & ranges$parameter == "cfr_base"), 
       c("min", "max")]
-    sim_pars[which(sim_pars$disease == e & sim_pars$parameter == "cfr_base"), 
-      "value_gen"] <- x$min + rx * (x$max - x$min)      
+    sim_pars_run_i[which(sim_pars_run_i$disease == e & 
+      sim_pars_run_i$parameter == "cfr_base"), "value_gen"] <- 
+      x$min + rx * (x$max - x$min)      
   }  
 
     
@@ -133,26 +138,28 @@ for (i in 1:max(runs$run)) {
   ## Generate random parameter values for each scenario...
   
   # (scenario loop starts here)    
-  for (j in scenarios) {
+  for (i in scenarios) {
 
     # Attribute probabilities of outbreaks
     for (u in diseases_epid) {
-      x <- see_data[["pu"]][[j]][[u]]
-      sim_pars[which(sim_pars$disease == u & sim_pars$parameter == "pu"), 
-        "value_gen"] <- approx(x$p_cum,x$pu, rx, ties = list("ordered", mean))$y
+      x <- see_data[["pu"]][[i]][[u]]
+      sim_pars_run_i[which(sim_pars_run_i$disease == u & 
+        sim_pars_run_i$parameter == "pu"), "value_gen"] <- 
+        approx(x$p_cum,x$pu, rx, rule = 2, ties = list("ordered", mean))$y
     }
 
     # (subperiod loop starts here)
     #...and for each subperiod:
-    for (k in subperiods) {
+    for (j in subperiods) {
       
       # attribute R0, proportion symptomatic and CFR values, for each disease
         # under a given exemplar disease (i.e. same transmission route)...
       for (e in exemplars) {
         
         # figure out R0 value for exemplar disease of this route
-        x <- see_data[["r0"]][[j]][[e]][[k]]
-        r0_tmp <- approx(x$p_cum, x$r0, rx, ties = list("ordered", mean))$y
+        x <- see_data[["r0"]][[i]][[e]][[j]]
+        r0_tmp <- approx(x$p_cum, x$r0, rx,  rule = 2,
+          ties = list("ordered", mean))$y
 
           # compute proportion of range covered by this value
           x <- (ranges[which(ranges$disease == e & 
@@ -160,13 +167,14 @@ for (i in 1:max(runs$run)) {
           r0_prop <- r0_tmp / (x$max - x$min)
                 
           # compute relative transmissibility
-          r0_rr <- r0_tmp / sim_pars[which(sim_pars$disease == e & 
-            sim_pars$parameter == "r0_base" & sim_pars$subperiod == k), 
-            "value_gen"]
+          r0_rr <- r0_tmp / sim_pars_run_i[which(sim_pars_run_i$disease == e & 
+            sim_pars_run_i$parameter == "r0_base" & 
+            sim_pars_run_i$subperiod == j), "value_gen"]
           
         # figure out CFR value for exemplar disease of this route
-        x <- see_data[["cfr"]][[j]][[e]][[k]]
-        cfr_tmp <- approx(x$p_cum, x$cfr, rx, ties = list("ordered", mean))$y
+        x <- see_data[["cfr"]][[i]][[e]][[j]]
+        cfr_tmp <- approx(x$p_cum, x$cfr, rx, rule = 2, 
+          ties = list("ordered", mean))$y
         
           # compute proportion of range covered by this value
           x <- (ranges[which(ranges$disease == e & 
@@ -174,9 +182,9 @@ for (i in 1:max(runs$run)) {
           cfr_prop <- cfr_tmp / (x$max - x$min)
 
           # compute relative CFR
-          cfr_rr <- cfr_tmp / sim_pars[which(sim_pars$disease == e & 
-            sim_pars$parameter == "cfr_base" & sim_pars$subperiod == k), 
-            "value_gen"]
+          cfr_rr <- cfr_tmp / sim_pars_run_i[which(sim_pars_run_i$disease == e & 
+            sim_pars_run_i$parameter == "cfr_base" & 
+            sim_pars_run_i$subperiod == j), "value_gen"]
           
         # for each disease under this exemplar (i.e. same transmission route)...
         for (u in list_exemplars[[e]]) {
@@ -186,58 +194,65 @@ for (i in 1:max(runs$run)) {
             
             # attribute R0 value
             x <- which(ranges$disease == u & ranges$parameter == "r0")
-            sim_pars[which(sim_pars$disease == u & sim_pars$parameter == "r0"
-              & sim_pars$subperiod == k), "value_gen"] <- ranges[x, "min"] + 
+            sim_pars_run_i[which(sim_pars_run_i$disease == u & 
+              sim_pars_run_i$parameter == "r0" & sim_pars_run_i$subperiod == j), 
+              "value_gen"] <- ranges[x, "min"] + 
               (ranges[x, "max"] - ranges[x, "min"]) * r0_prop
             
             # attribute proportion symptomatic value within known range
             x <- which(ranges$disease == u & ranges$parameter == "pd")
-            sim_pars[which(sim_pars$disease == u & sim_pars$parameter == "pd"
-              & sim_pars$subperiod == k), "value_gen"] <- ranges[x, "min"] + 
+            sim_pars_run_i[which(sim_pars_run_i$disease == u & 
+              sim_pars_run_i$parameter == "pd" & sim_pars_run_i$subperiod == j), 
+              "value_gen"] <- ranges[x, "min"] + 
               (ranges[x, "max"] - ranges[x, "min"]) * rx
             
             # attribute CFR value
             x <- which(ranges$disease == u & ranges$parameter == "cfr")
-            sim_pars[which(sim_pars$disease == u & sim_pars$parameter == "cfr" 
-              & sim_pars$subperiod == k), "value_gen"] <- ranges[x, "min"] + 
+            sim_pars_run_i[which(sim_pars_run_i$disease == u & 
+              sim_pars_run_i$parameter == "cfr" & sim_pars_run_i$subperiod== j), 
+              "value_gen"] <- ranges[x, "min"] + 
               (ranges[x, "max"] - ranges[x, "min"]) * cfr_prop
             
             # attribute age-specific CFR values
-            x <- which(sim_pars$disease == u & sim_pars$parameter == "cfr" 
-              & sim_pars$subperiod == k)
-            sim_pars[x, grep("value_a", colnames(sim_pars))] <- 
-              sim_pars[which(sim_pars$disease == u & sim_pars$parameter == "cfr" 
-              & sim_pars$subperiod == k), "value_gen"] * 
-              sim_pars[which(sim_pars$disease == u & sim_pars$parameter == "cfr" 
-              & sim_pars$subperiod == "overall"), 
-                grep("value_a", colnames(sim_pars))]
+            x <- which(sim_pars_run_i$disease == u & 
+              sim_pars_run_i$parameter == "cfr" & sim_pars_run_i$subperiod == j)
+            sim_pars_run_i[x, grep("value_a", colnames(sim_pars_run_i))] <- 
+              sim_pars_run_i[which(sim_pars_run_i$disease == u & 
+              sim_pars_run_i$parameter == "cfr" 
+              & sim_pars_run_i$subperiod == j), "value_gen"] * 
+              sim_pars_run_i[which(sim_pars_run_i$disease == u & 
+              sim_pars_run_i$parameter == "cfr" 
+              & sim_pars_run_i$subperiod == "overall"), 
+                grep("value_a", colnames(sim_pars_run_i))]
           }
           
           # if the disease is NOT epidemic-prone...
           if (! u %in% diseases_epid) {
           
             # attribute relative transmissibility
-            x <- which(sim_pars$disease == u & sim_pars$parameter == "r0_rr" 
-              & sim_pars$subperiod == k)
-            sim_pars[x, "value_gen"] <- r0_rr
+            x <- which(sim_pars_run_i$disease == u & 
+              sim_pars_run_i$parameter == "r0_rr" 
+              & sim_pars_run_i$subperiod == j)
+            sim_pars_run_i[x, "value_gen"] <- r0_rr
             
             # attribute relative CFR
-            x <- which(sim_pars$disease == u & sim_pars$parameter == "cfr_rr" 
-              & sim_pars$subperiod == k)
-            sim_pars[x, "value_gen"] <- cfr_rr
+            x <- which(sim_pars_run_i$disease == u & 
+              sim_pars_run_i$parameter == "cfr_rr" 
+              & sim_pars_run_i$subperiod == j)
+            sim_pars_run_i[x, "value_gen"] <- cfr_rr
             
           }          
         }
       }
 
-    } # (close k - subperiod loop) 
+    } # (close j - subperiod loop) 
 
     # Attribute parameters table to this specific run and scenario
-    sim[[paste("run", i, sep = "_")]][[j]] <- sim_pars  
+    sim[[paste("run", run_i, sep = "_")]][[i]] <- sim_pars_run_i  
     
-  } # (close j - scenario loop)   
+  } # (close i - scenario loop)   
 
-} # (close i - run loop)
+} # (close run_i - run loop)
 close(pb)    
       
       
