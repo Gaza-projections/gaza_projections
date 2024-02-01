@@ -80,6 +80,10 @@
   ## Prepare simulations
   source(paste(dir_path, "code/03_prepare_simulations.R", sep =""))
         
+  #...................................      
+  ## Run simulations
+  source(paste(dir_path, "code/04_run_simulations.R", sep =""))
+        
 
 
 #...............................................................................  

@@ -61,6 +61,7 @@
     
     # Identify subperiods
     subperiods <- c("subperiod1", "subperiod2")
+    names(subperiods) <- c("months 1 to 3", "months 4 to 6")
     
     # Identify scenarios
     scenarios <- c("status quo", "escalation", "ceasefire")

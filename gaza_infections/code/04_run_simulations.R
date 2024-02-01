@@ -3,7 +3,7 @@
 #...............................................................................
 
 #...............................................................................
-## ----- R SCRIPT TO RUN AND ANALYSE SIMULATIONS FOR INFECTIONS MODEL  ------ ##
+## ----- R SCRIPT TO RUN SIMULATIONS FOR EPIDEMIC AND ENDEMIC INFECTIONS ---- ##
 #...............................................................................
 
                           # LSHTM (January 2024)
@@ -11,7 +11,7 @@
 
 
 #...............................................................................   
-### Initialising objects needed for the simulation
+### Initialising objects needed for the simulations
 #...............................................................................
 
   #...................................      
@@ -39,9 +39,18 @@
     timeline_sim <- merge(timeline_sim, pop, by = "demography_group", 
       all.x = TRUE)
     
+  #...................................      
+  ## Initialise output
     
+    # For epidemic infections model  
+    out_epid <- data.frame()  
+
+    # For stable-transmission infections model  
+    out_ende <- data.frame()  
+    
+            
 #...............................................................................   
-### Running epidemic (SEIR model simulations)
+### Running epidemic (SEIR model) simulations
 #...............................................................................
 
 # (run loop starts here)    
@@ -133,15 +142,33 @@ for (run_i in 1:max(runs$run)) {
           all.x = TRUE)
       
       # run SEIR model
-      
+      x <- f_seir(disease_f = u, scenario_f = i, timeline_f = timeline_ui)
           
       # collect results  
-        
-        
+      x$run <- run_i
+      x$scenario <- i
+      x$disease <- u
+      out_epid <- rbind(out_epid, x)
         
     } # (close u - disease loop)
   } # (close i - scenario loop)
 } # (close run_i - run loop)
 close(pb)    
       
+  #...................................      
+  ## Save raw output
+  write_rds(out_epid, paste(dir_path, "outputs/", 
+    "out_epid_all_runs.rds", sep=""))
+
+
+
+
+#...............................................................................   
+### Running stable-transmission simulations
+#...............................................................................
+
+
       
+#...............................................................................   
+### ENDS
+#...............................................................................
