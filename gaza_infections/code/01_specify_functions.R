@@ -10,6 +10,105 @@
                           # francesco.checchi@lshtm_ac.uk 
 
 
+#...............................................................................   
+### Function to calculate the calibration and information scores for each 
+  # elicitation expert, leading to combined scores and weights; based on 
+  # https://ocw.tudelft.nl/course-readings/2-3-2-empirical-probability-vectors/
+#...............................................................................
+
+f_score <- function(see_f = see) {
+
+  #...................................      
+  ## Preparatory steps
+    
+    # Restrict data to calibration questions only
+    see_f <- subset(see_f, parameter == "cal")
+
+  #...................................      
+  ## Compute each expert's calibration score
+    
+    # Identify where the 'right' answer falls relative to each set of estimates
+    see_f$s <- apply(see_f, 1, function (x) 
+      {findInterval(x[["answer"]], 
+        as.numeric(x[c("value10", "value50", "value90")]), 
+        rightmost.closed = TRUE) + 1 }) 
+
+    # Tabulate proportion of calibration answers falling within each quartile,
+      # by expert (= 'empirical' probability vector)
+    prob_s <- table(see_f[, c("expert", "s")])
+    prob_s <- prob_s / rowSums(prob_s)
+    prob_s <- data.frame(prob_s)
+    colnames(prob_s) <- c("expert", "quartile", "s")
+    
+    # Figure out theoretical probability vector and add it to dataframe
+    x <- length(unique(prob_s$expert))
+    prob_p <- c(rep(0.10, x), rep(0.40, x), rep(0.40, x), rep(0.10, x)) 
+      # <10%, 10-49.9%, 50.0-89.9%, >=90%, repeated for each expert
+    prob_s$p <- prob_p
+    
+    # Compute the Kullback-Leibler divergence of s and p
+    prob_s$l <- prob_s$s * log(prob_s$s / prob_s$p)
+      # replace NaNs with 0s (legitimate!)
+      prob_s$l <- ifelse(prob_s$l == "NaN", 0, prob_s$l)
+    
+    # Aggregate so as to get Kullback-Leibler statistic for each expert
+    experts <- aggregate(list(l = prob_s$l), by = list(expert = prob_s$expert),
+      FUN = sum)
+
+    # Compute each expert's calibration score
+    n_q <- nrow(see_f) / x # number of calibration questions
+    experts$cal <-  dchisq(2 * n_q * experts$l, df = 3)   
+    
+
+  #...................................      
+  ## Compute each expert's information score
+    
+    # Initialise output
+    out <- data.frame()
+    
+    # Compute the experts' information score, for each question
+    for (i in unique(see_f$question)) {
+      # question responses
+      see_i <- see_f[which(see_f$question == i), ]
+      
+      # extremes of range      
+      lo <- min(see_i$value10, see_i$answer)
+      hi <- max(see_i$value90, see_i$answer)
+      
+      # apply a 10% overshoot rule
+      lo <- lo - 0.1 * (hi - lo)
+      hi <- hi + 0.1 * (hi - lo)
+      
+      # compute information score for the question, for each expert
+      see_i$inf <- 0.10 * log(0.10 / (see_i$value10 - lo)) + 
+        0.40 * log(0.40 / (see_i$value50 - see_i$value10)) + 
+        0.40 * log(0.40 / (see_i$value90 - see_i$value50)) + 
+        0.10 * log(0.10 / (hi - see_i$value90)) + 
+        log(hi - lo)
+  
+      # add to output
+      out <- rbind(out, see_i[, c("expert", "question", "inf")])
+    }
+    
+    # Compute mean information score per expert, and add to results
+    out <- aggregate(list(inf = out$inf), by = list(expert = out$expert),
+      FUN = mean)
+    experts <- merge(experts, out, by = "expert")
+    
+  #...................................      
+  ## Compute each expert's combined score and performance weight
+    
+    # Compute combined scores
+    experts$score <- experts$cal * experts$inf
+        
+    # Compute normalised performance weights
+    experts$wt <- experts$score / sum(experts$score)
+    
+    # Output
+    return(experts[, c("expert", "cal", "inf", "score", "wt")])
+}
+
+
 
 #...............................................................................   
 ### Function to implement one run of a Susceptible-Infectious-Recovered model
@@ -59,9 +158,9 @@ if (y == 1) {
     
       #...and the number of days to simulate in subperiods 1 and 2 are
       days_subperiod1 <- max(0, max(timeline_f[which(timeline_f$subperiod == 
-        "subperiod1"), "time"]) - time_epid_start)
+        "months 1 to 3"), "time"]) - time_epid_start)
       days_subperiod2 <- min(max(timeline_f$time) - 
-        max(timeline_f[which(timeline_f$subperiod== "subperiod1"), "time"]), 
+        max(timeline_f[which(timeline_f$subperiod== "months 1 to 3"), "time"]), 
         max(timeline_f$time) - time_epid_start)
       
   ## Set starting compartment sizes, based on susceptibility model
@@ -94,15 +193,15 @@ if (y == 1) {
 
     # Recognise parameters for the disease_f, specific to the subperiod
       # basic reproduction number
-      r0 <- mean(timeline_f[which(timeline_f$subperiod == "subperiod1"), 
+      r0 <- mean(timeline_f[which(timeline_f$subperiod == "months 1 to 3"), 
         "r0"])
 
       # infectiousness period
-      tau <- mean(timeline_f[which(timeline_f$subperiod == "subperiod1"), 
+      tau <- mean(timeline_f[which(timeline_f$subperiod == "months 1 to 3"), 
         "tau"])
       
       # pre-infectiousness period
-      pre_tau <- mean(timeline_f[which(timeline_f$subperiod == "subperiod1"), 
+      pre_tau <- mean(timeline_f[which(timeline_f$subperiod == "months 1 to 3"), 
         "pre_tau"])
       
     # Run SEIR model to end of sub-period 1
@@ -129,15 +228,15 @@ if (y == 1) {
 
     # Recognise parameters for the disease_f, specific to the subperiod
       # basic reproduction number
-      r0 <- mean(timeline_f[which(timeline_f$subperiod == "subperiod2"), 
+      r0 <- mean(timeline_f[which(timeline_f$subperiod == "months 4 to 6"), 
         "r0"])
 
       # infectiousness period
-      tau <- mean(timeline_f[which(timeline_f$subperiod == "subperiod2"), 
+      tau <- mean(timeline_f[which(timeline_f$subperiod == "months 4 to 6"), 
         "tau"])
       
       # pre-infectiousness period
-      pre_tau <- mean(timeline_f[which(timeline_f$subperiod == "subperiod2"), 
+      pre_tau <- mean(timeline_f[which(timeline_f$subperiod == "months 4 to 6"), 
         "pre_tau"])
       
     # Run epidemic till the end of sub-period 2
@@ -200,10 +299,29 @@ if (y == 1) {
     # Symptomatic cases
     timeline_f$symptomatic <- timeline_f$new_infections * timeline_f$pd
     
-    # Compute deaths, adjusted for changing susceptibility to infection/disease_f
-    timeline_f$deaths <- timeline_f$symptomatic * timeline_f$cfr * 
-      timeline_f$sd / (timeline_f$susceptibles / timeline_f$pop)
-        
+    # Compute deaths, adjusted for changing susceptibility to infection/disease
+      # compute change in susceptibles at all time points, by age
+      timeline_f$change_susceptibles <- NA
+      for (j in unique(timeline_f$age) ) {
+        timeline_f[which(timeline_f$age == j), "change_susceptibles"] <-
+          timeline_f[which(timeline_f$age == j), "susceptibles"] -
+          timeline_f[which(timeline_f$age == j & timeline_f$time == 0), 
+            "susceptibles"]
+      }
+      
+      # compute adjustment factor for (changing) ratio of susceptibility to
+        # disease and infection (# 0.000001 added to avoid division by 0)
+      timeline_f$adjust <- 
+        ((timeline_f[which(timeline_f$time == 0), "sd"] + 0.000001) * 
+           timeline_f$pop + timeline_f$change_susceptibles) / 
+        ((timeline_f[which(timeline_f$time == 0), "si"]  + 0.000001) * 
+           timeline_f$pop + timeline_f$change_susceptibles)
+      
+      # compute deaths, adjusting 
+      timeline_f$deaths <- timeline_f$symptomatic * timeline_f$cfr * 
+        timeline_f$adjust
+
+          
   #...................................      
   ## Collect and return results
     # Aggregate by sub-period
@@ -301,11 +419,6 @@ f_target <- function(input_matrix = contact_matrix, ages_wanted = ages) {
     # Output target matrix
     return(target_matrix)
 } 
-
-
-
-  
-
 
   
 #...............................................................................

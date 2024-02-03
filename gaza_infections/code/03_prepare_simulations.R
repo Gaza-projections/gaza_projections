@@ -54,7 +54,7 @@
       
       # delete unneeded rows
       sim_pars <- sim_pars[-x, ]
-###################MAYBE CFR AGE ON ITS OWN, WILL REDUCE SIZE OF DATASET IF MANY RUNS      
+     
   #...................................      
   ## Initialise ranges of parameters to sample within
     
@@ -88,10 +88,6 @@
           
     # Loop progress bar   
     pb <- txtProgressBar(min = 1, max = max(runs$run), style = 3)
-
-      
-######################PROBLEM WITH APPROX NA 
-    
 
 #...............................................................................   
 ### Preparing simulation runs
@@ -142,10 +138,12 @@ for (run_i in 1:max(runs$run)) {
 
     # Attribute probabilities of outbreaks
     for (u in diseases_epid) {
-      x <- see_data[["pu"]][[i]][[u]]
+      x <- subset(see, disease == u & scenario == i & expert == "all" &
+        parameter == "pu")
       sim_pars_run_i[which(sim_pars_run_i$disease == u & 
         sim_pars_run_i$parameter == "pu"), "value_gen"] <- 
-        approx(x$p_cum,x$pu, rx, rule = 2, ties = list("ordered", mean))$y
+        approx(x[, grep("pcum_", names(x))], x[, grep("x_", names(x))], rx, 
+          rule = 2, ties = list("ordered", mean))$y
     }
 
     # (subperiod loop starts here)
@@ -157,9 +155,10 @@ for (run_i in 1:max(runs$run)) {
       for (e in exemplars) {
         
         # figure out R0 value for exemplar disease of this route
-        x <- see_data[["r0"]][[i]][[e]][[j]]
-        r0_tmp <- approx(x$p_cum, x$r0, rx,  rule = 2,
-          ties = list("ordered", mean))$y
+        x <- subset(see, disease == e & scenario == i & subperiod == j &
+          expert == "all" & parameter == "r0")
+        r0_tmp <- approx(x[, grep("pcum_", names(x))], x[,grep("x_", names(x))], 
+          rx,  rule = 2, ties = list("ordered", mean))$y
 
           # compute proportion of range covered by this value
           x <- (ranges[which(ranges$disease == e & 
@@ -172,9 +171,10 @@ for (run_i in 1:max(runs$run)) {
             sim_pars_run_i$subperiod == j), "value_gen"]
           
         # figure out CFR value for exemplar disease of this route
-        x <- see_data[["cfr"]][[i]][[e]][[j]]
-        cfr_tmp <- approx(x$p_cum, x$cfr, rx, rule = 2, 
-          ties = list("ordered", mean))$y
+        x <- subset(see, disease == e & scenario == i & subperiod == j &
+          expert == "all" & parameter == "cfr")
+        cfr_tmp <- approx(x[,grep("pcum_", names(x))], x[,grep("x_", names(x))], 
+          rx,  rule = 2, ties = list("ordered", mean))$y
         
           # compute proportion of range covered by this value
           x <- (ranges[which(ranges$disease == e & 

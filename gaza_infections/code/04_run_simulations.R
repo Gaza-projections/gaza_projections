@@ -103,7 +103,7 @@ for (run_i in 1:max(runs$run)) {
         pre_tau <- sim_pars_u[which(sim_pars_u$disease == u & 
           sim_pars_u$parameter == "pre_tau"), c("subperiod", "value_gen")]
         colnames(pre_tau) <- c("subperiod", "pre_tau")
-        timeline_ui <- merge(timeline_ui, pre_tau, by = "subperiod", all.x = TRUE)
+        timeline_ui <- merge(timeline_ui, pre_tau, by ="subperiod",all.x = TRUE)
         
         # proportion of symptomatics
         pd <- sim_pars_u[which(sim_pars_u$disease == u & 

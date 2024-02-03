@@ -57,12 +57,18 @@
     # Initialise random numbers
     set.seed(123)
     
-    # # Colour-blind palette for graphing
-    # palette_cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
-    #   "#0072B2", "#D55E00", "#CC79A7")
-    palette_cb <- viridis(16)
-    show_col(palette_cb)
-
+    # Colour-blind palette for graphing
+      # general palette
+      palette_gen <- viridis(16)
+      show_col(palette_gen)
+          
+      # specific palette for the pre-war period, crisis to date period and 
+        # three scenarios
+      periods <- c("pre-war", "to date", "ceasefire", "status quo", "escalation")
+      
+      palette_periods <- c("azure4", palette_gen[c(2, 12, 8, 4)])
+      names(palette_periods) <- periods
+      show_col(palette_periods)
 
 #...............................................................................  
 ### Sourcing other scripts
@@ -83,6 +89,10 @@
   #...................................      
   ## Run simulations
   source(paste(dir_path, "code/04_run_simulations.R", sep =""))
+        
+  #...................................      
+  ## Analyse simulations
+  source(paste(dir_path, "code/05_analyse_and_visualise.R", sep =""))
         
 
 
