@@ -72,12 +72,6 @@
       idvar = c("disease", "parameter"), timevar = "which_value")
     colnames(ranges) <- c("disease", "parameter", "max", "min")
     ranges <- ranges[, c("disease", "parameter", "min", "max")]
-    
-
-  #...................................      
-  ## Initialise disease seasonality dataframe (fixed)
-
-######################TO DO    
         
   #...................................      
   ## Initialise other objects
@@ -89,6 +83,7 @@
     # Loop progress bar   
     pb <- txtProgressBar(min = 1, max = max(runs$run), style = 3)
 
+    
 #...............................................................................   
 ### Preparing simulation runs
 #...............................................................................
@@ -256,3 +251,6 @@ for (run_i in 1:max(runs$run)) {
 close(pb)    
       
       
+#...............................................................................
+### ENDS
+#...............................................................................

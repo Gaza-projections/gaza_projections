@@ -36,9 +36,9 @@
     epidemic_pars <- data.frame(readxl::read_excel(filename, 
       sheet = "epidemic_parameters"))
 
-    # Read data on past epidemiology
-    past_epi <- data.frame(readxl::read_excel(filename, 
-      sheet = "past_epidemiology"))
+    # Read endemic (stable-transmission) infection parameters
+    endemic_pars <- data.frame(readxl::read_excel(filename, 
+      sheet = "endemic_parameters"))
 
   #...................................      
   ## Read in or set other parameters
@@ -53,7 +53,9 @@
   #...................................      
   ## Read in or set other parameters
 
-    # Identify start, middle and end dates of projection period
+    # Identify important dates
+    date_crisis <- dmy(gen_pars[which(gen_pars$parameter == "date_crisis"), 
+      "value_gen"])
     date_start <- dmy(gen_pars[which(gen_pars$parameter == "date_start"), 
       "value_gen"])
     date_mid <- dmy(gen_pars[which(gen_pars$parameter == "date_mid"), 
@@ -180,11 +182,20 @@
       see_wt <- merge(x, see_wt, by = cols)
       see_wt$expert = "all"
       
-      # add mean distributions to expert-specific ones and save output
+      # add mean distributions to expert-specific ones
       x <- c(grep("x_", colnames(see), value = TRUE),
         grep("pcum_", colnames(see), value = TRUE))
       see <- rbind(see[, c("expert", cols, x)], see_wt[, c("expert", cols, x)] )
       see$scenario <- factor(see$scenario, levels = scenarios)
+      
+######################      
+      # modify range of r0 for measles to allow for larger estimates
+# NOTE: NEED TO REMOVE / RECTIFY DURING NEXT ITERATION
+      x <- which(see$disease == "measles" & see$parameter == "r0")
+      see[x, grep("x_", colnames(see))] <- see[x, grep("x_", colnames(see))] + 10
+######################
+      
+      # save output
       write_rds(see, paste(dir_path, 'inputs/',"see_distributions.rds", sep=""))
                   
                 
@@ -214,7 +225,7 @@
           si_modelled[[i]][[j]] <- x
         }
       }
- 
+
     # Read susceptibility to disease (or actually its inverse)      
     sd_modelled <- read_rds(paste(dir_path, 
       "inputs/immunity_projections/output_immune_disease_only.rds", sep =""))  
@@ -233,6 +244,15 @@
         }
       }
     
+#####################
+    # Correct diphtheria values - implausible
+# NEED TO IMPROVE MODEL FOR NEXT ITERATION
+    for (j in c("ceasefire", "escalation", "status_quo")) {
+      si_modelled[["diphtheria"]][[j]][, ages] <- 0.2
+      sd_modelled[["diphtheria"]][[j]][, ages] <- 0.2 
+    }
+#####################    
+     
              
   #...................................      
   ## Populate proportions susceptible to infection values
@@ -429,6 +449,133 @@
         
 
     
+#...............................................................................  
+### Reading and preparing data for endemic infection  model
+#...............................................................................
+        
+  #...................................      
+  ## Read in endemic data
+    
+    # Identify file name
+    filename <- paste(dir_path, 'inputs/', 
+      "gaza_infections_endemic_data.xlsx", sep="")
+    
+    # Read data
+    ende <- data.frame(readxl::read_excel(filename, sheet = "endemic_data"))
+    
+
+  #...................................      
+  ## Model annual deaths as a function of COVID-19
+
+    # Select data to model
+    df <- ende[complete.cases(ende), c("year", "d", "pop", "prop_covid")]
+    
+    # Fit a neg-bin model to the data, with COVID-19 proportion as covariate    
+    fit <- glm.nb(formula = d ~ prop_covid + offset(log(pop)), data = df)
+    
+    # Predict point estimate and confidence interval
+    df$pred <- exp(predict(fit))
+    x <- unlist(predict(fit, se.fit = TRUE)[2])
+    df$lci <- exp(predict(fit) - 1.96 * x)   
+    df$uci <- exp(predict(fit) + 1.96 * x)   
+    
+    # Plot data and modelled fit
+      
+      # prepare data for plotting
+      df2 <-df
+      df2$d_covid <- as.integer(df2$d * df2$prop_covid)
+      df2$d_other <- df2$d - df2$d_covid
+      df2 <- reshape(direction = "long", sep = "_",
+        data = df2[, c("year", "d_covid", "d_other")], varying = 
+        c("d_covid", "d_other"), timevar = "cause", 
+        idvar = "year")
+      df2$cause <- ifelse(df2$cause == "covid", "COVID-19", "other")
+      
+      # plot
+      ggplot() +
+        geom_bar(data = df2, aes(x = year, y = d, fill = cause, colour = cause), 
+          alpha = 0.7, stat = "identity", position = "stack") +
+        geom_point(data = df, aes(x = year, y = pred), colour = palette_gen[5])+
+        geom_errorbar(data = df, aes(ymin = lci, ymax = uci, x = year), 
+          width = 0.3, colour = palette_gen[5]) +
+        scale_fill_manual(values = palette_gen[c(14, 10)]) +
+        scale_colour_manual(values = palette_gen[c(14, 10)]) +
+        theme_bw() +
+        scale_x_continuous("year", breaks = 2016:2022) +
+        scale_y_continuous("number of deaths due to endemic infections",
+          breaks = seq(0, 1400, by = 200), expand = c(0, 40) ) +
+        theme(panel.grid.major.x = element_blank(), legend.position = "top")
+      
+    # Save plot and fit
+    ggsave(paste(dir_path, 'outputs/' , "fit_model_endemic_deaths.png", sep=""),
+      dpi = "print", units = "cm", width = 20, height = 12)
+    write_rds(fit, paste(dir_path, 'inputs/' , "fit_model_endemic_deaths.rds", 
+      sep=""))
+    
+  #...................................      
+  ## Prepare other inputs
+    
+    # Seasonality data
+      # select data
+      w <- endemic_pars[which(endemic_pars$parameter == "w"), c("disease",
+        grep("value_m", colnames(endemic_pars), value = TRUE) )]
+      colnames(w) <- c("disease", month.abb)
+    
+      # reshape long
+      w <- reshape(data = w, direction = "long", v.names = "w", 
+        times = month.abb,
+        varying = month.abb, timevar = "month", idvar = "disease")
+      
+    # Proportional mortality data
+    prop_d <- endemic_pars[which(endemic_pars$parameter == "prop_d"),
+      c("disease", "value_gen")]
+    
+    # Age distribution of deaths, by disease
+      # select data
+      prop_age <- endemic_pars[which(endemic_pars$parameter == "prop_age"), 
+        c("disease", grep("value_a", colnames(endemic_pars), value = TRUE) )]
+      colnames(prop_age) <- gsub("value_a", "", colnames(prop_age))
+    
+      # reshape long
+      prop_age <- reshape(data = prop_age, direction = "long", 
+        v.names = "prop_age", times = ages,
+        varying = ages, timevar = "age", idvar = "disease")
+      
+    # Daily timeline with age groups and diseases
+      # needs to go back to Jan 2023 to take care of seasonality
+    x <- ymd(paste("2023", "01", "01", sep = "-")) : 
+      ymd(paste("2024", "12", "31", sep = "-"))
+    timeline_ende <- expand.grid(date = as.Date(x), age= ages,
+      disease = diseases[which(diseases$category == "endemic"), "disease"])
+      
+      # add year and month
+      timeline_ende$year <- year(timeline_ende$date)  
+      timeline_ende$month <- month(timeline_ende$date)
+      timeline_ende$month <- sapply(timeline_ende$month, 
+        function(x) {month.abb[x]})
+    
+      # add subperiod
+      timeline_ende$subperiod <- "pre-war"
+      timeline_ende[which(timeline_ende$date %in% 
+        date_crisis : (date_start - 1)), "subperiod"] <- "to date"
+      timeline_ende[which(timeline_ende$date %in% 
+        date_start : (date_mid - 1)), "subperiod"] <- "months 1 to 3"
+      timeline_ende[which(timeline_ende$date %in% 
+        date_mid : date_end), "subperiod"] <- "months 4 to 6"
+      timeline_ende[which(timeline_ende$date > date_end), "subperiod"] <- "post"
+      
+      # add population    
+      timeline_ende <- merge(timeline_ende, ende[, c("year", "pop")],
+        by = "year", all.x = TRUE)
+      
+      # add route of transmission
+      timeline_ende <- merge(timeline_ende, diseases[, c("disease", "route")],
+        by = "disease", all.x = TRUE)
+      
+      # add age distribution of deaths
+      timeline_ende <- merge(timeline_ende, prop_age, by = c("disease", "age"),
+        all.x = TRUE)
+        
 #...............................................................................
 ### ENDS
 #...............................................................................

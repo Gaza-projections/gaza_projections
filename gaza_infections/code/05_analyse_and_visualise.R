@@ -136,7 +136,7 @@
     "disease", "subperiod", "age")], FUN = function(x) {
       quantile(x, c(0.5, 0.025, 0.975) )} )
   tab1[, grep("deaths", colnames(tab1))] <- apply(
-    tab1[, grep("deaths", colnames(tab1))], 2, round, -1)
+    tab1[, grep("deaths", colnames(tab1))], 2, round, -0)
   write.csv(tab1, paste(dir_path, "outputs/out_tab_epid_all.csv", sep = "/"),
     row.names = FALSE)
 
@@ -150,7 +150,7 @@
       by = tab2[, c("scenario", "disease", "subperiod")], 
       FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
     tab2[, grep("deaths", colnames(tab2))] <- apply(
-      tab2[, grep("deaths", colnames(tab2))], 2, round, -1)
+      tab2[, grep("deaths", colnames(tab2))], 2, round, 0)
     tab2 <- data.frame(tab2[, c("scenario", "disease", "subperiod")],
       unlist(tab2$deaths))
     colnames(tab2) <- c("scenario", "disease", "subperiod", "median", "lci", 
@@ -195,7 +195,7 @@
       by = tab3[, c("scenario", "age", "subperiod")], 
       FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
     tab3[, grep("deaths", colnames(tab3))] <- apply(
-      tab3[, grep("deaths", colnames(tab3))], 2, round, -1)
+      tab3[, grep("deaths", colnames(tab3))], 2, round, 0)
     tab3 <- data.frame(tab3[, c("scenario", "age", "subperiod")],
       unlist(tab3$deaths))
     colnames(tab3) <- c("scenario", "age", "subperiod", "median", "lci", 
@@ -266,7 +266,126 @@
 ### Analysing simulations for stable-transmission infections
 #...............................................................................
 
+  #...................................      
+  ## Read and format output as needed
 
+   # Read simulation output if not already in environment
+    if (! exists("out_ende")) {out_ende <- read_rds(paste(dir_path,
+      'outputs/',"out_ende_all_runs.rds", sep=""))}
+        
+    # Format age
+    out_ende$age <- gsub("to", " to ", out_ende$age)
+
+    # Compute excess deaths
+    out_ende$d_excess <- out_ende$d_crisis - out_ende$d_base
+    
+    # Output columns
+    cols <- c(paste("d_base", c("median", "lci", "uci"), sep = "_"),
+      paste("d_crisis", c("median", "lci", "uci"), sep = "_"),
+      paste("d_excess", c("median", "lci", "uci"), sep = "_"))
+
+    
+  #...................................      
+  ## Tabulate deaths by scenario, disease, age group and subperiod
+  tab1 <- aggregate(list(out_ende[, grep("d_", colnames(out_ende))]),
+    by = out_ende[, c("scenario", "disease", "subperiod", "age")], 
+    FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+  tab1 <- data.frame(tab1[, c("scenario", "disease", "subperiod", "age")],
+    tab1$d_base, tab1$d_crisis, tab1$d_excess)
+  colnames(tab1) <- c("scenario", "disease", "subperiod", "age", cols)
+  # tab1[, grep("d_", colnames(tab1))] <- apply(
+  #   tab1[, grep("d_", colnames(tab1))], 2, round, 0)
+  write.csv(tab1, paste(dir_path, "outputs/out_tab_ende_all.csv", sep = "/"),
+    row.names = FALSE)
+
+  #...................................      
+  ## Tabulate deaths by scenario, disease, and subperiod
+    
+    # Aggregate
+    tab2 <- aggregate(out_ende[, grep("d_", colnames(out_ende))],
+      by = out_ende[, c("scenario", "disease", "subperiod", "run")], FUN = sum)
+    tab2 <- aggregate(tab2[, grep("d_", colnames(tab2))],
+      by = tab2[, c("scenario", "disease", "subperiod")], 
+      FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+    tab2 <- data.frame(tab2[, c("scenario", "disease", "subperiod")],
+      tab2$d_base, tab2$d_crisis, tab2$d_excess)
+    colnames(tab2) <- c("scenario", "disease", "subperiod", cols)
+    tab2[, grep("d_", colnames(tab2))] <- apply(
+      tab2[, grep("d_", colnames(tab2))], 2, round, 0)
+
+    # Add totals for the entire subperiod
+    x <- aggregate(tab2[, cols], by = 
+      tab2[, c("scenario", "disease")], FUN = sum)
+    x$subperiod <- "total"
+    x <- x[, c("scenario", "disease", "subperiod", cols)]
+    tab2 <- rbind(tab2, x)
+    
+    # Output raw table
+    write.csv(tab2, paste(dir_path, "outputs/out_tab_ende_dis.csv", sep = "/"),
+      row.names = FALSE)
+    
+    # Improve numbers format
+    tab2[, cols] <- apply(tab2[, cols], 2, format, big.mark = ",")
+    tab2[, cols] <- apply(tab2[, cols],
+      2, function(x) {trimws(as.character(x))} )
+    for (i in c("base", "crisis", "excess")) {
+      tab2[, paste("deaths", i, sep = "_")] <- 
+        paste(tab2[, paste("d", i, "median", sep = "_")], " (", 
+          tab2[, paste("d", i, "lci", sep = "_")], " to ",
+          tab2[, paste("d", i, "uci", sep = "_")], ")", sep = "")       
+    }
+    tab2 <- tab2[, c("scenario", "disease", "subperiod",
+      "deaths_base", "deaths_crisis", "deaths_excess")]
+  
+    # Write 
+    write.csv(tab2, paste(dir_path, "outputs/out_tab_ende_dis_pretty.csv", 
+      sep = "/"), row.names = FALSE)
+    
+  #...................................      
+  ## Tabulate deaths by scenario, age, and subperiod
+
+    # Aggregate
+    tab3 <- aggregate(out_ende[, grep("d_", colnames(out_ende))],
+      by = out_ende[, c("scenario", "age", "subperiod", "run")], FUN = sum)
+    tab3 <- aggregate(tab3[, grep("d_", colnames(tab3))],
+      by = tab3[, c("scenario", "age", "subperiod")], 
+      FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+    tab3 <- data.frame(tab3[, c("scenario", "age", "subperiod")],
+      tab3$d_base, tab3$d_crisis, tab3$d_excess)
+    colnames(tab3) <- c("scenario", "age", "subperiod", cols)
+    tab3[, grep("d_", colnames(tab3))] <- apply(
+      tab3[, grep("d_", colnames(tab3))], 2, round, 0)
+
+    # Add totals for the entire subperiod
+    x <- aggregate(tab3[, cols], by = 
+      tab3[, c("scenario", "age")], FUN = sum)
+    x$subperiod <- "total"
+    x <- x[, c("scenario", "age", "subperiod", cols)]
+    tab3 <- rbind(tab3, x)
+    
+    # Output raw table
+    write.csv(tab3, paste(dir_path, "outputs/out_tab_ende_age.csv", sep = "/"),
+      row.names = FALSE)
+    
+    # Improve numbers format
+    tab3[, cols] <- apply(tab3[, cols], 2, format, big.mark = ",")
+    tab3[, cols] <- apply(tab3[, cols],
+      2, function(x) {trimws(as.character(x))} )
+    for (i in c("base", "crisis", "excess")) {
+      tab3[, paste("deaths", i, sep = "_")] <- 
+        paste(tab3[, paste("d", i, "median", sep = "_")], " (", 
+          tab3[, paste("d", i, "lci", sep = "_")], " to ",
+          tab3[, paste("d", i, "uci", sep = "_")], ")", sep = "")       
+    }
+    tab3 <- tab3[, c("scenario", "age", "subperiod",
+      "deaths_base", "deaths_crisis", "deaths_excess")]
+  
+    # Write 
+    write.csv(tab3, paste(dir_path, "outputs/out_tab_ende_age_pretty.csv", 
+      sep = "/"), row.names = FALSE)
+    
+    
+  
 
 #...............................................................................   
 ### ENDS

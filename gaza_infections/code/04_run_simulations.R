@@ -15,7 +15,7 @@
 #...............................................................................
 
   #...................................      
-  ## Initialise timeline with age groups and population
+  ## Initialise daily timeline with age groups and population (for epidemics)
     
     # Initialise a timeline object
     timeline_sim <- timeline
@@ -38,7 +38,7 @@
       pop = demography_vector)
     timeline_sim <- merge(timeline_sim, pop, by = "demography_group", 
       all.x = TRUE)
-    
+  
   #...................................      
   ## Initialise output
     
@@ -161,14 +161,125 @@ close(pb)
     "out_epid_all_runs.rds", sep=""))
 
 
-
-
 #...............................................................................   
 ### Running stable-transmission simulations
 #...............................................................................
 
+# (run loop starts here)    
+for (run_i in 1:max(runs$run)) {
 
+  #...................................      
+  ## Preparatory steps
+
+    # Update progress bar
+    setTxtProgressBar(pb, run_i)
+
+    # Identify random number from [0,1]
+    rx <- runs[run_i, "rx"]
+      # rx is the extent along the positive-negative spectrum, so 1-rx = inverse  
+
+  #...................................      
+  ## For each scenario...
+  for (i in scenarios) {
+    
+    # Get parameter values for this run and scenario
+    sim_pars <- sim[[run_i]][[i]]
+    sim_pars <- sim_pars[which(sim_pars$parameter %in% c("r0_rr", "cfr_rr")), 
+      c("disease", "parameter", "subperiod", "value_gen")]
+
+    # Initialise fresh timeline
+    timeline_runi_i <- timeline_ende
+    
+    # Add relative risks
+      # transmissibility
+      x <- sim_pars[which(sim_pars$parameter == "r0_rr"), 
+        c("disease", "subperiod", "value_gen")]
+      colnames(x) <- c("disease", "subperiod", "r0_rr")
+      timeline_runi_i <- merge(timeline_runi_i, x,
+        by = c("disease", "subperiod"), all.x = TRUE)
+    
+      # CFR
+      x <- sim_pars[which(sim_pars$parameter == "cfr_rr"), 
+        c("disease", "subperiod", "value_gen")]
+      colnames(x) <- c("disease", "subperiod", "cfr_rr")
+      timeline_runi_i <- merge(timeline_runi_i, x,
+        by = c("disease", "subperiod"), all.x = TRUE)
       
+    # Generate a random number of infectious disease deaths by year
+    d <- c()
+    x <- predict(fit, newdata = 
+      ende[which(ende$year %in% unique(timeline_ende$year)), ], se.fit = TRUE)
+    for (j in 1:length(x$fit)) 
+      {d[j] <- exp(qnorm(rx, x$fit[j], sd = x$se.fit[j]))}
+    d_y <- data.frame(year = unique(timeline_ende$year), d_y = as.integer(d) )  
+    
+    # Distribute total deaths into each cause
+    d_by <- unique(timeline_ende[, c("year", "disease", "route")])
+    d_by <- merge(d_by, d_y, by = "year", all.x = TRUE)
+    d_by$d <- NA
+    for (j in 1:nrow(d_by)) {
+      # COVID-19 deaths
+      if (d_by[j, "disease"] == "COVID-19") {
+        d_by[j, "d"] <- d_by[j, "d_y"] * 
+          ende[which(ende$year == d_by[j, "year"]), "prop_covid"]
+      }
+      
+      # other airborne droplet deaths
+      if (d_by[j, "disease"] != "COVID-19" & 
+        d_by[j, "route"] == "airborne-droplet") {
+        d_by[j, "d"] <- d_by[j, "d_y"] * 
+          ende[which(ende$year == d_by[j, "year"]), "prop_airborne"] *
+          prop_d[which(prop_d$disease == d_by[j, "disease"]), "value_gen"]
+      }
+      
+      # faecal-oral deaths
+      if (d_by[j, "route"] == "faecal-oral") {
+        d_by[j, "d"] <- d_by[j, "d_y"] *
+          ende[which(ende$year == d_by[j, "year"]), "prop_faecal"] *
+          prop_d[which(prop_d$disease == d_by[j, "disease"]), "value_gen"]
+      }
+    }
+    
+    # Now distribute by month of the year, based on seasonality
+    d_m <- unique(timeline_ende[, c("disease", "year", "month")])
+    d_m <- merge(d_m, d_by[, c("disease", "year", "d")], 
+      by = c("disease", "year"), all.x = TRUE)
+    d_m <- merge(d_m, w, by = c("disease", "month"), all.x = TRUE)
+    d_m$d_m <- d_m$d * d_m$w
+
+    # Now distribute by day
+    timeline_runi_i <- merge(timeline_runi_i, 
+      d_m[, c("disease", "year", "month", "d_m")],
+      by = c("disease", "year", "month"), all.x = TRUE)
+    timeline_runi_i$d_d <- timeline_runi_i$d_m / 
+      days_in_month(timeline_runi_i$date)
+      
+    # Now distribute by age group
+    timeline_runi_i$d_base <- timeline_runi_i$d_d * timeline_runi_i$prop_age 
+  
+    # Lastly, apply crisis relative risks
+    timeline_runi_i$d_crisis <- timeline_runi_i$d_base * timeline_runi_i$r0_rr * 
+      timeline_runi_i$cfr_rr
+##### WILL NEED TO ADD CHANGING SUSCEPTIBILITY IN LATER EDITIONS    
+    
+    # Aggregate and collect output by subperiod
+    x <- subset(timeline_runi_i, subperiod %in% subperiods)
+    x <- aggregate(x[, c("d_base", "d_crisis")], by =
+      x[, c("route", "disease", "subperiod", "age")], FUN = sum)    
+    x$scenario <- i
+    x$run <- run_i
+    out_ende <- rbind(out_ende, x)
+      
+  } # (close i - scenario loop)
+} # (close run_i - run loop)  
+close(pb) 
+
+  #...................................      
+  ## Save raw output
+  write_rds(out_ende, paste(dir_path, "outputs/", 
+    "out_ende_all_runs.rds", sep=""))
+
+
 #...............................................................................   
 ### ENDS
 #...............................................................................
