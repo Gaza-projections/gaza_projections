@@ -1,0 +1,73 @@
+"scenario","disease","subperiod","d_base_median","d_base_lci","d_base_uci","d_crisis_median","d_crisis_lci","d_crisis_uci","d_excess_median","d_excess_lci","d_excess_uci"
+"ceasefire","Hib disease","months 1 to 3",0,0,0,0,0,0,0,0,0
+"escalation","Hib disease","months 1 to 3",0,0,0,0,0,0,0,0,0
+"status quo","Hib disease","months 1 to 3",0,0,0,0,0,0,0,0,0
+"ceasefire","pneumococcal disease","months 1 to 3",31,26,38,123,24,566,93,-2,528
+"escalation","pneumococcal disease","months 1 to 3",31,26,38,150,36,697,119,10,659
+"status quo","pneumococcal disease","months 1 to 3",31,26,38,152,31,636,121,5,598
+"ceasefire","RSV","months 1 to 3",13,10,15,50,10,228,37,-1,212
+"escalation","RSV","months 1 to 3",13,10,15,60,15,280,48,4,265
+"status quo","RSV","months 1 to 3",13,10,15,61,12,256,49,2,241
+"ceasefire","COVID-19","months 1 to 3",52,43,63,206,41,944,155,-3,881
+"escalation","COVID-19","months 1 to 3",52,43,63,251,61,1163,199,17,1100
+"status quo","COVID-19","months 1 to 3",52,43,63,254,52,1061,202,8,998
+"ceasefire","Influenza, para-influenza","months 1 to 3",30,25,37,119,23,546,90,-2,509
+"escalation","Influenza, para-influenza","months 1 to 3",30,25,37,145,35,673,115,10,636
+"status quo","Influenza, para-influenza","months 1 to 3",30,25,37,147,30,614,117,5,577
+"ceasefire","rotavirus","months 1 to 3",1,1,1,9,2,33,8,1,33
+"escalation","rotavirus","months 1 to 3",1,1,1,17,2,41,17,1,40
+"status quo","rotavirus","months 1 to 3",1,1,1,16,2,38,16,1,37
+"ceasefire","other viral gastroenteritis","months 1 to 3",1,1,2,18,3,67,17,2,65
+"escalation","other viral gastroenteritis","months 1 to 3",1,1,2,35,4,81,33,3,79
+"status quo","other viral gastroenteritis","months 1 to 3",1,1,2,32,4,77,31,3,75
+"ceasefire","bacterial gastroenteritis","months 1 to 3",1,1,2,18,3,67,17,2,65
+"escalation","bacterial gastroenteritis","months 1 to 3",1,1,2,35,4,81,33,3,79
+"status quo","bacterial gastroenteritis","months 1 to 3",1,1,2,32,4,77,31,3,75
+"ceasefire","Hib disease","months 4 to 6",0,0,0,0,0,0,0,0,0
+"escalation","Hib disease","months 4 to 6",0,0,0,0,0,0,0,0,0
+"status quo","Hib disease","months 4 to 6",0,0,0,0,0,0,0,0,0
+"ceasefire","pneumococcal disease","months 4 to 6",31,26,38,90,19,520,59,-7,482
+"escalation","pneumococcal disease","months 4 to 6",31,26,38,192,40,736,161,13,698
+"status quo","pneumococcal disease","months 4 to 6",31,26,38,172,30,598,139,4,560
+"ceasefire","RSV","months 4 to 6",1,1,1,3,1,19,2,0,17
+"escalation","RSV","months 4 to 6",1,1,1,7,1,27,6,0,25
+"status quo","RSV","months 4 to 6",1,1,1,6,1,22,5,0,20
+"ceasefire","COVID-19","months 4 to 6",23,19,28,66,14,380,43,-5,352
+"escalation","COVID-19","months 4 to 6",23,19,28,140,29,537,118,10,509
+"status quo","COVID-19","months 4 to 6",23,19,28,125,22,436,102,3,408
+"ceasefire","Influenza, para-influenza","months 4 to 6",2,2,3,6,1,36,4,-1,33
+"escalation","Influenza, para-influenza","months 4 to 6",2,2,3,13,3,50,11,1,48
+"status quo","Influenza, para-influenza","months 4 to 6",2,2,3,12,2,41,10,0,38
+"ceasefire","rotavirus","months 4 to 6",1,1,1,8,1,33,7,1,32
+"escalation","rotavirus","months 4 to 6",1,1,1,18,2,41,18,2,41
+"status quo","rotavirus","months 4 to 6",1,1,1,15,2,38,15,1,37
+"ceasefire","other viral gastroenteritis","months 4 to 6",1,1,2,16,3,67,15,2,65
+"escalation","other viral gastroenteritis","months 4 to 6",1,1,2,36,5,83,35,3,81
+"status quo","other viral gastroenteritis","months 4 to 6",1,1,2,31,4,76,29,3,75
+"ceasefire","bacterial gastroenteritis","months 4 to 6",1,1,2,16,3,67,15,2,65
+"escalation","bacterial gastroenteritis","months 4 to 6",1,1,2,36,5,83,35,3,81
+"status quo","bacterial gastroenteritis","months 4 to 6",1,1,2,31,4,76,29,3,75
+"ceasefire","Hib disease","total",0,0,0,0,0,0,0,0,0
+"escalation","Hib disease","total",0,0,0,0,0,0,0,0,0
+"status quo","Hib disease","total",0,0,0,0,0,0,0,0,0
+"ceasefire","pneumococcal disease","total",62,52,76,213,43,1086,152,-9,1010
+"escalation","pneumococcal disease","total",62,52,76,342,76,1433,280,23,1357
+"status quo","pneumococcal disease","total",62,52,76,324,61,1234,260,9,1158
+"ceasefire","RSV","total",14,11,16,53,11,247,39,-1,229
+"escalation","RSV","total",14,11,16,67,16,307,54,4,290
+"status quo","RSV","total",14,11,16,67,13,278,54,2,261
+"ceasefire","COVID-19","total",75,62,91,272,55,1324,198,-8,1233
+"escalation","COVID-19","total",75,62,91,391,90,1700,317,27,1609
+"status quo","COVID-19","total",75,62,91,379,74,1497,304,11,1406
+"ceasefire","Influenza, para-influenza","total",32,27,40,125,24,582,94,-3,542
+"escalation","Influenza, para-influenza","total",32,27,40,158,38,723,126,11,684
+"status quo","Influenza, para-influenza","total",32,27,40,159,32,655,127,5,615
+"ceasefire","rotavirus","total",2,2,2,17,3,66,15,2,65
+"escalation","rotavirus","total",2,2,2,35,4,82,35,3,81
+"status quo","rotavirus","total",2,2,2,31,4,76,31,2,74
+"ceasefire","other viral gastroenteritis","total",2,2,4,34,6,134,32,4,130
+"escalation","other viral gastroenteritis","total",2,2,4,71,9,164,68,6,160
+"status quo","other viral gastroenteritis","total",2,2,4,63,8,153,60,6,150
+"ceasefire","bacterial gastroenteritis","total",2,2,4,34,6,134,32,4,130
+"escalation","bacterial gastroenteritis","total",2,2,4,71,9,164,68,6,160
+"status quo","bacterial gastroenteritis","total",2,2,4,63,8,153,60,6,150
