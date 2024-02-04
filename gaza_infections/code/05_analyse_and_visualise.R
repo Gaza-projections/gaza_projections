@@ -134,9 +134,13 @@
   ## Tabulate deaths by scenario, disease, age group and subperiod
   tab1 <- aggregate(list(deaths = out_epid$deaths),by = out_epid[, c("scenario",
     "disease", "subperiod", "age")], FUN = function(x) {
-      quantile(x, c(0.5, 0.025, 0.975) )} )
-  tab1[, grep("deaths", colnames(tab1))] <- apply(
-    tab1[, grep("deaths", colnames(tab1))], 2, round, -0)
+      return(c(mean(x), quantile(x, c(0.5, 0.025, 0.975))) )} )
+  tab1 <- data.frame(tab1[, c("scenario", "disease", "subperiod", "age")],
+    tab1$deaths)
+  colnames(tab1) <- c("scenario", "disease", "subperiod", "age",
+    "deaths_mean", "deaths_median", "deaths_lci", "deaths_uci")
+  # tab1[, grep("deaths", colnames(tab1))] <- apply(
+  #   tab1[, grep("deaths", colnames(tab1))], 2, round, -0)
   write.csv(tab1, paste(dir_path, "outputs/out_tab_epid_all.csv", sep = "/"),
     row.names = FALSE)
 
@@ -289,10 +293,14 @@
   ## Tabulate deaths by scenario, disease, age group and subperiod
   tab1 <- aggregate(list(out_ende[, grep("d_", colnames(out_ende))]),
     by = out_ende[, c("scenario", "disease", "subperiod", "age")], 
-    FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+    FUN = function(x) {return(c(mean(x), quantile(x, c(0.5, 0.025, 0.975))) )} )
   tab1 <- data.frame(tab1[, c("scenario", "disease", "subperiod", "age")],
     tab1$d_base, tab1$d_crisis, tab1$d_excess)
-  colnames(tab1) <- c("scenario", "disease", "subperiod", "age", cols)
+  colnames(tab1) <- c("scenario", "disease", "subperiod", "age", 
+    paste("d_base", c("mean", "median", "lci", "uci"), sep = "_"),
+    paste("d_crisis", c("mean", "median", "lci", "uci"), sep = "_"),
+    paste("d_excess", c("mean", "median", "lci", "uci"), sep = "_")
+  )
   # tab1[, grep("d_", colnames(tab1))] <- apply(
   #   tab1[, grep("d_", colnames(tab1))], 2, round, 0)
   write.csv(tab1, paste(dir_path, "outputs/out_tab_ende_all.csv", sep = "/"),
