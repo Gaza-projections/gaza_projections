@@ -123,7 +123,7 @@
     tab1 <- tab1[, c("module", "subperiod", scenarios)]
     tab1 <- tab1[order(tab1$module, tab1$subperiod), ]
     tab1 <- tab1[, c("disease", "subperiod", scenarios)]
-    write.csv(tab1, paste(dir_path, "outputs/out_tab_epid_dis_pretty.csv", 
+    write.csv(tab1, paste(dir_path, "outputs/out_tab_excess_pretty.csv", 
       sep = "/"), row.names = FALSE)
      
   #...................................
