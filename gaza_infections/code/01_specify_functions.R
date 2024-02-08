@@ -117,37 +117,18 @@ f_score <- function(see_f = see) {
     # uses Epiverse-TRACE 'epidemics' package
 #...............................................................................
 
-f_seir <- function(disease_f, scenario_f, timeline_f,
+f_seir <- function(disease_f, scenario_f, timeline_f, rx_start_f,
   initial_conditions_f = initial_conditions,
   contact_matrix_f = contact_matrix, demography_vector_f = demography_vector) {
 
   #...................................      
-  ## Decide whether an outbreak will occur during the projection period
-    
-    # Sample from a binomial distribution of probability of an outbreak
-    y <- rbinom(1, 1, prob = mean(timeline_f$pu) )
-  
-    # If 0, no outbreak: end function here
-    if (y == 0) {
-      
-      # Return output with 0 infections, cases and deaths
-      timeline_f[, c("new_infections", "symptomatic", "deaths")] <- 0
-      out_f <-aggregate(timeline_f[,c("new_infections","symptomatic","deaths")],
-        by = timeline_f[, c("subperiod", "age")], FUN = sum)
-      return(out_f)
-    }
-  
-# If p = 1, an outbreak occurs; function continues
-if (y == 1) {
-      
-  #...................................      
-  ## Select random starting date for epidemic, and compute resulting periods
+  ## Identify random starting date for epidemic, and compute resulting periods
     # starting time is not dependent on random run variable: it's totally random
       
-    # Sample random starting day within the projection period
+    # Random starting day within the projection period
       # sample random starting day
       time_epid_start <- unique(timeline_f[which(timeline_f$time == 
-        as.integer(runif(1, 0, 1) * max(timeline_f$time))), "time"])
+        as.integer(rx_start_f * max(timeline_f$time))), "time"])
       
       # update in timeline
       timeline_f$time_epid <- timeline_f$time - time_epid_start + 1
@@ -187,11 +168,11 @@ if (y == 1) {
     )
         
   #...................................      
-  ## Simulate epidemic over subperiod 1
+  ## Simulate epidemic over subperiods 1 and 2
     # (but only if the epidemic starts within sub-period 1)
   if (time_epid_start <= time_periods["end_subperiod1"]) {
 
-    # Recognise parameters for the disease_f, specific to the subperiod
+    # Recognise parameters for sub-period 1
       # basic reproduction number
       r0 <- mean(timeline_f[which(timeline_f$subperiod == "months 1 to 3"), 
         "r0"])
@@ -204,29 +185,55 @@ if (y == 1) {
       pre_tau <- mean(timeline_f[which(timeline_f$subperiod == "months 1 to 3"), 
         "pre_tau"])
       
+   # Recognise parameters for sub-period 2
+      # basic reproduction number
+      r0_2 <- mean(timeline_f[which(timeline_f$subperiod == "months 4 to 6"), 
+        "r0"])
+      
+      # infectiousness period
+      tau_2 <- mean(timeline_f[which(timeline_f$subperiod == "months 4 to 6"), 
+        "tau"])
+      
+      # pre-infectiousness period
+      pre_tau_2 <- mean(timeline_f[which(timeline_f$subperiod=="months 4 to 6"), 
+        "pre_tau"])
+      
+    # Define time-varying parameters
+    time_dependence = list(
+      transmissibility = function(time, x, x2 = r0_2 / tau_2, 
+        time_change = time_periods["end_subperiod1"]) {
+        if(time > time_change) x2
+        else x
+      },
+      infectiousness_rate = function(time, x, x2 = 1 / pre_tau_2, 
+        time_change = time_periods["end_subperiod1"]) {
+        if(time > time_change) x2
+        else x
+      },
+      recovery_rate = function(time, x, x2 = 1 / tau_2,
+        time_change = time_periods["end_subperiod1"]) {
+        if(time > time_change) x2
+        else x
+      }
+    )
+      
     # Run SEIR model to end of sub-period 1
-    run_subperiod1 <- epidemics::model_default_cpp(
+    run_seir <- epidemics::model_default_cpp(
       population = model_population,
       transmissibility = r0 / tau,
       infectiousness_rate = 1 / pre_tau,
       recovery_rate = 1 / tau,
-      time_end = days_subperiod1,
+      time_end = days_subperiod1 + days_subperiod2,
+      time_dependence = time_dependence,
       increment = 1
     )
-    
-    # Update initial conditions after sub-period 1
-    x <- subset(run_subperiod1, time == max(run_subperiod1$time))
-    initial_conditions_f$S <- x[which(x$compartment == "susceptible"), "value"]
-    initial_conditions_f$E <- x[which(x$compartment == "exposed"), "value"]
-    initial_conditions_f$I <- x[which(x$compartment == "infectious"), "value"]
-    initial_conditions_f$R <- x[which(x$compartment == "recovered"), "value"]
-    initial_conditions_f$V <- x[which(x$compartment == "vaccinated"), "value"]
   }
 
   #...................................      
-  ## Simulate epidemic over subperiod 2
+  ## Simulate epidemic over subperiod 2 only
+    # if the epidemic only starts in subperiod 2
 
-    # Recognise parameters for the disease_f, specific to the subperiod
+    # Recognise parameters for sub-period 2
       # basic reproduction number
       r0 <- mean(timeline_f[which(timeline_f$subperiod == "months 4 to 6"), 
         "r0"])
@@ -239,8 +246,8 @@ if (y == 1) {
       pre_tau <- mean(timeline_f[which(timeline_f$subperiod == "months 4 to 6"), 
         "pre_tau"])
       
-    # Run epidemic till the end of sub-period 2
-    run_subperiod2 <- epidemics::model_default_cpp(
+    # Run SEIR model till the end of sub-period 2
+    run_seir <- epidemics::model_default_cpp(
       population = model_population,
       transmissibility = r0 / tau,
       infectiousness_rate = 1 / pre_tau,
@@ -252,22 +259,11 @@ if (y == 1) {
   #...................................      
   ## Assemble output into a timeline of susceptibles and new infections
 
-    # Collect subperiod 1, if run
-    run_full <- c()
-    if (time_epid_start <= time_periods["end_subperiod1"]) {
-      x <- subset(run_subperiod1, compartment == "susceptible")
-      x <- merge(x, new_infections(run_subperiod1),
-        by = c("time", "demography_group"), all.x = TRUE)
-      x$time <- x$time + time_epid_start
-      run_full <- rbind(run_full, x)
-    }
-          
-    # Collect and add subperiod 2
-    x <- subset(run_subperiod2, compartment == "susceptible")
-    x <- merge(x, new_infections(run_subperiod2),
+    # Assemble output
+    run_full <- subset(run_seir, compartment == "susceptible")
+    run_full <- merge(run_full, new_infections(run_seir),
       by = c("time", "demography_group"), all.x = TRUE)
-    x$time <- x$time + days_subperiod1 + time_epid_start
-    run_full <- rbind(run_full, x)
+    run_full$time <- run_full$time + time_epid_start
     run_full <- run_full[, 
       c("time", "demography_group", "value", "new_infections")]
     colnames(run_full)[colnames(run_full) == "value"] <- "susceptibles"
@@ -325,12 +321,12 @@ if (y == 1) {
   #...................................      
   ## Collect and return results
     # Aggregate by sub-period
-    out_f <- aggregate(timeline_f[,c("new_infections", "symptomatic", "deaths")],
+    out_f <- aggregate(timeline_f[,c("new_infections", "symptomatic","deaths")],
       by = timeline_f[, c("subperiod", "age")], FUN = sum)
     
     # Return results      
     return(out_f)
-  }
+
 }
 
 

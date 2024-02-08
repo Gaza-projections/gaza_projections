@@ -44,7 +44,7 @@
     
     # For epidemic infections model  
     out_epid <- data.frame()  
-
+    
     # For stable-transmission infections model  
     out_ende <- data.frame()  
     
@@ -78,78 +78,101 @@ for (run_i in 1:max(runs$run)) {
       
       # get parameter values for this run, scenario and disease
       sim_pars_u <- subset(sim_pars, disease == u)      
+
+        # binomial realisation of probability of an epidemic
+        pu <- sim_pars_u[which(sim_pars_u$subperiod == "overall" & 
+          sim_pars_u$parameter == "pu"), "value_gen"]  
+        y <- rbinom(1, 1, prob = pu)
       
-      # add parameters
+      # if y = 0, no outbreak: end loop here
+      if (y == 0) {
       
-        # Probability of an epidemic
-        pu <- sim_pars_u[which(sim_pars_u$disease == u &
-          sim_pars_u$subperiod == "overall" & sim_pars_u$parameter == "pu"), 
-          "value_gen"]  
-        timeline_ui$pu <- pu
+        # collect output with 0 infections, cases and deaths
+        timeline_ui[, c("new_infections", "symptomatic", "deaths")] <- 0
+        x <- aggregate(timeline_ui[,c("new_infections", "symptomatic",
+          "deaths")],
+          by = timeline_ui[, c("subperiod", "age")], FUN = sum)
+        x$run <- run_i
+        x$scenario <- i
+        x$disease <- u
+        out_epid <- rbind(out_epid, x)
         
-        # R0
-        r0 <- sim_pars_u[which(sim_pars_u$disease == u & 
-          sim_pars_u$parameter == "r0"), c("subperiod", "value_gen")]
-        colnames(r0) <- c("subperiod", "r0")
-        timeline_ui <- merge(timeline_ui, r0, by = "subperiod", all.x = TRUE)
-  
-        # infectiousness period
-        tau <- sim_pars_u[which(sim_pars_u$disease == u & 
-          sim_pars_u$parameter == "tau"), c("subperiod", "value_gen")]
-        colnames(tau) <- c("subperiod", "tau")
-        timeline_ui <- merge(timeline_ui, tau, by = "subperiod", all.x = TRUE)
-        
-        # pre-infectious period
-        pre_tau <- sim_pars_u[which(sim_pars_u$disease == u & 
-          sim_pars_u$parameter == "pre_tau"), c("subperiod", "value_gen")]
-        colnames(pre_tau) <- c("subperiod", "pre_tau")
-        timeline_ui <- merge(timeline_ui, pre_tau, by ="subperiod",all.x = TRUE)
-        
-        # proportion of symptomatics
-        pd <- sim_pars_u[which(sim_pars_u$disease == u & 
-          sim_pars_u$parameter == "pd"), c("subperiod", "value_gen")]
-        colnames(pd) <- c("subperiod", "pd")
-        timeline_ui <- merge(timeline_ui, pd, by = "subperiod", all.x = TRUE)
-        
-        # CFR values by subperiod and age group
-        cfr <- sim_pars_u[which(sim_pars_u$disease == u & 
-          sim_pars_u$parameter == "cfr" & sim_pars_u$subperiod %in% subperiods),
-          c("subperiod", grep("value_a", colnames(sim_pars_u), value = TRUE))]
-        cfr <- reshape(cfr, direction = "long",
-          varying = list(colnames(cfr)[colnames(cfr) != "subperiod"]),
-          timevar = "age", v.names = "cfr",
-          idvar = "subperiod",
-          times = colnames(cfr)[colnames(cfr) != "subperiod"]
-        )
-        cfr$age <- gsub("value_a", "", cfr$age)
-        timeline_ui <- merge(timeline_ui, cfr, by = c("subperiod", "age"), 
-          all.x = TRUE)
-        
-        # STARTING proportion susceptible to infection
-        si <- si_list[[u]][[i]]
-        si <- reshape(si, direction = "long", varying = list(ages),
-          timevar = "age", v.names = "si", idvar = "month", times = ages
-        )
-        timeline_ui <- merge(timeline_ui, si, by = c("month", "age"), 
-          all.x = TRUE)
-        
-        # proportion susceptible to severe disease
-        sd <- sd_list[[u]][[i]]
-        sd <- reshape(sd, direction = "long", varying = list(ages),
-          timevar = "age", v.names = "sd", idvar = "month", times = ages
-        )
-        timeline_ui <- merge(timeline_ui, sd, by = c("month", "age"), 
-          all.x = TRUE)
-      
-      # run SEIR model
-      x <- f_seir(disease_f = u, scenario_f = i, timeline_f = timeline_ui)
+        # advance to the next loop
+        next
+      } # (close if y = 0 loop)
+
+      # if y = 1, an outbreak occurs; function continues
+      if (y == 1) {
+                      
+        # add parameters
+          # random number defining epidemic start
+          rx_start <- runif(1)
           
-      # collect results  
-      x$run <- run_i
-      x$scenario <- i
-      x$disease <- u
-      out_epid <- rbind(out_epid, x)
+          # R0
+          r0 <- sim_pars_u[which(sim_pars_u$parameter == "r0"), 
+            c("subperiod", "value_gen")]
+          colnames(r0) <- c("subperiod", "r0")
+          timeline_ui <- merge(timeline_ui, r0, by = "subperiod", all.x = TRUE)
+    
+          # infectiousness period
+          tau <- sim_pars_u[which(sim_pars_u$parameter == "tau"), 
+            c("subperiod", "value_gen")]
+          colnames(tau) <- c("subperiod", "tau")
+          timeline_ui <- merge(timeline_ui, tau, by = "subperiod", all.x = TRUE)
+          
+          # pre-infectious period
+          pre_tau <- sim_pars_u[which(sim_pars_u$parameter == "pre_tau"), 
+            c("subperiod", "value_gen")]
+          colnames(pre_tau) <- c("subperiod", "pre_tau")
+          timeline_ui <- merge(timeline_ui, pre_tau, by ="subperiod",
+            all.x = TRUE)
+          
+          # proportion of symptomatics
+          pd <- sim_pars_u[which(sim_pars_u$parameter == "pd"), 
+            c("subperiod", "value_gen")]
+          colnames(pd) <- c("subperiod", "pd")
+          timeline_ui <- merge(timeline_ui, pd, by = "subperiod", all.x = TRUE)
+          
+          # CFR values by subperiod and age group
+          cfr <- sim_pars_u[which(sim_pars_u$parameter == "cfr" & 
+            sim_pars_u$subperiod %in% subperiods),
+            c("subperiod", grep("value_a", colnames(sim_pars_u), value = TRUE))]
+          cfr <- reshape(cfr, direction = "long",
+            varying = list(colnames(cfr)[colnames(cfr) != "subperiod"]),
+            timevar = "age", v.names = "cfr",
+            idvar = "subperiod",
+            times = colnames(cfr)[colnames(cfr) != "subperiod"]
+          )
+          cfr$age <- gsub("value_a", "", cfr$age)
+          timeline_ui <- merge(timeline_ui, cfr, by = c("subperiod", "age"), 
+            all.x = TRUE)
+          
+          # STARTING proportion susceptible to infection
+          si <- si_list[[u]][[i]]
+          si <- reshape(si, direction = "long", varying = list(ages),
+            timevar = "age", v.names = "si", idvar = "month", times = ages
+          )
+          timeline_ui <- merge(timeline_ui, si, by = c("month", "age"), 
+            all.x = TRUE)
+          
+          # proportion susceptible to severe disease
+          sd <- sd_list[[u]][[i]]
+          sd <- reshape(sd, direction = "long", varying = list(ages),
+            timevar = "age", v.names = "sd", idvar = "month", times = ages
+          )
+          timeline_ui <- merge(timeline_ui, sd, by = c("month", "age"), 
+            all.x = TRUE)
         
+        # run SEIR model
+        x <- f_seir(disease_f = u, scenario_f = i, timeline_f = timeline_ui,
+          rx_start_f = rx_start)
+            
+        # collect results  
+        x$run <- run_i
+        x$scenario <- i
+        x$disease <- u
+        out_epid <- rbind(out_epid, x)
+      } # (close if y = 1 loop)
     } # (close u - disease loop)
   } # (close i - scenario loop)
 } # (close run_i - run loop)
