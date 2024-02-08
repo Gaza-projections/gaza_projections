@@ -47,8 +47,9 @@
       # number of runs
       x <- as.integer(gen_pars[which(gen_pars$parameter == "runs"),"value_gen"])
     
-      # dataframe of runs, sorted ascendingly
-      runs <- data.frame(run = 1:x, rx = sort(runif(x)) )
+      # dataframe of runs with two random values: one for transmissibility
+        # parameters, one for probability of disease and CFR
+      runs <- data.frame(run = 1:x, rx_r0 = runif(x), rx_cfr = runif(x) )
      
   #...................................      
   ## Read in or set other parameters
@@ -62,6 +63,9 @@
       "value_gen"])
     date_end <- dmy(gen_pars[which(gen_pars$parameter == "date_end"), 
       "value_gen"])
+    
+    # Identify whether we should include expert weights in the SEE distributions
+    expert_wt <- gen_pars[which(gen_pars$parameter == "expert_wt"), "value_gen"]
     
     # Identify subperiods
     subperiods <- c("months 1 to 3", "months 4 to 6")
@@ -126,6 +130,14 @@
     see <- see[, c("expert", "disease", "subperiod", "scenario", "parameter",
       "value10", "value50", "value90", "wt")]
    
+    # Output experts' weights
+    write.csv(experts, paste(dir_path, "/outputs/out_see_experts_wts.csv",
+      sep = ""), row.names = FALSE)
+    
+    # If we do not want to take into account experts' weights, set equal weights
+    if (expert_wt == "no") {
+      see$wt <- 1 / nrow(experts)
+    }
     
   #...................................      
   ## Compute empirical cumulative distributions for each question
@@ -189,10 +201,18 @@
       see$scenario <- factor(see$scenario, levels = scenarios)
       
 ######################      
-      # modify range of r0 for measles to allow for larger estimates
-# NOTE: NEED TO REMOVE / RECTIFY DURING NEXT ITERATION
-      x <- which(see$disease == "measles" & see$parameter == "r0")
-      see[x, grep("x_", colnames(see))] <- see[x, grep("x_", colnames(see))] + 10
+      # modify r0 for measles to override SEE
+# NOTE: NEED TO RECTIFY DURING NEXT ITERATION
+      x <- which(see$disease == "measles" & see$parameter == "r0" & 
+        see$expert == "all")
+      cols1 <- grep("x_", colnames(see))
+      cols2 <- grep("pcum_", colnames(see))
+      see[x[1], cols2]<-punif(as.numeric(see[x[1], cols1]), min = 16, max = 20)
+      see[x[2], cols2]<-punif(as.numeric(see[x[2], cols1]), min = 24, max = 28)
+      see[x[3], cols2]<-punif(as.numeric(see[x[3], cols1]), min = 20, max = 24)
+      see[x[4], cols2]<-punif(as.numeric(see[x[4], cols1]), min = 18, max = 22)
+      see[x[5], cols2]<-punif(as.numeric(see[x[5], cols1]), min = 26, max = 30)
+      see[x[6], cols2]<-punif(as.numeric(see[x[6], cols1]), min = 22, max = 26)
 ######################
       
       # save output

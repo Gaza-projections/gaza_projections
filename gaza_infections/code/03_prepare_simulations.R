@@ -97,8 +97,9 @@ for (run_i in 1:max(runs$run)) {
     # Update progress bar
     setTxtProgressBar(pb, run_i)
   
-    # Identify random number from [0,1]
-    rx <- runs[run_i, "rx"]
+    # Identify random numbers from [0,1]
+    rx_r0 <- runs[run_i, "rx_r0"]
+    rx_cfr <- runs[run_i, "rx_cfr"]
       # rx is the extent along the positive-negative spectrum, so 1-rx = inverse  
 
     # Initialise fresh version of parameters dataframe
@@ -106,7 +107,8 @@ for (run_i in 1:max(runs$run)) {
     
   #...................................      
   ## Generate random parameter values for exemplar diseases at baseline
-    # (common to all scenarios and subperiods)
+    # (common to all scenarios and subperiods); not correlated to other
+    # uncertainty distributions
       
   for (e in exemplars) {
     # R0 at baseline
@@ -114,14 +116,14 @@ for (run_i in 1:max(runs$run)) {
       c("min", "max")]
     sim_pars_run_i[which(sim_pars_run_i$disease == e & 
       sim_pars_run_i$parameter == "r0_base"), "value_gen"] <- 
-      x$min + rx * (x$max - x$min)
+      x$min + runif(1) * (x$max - x$min)
     
     # CFR at baseline
     x <- ranges[which(ranges$disease == e & ranges$parameter == "cfr_base"), 
       c("min", "max")]
     sim_pars_run_i[which(sim_pars_run_i$disease == e & 
       sim_pars_run_i$parameter == "cfr_base"), "value_gen"] <- 
-      x$min + rx * (x$max - x$min)      
+      x$min + runif(1) * (x$max - x$min)      
   }  
 
     
@@ -137,7 +139,7 @@ for (run_i in 1:max(runs$run)) {
         parameter == "pu")
       sim_pars_run_i[which(sim_pars_run_i$disease == u & 
         sim_pars_run_i$parameter == "pu"), "value_gen"] <- 
-        approx(x[, grep("pcum_", names(x))], x[, grep("x_", names(x))], rx, 
+        approx(x[, grep("pcum_", names(x))], x[, grep("x_", names(x))], rx_r0, 
           rule = 2, ties = list("ordered", mean))$y
     }
 
@@ -153,7 +155,7 @@ for (run_i in 1:max(runs$run)) {
         x <- subset(see, disease == e & scenario == i & subperiod == j &
           expert == "all" & parameter == "r0")
         r0_tmp <- approx(x[, grep("pcum_", names(x))], x[,grep("x_", names(x))], 
-          rx,  rule = 2, ties = list("ordered", mean))$y
+          rx_r0,  rule = 2, ties = list("ordered", mean))$y
 
           # compute proportion of range covered by this value
           x <- (ranges[which(ranges$disease == e & 
@@ -169,7 +171,7 @@ for (run_i in 1:max(runs$run)) {
         x <- subset(see, disease == e & scenario == i & subperiod == j &
           expert == "all" & parameter == "cfr")
         cfr_tmp <- approx(x[,grep("pcum_", names(x))], x[,grep("x_", names(x))], 
-          rx,  rule = 2, ties = list("ordered", mean))$y
+          rx_cfr,  rule = 2, ties = list("ordered", mean))$y
         
           # compute proportion of range covered by this value
           x <- (ranges[which(ranges$disease == e & 
@@ -199,7 +201,7 @@ for (run_i in 1:max(runs$run)) {
             sim_pars_run_i[which(sim_pars_run_i$disease == u & 
               sim_pars_run_i$parameter == "pd" & sim_pars_run_i$subperiod == j), 
               "value_gen"] <- ranges[x, "min"] + 
-              (ranges[x, "max"] - ranges[x, "min"]) * rx
+              (ranges[x, "max"] - ranges[x, "min"]) * rx_cfr
             
             # attribute CFR value
             x <- which(ranges$disease == u & ranges$parameter == "cfr")

@@ -130,6 +130,25 @@
     # Format age
     out_epid$age <- gsub("to", " to ", out_epid$age)
 
+    
+  #...................................      
+  ## Investigate the stability of runs
+  out_epid <- out_epid[order(out_epid$run, out_epid$scenario, 
+    out_epid$disease), ]
+  ggplot(data = out_epid, aes(x = run, y = deaths, colour = scenario,
+    fill = scenario)) +
+    geom_line(alpha = 0.7) +
+    facet_grid(scenario ~ disease) +
+    theme_bw() +
+    scale_colour_manual(values = palette_periods[c(3,4,5)]) +
+    scale_fill_manual(values = palette_periods[c(3,4,5)]) +
+    theme(legend.position = "top")
+  
+  ggsave(paste(dir_path, 'outputs/' , "epid_run_distributions.png", sep=""),
+    dpi = "print", units = "cm", width = 30, height = 12)
+  
+  
+    
   #...................................      
   ## Tabulate deaths by scenario, disease, age group and subperiod
   tab1 <- aggregate(list(deaths = out_epid$deaths),by = out_epid[, c("scenario",
@@ -152,19 +171,20 @@
       by = out_epid[, c("scenario", "disease", "subperiod", "run")], FUN = sum)
     tab2 <- aggregate(list(deaths = tab2$deaths),
       by = tab2[, c("scenario", "disease", "subperiod")], 
-      FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.5, 0.025, 0.975))))})
     tab2[, grep("deaths", colnames(tab2))] <- apply(
       tab2[, grep("deaths", colnames(tab2))], 2, round, 0)
     tab2 <- data.frame(tab2[, c("scenario", "disease", "subperiod")],
       unlist(tab2$deaths))
-    colnames(tab2) <- c("scenario", "disease", "subperiod", "median", "lci", 
-      "uci")
+    colnames(tab2) <- c("scenario", "disease", "subperiod", "mean", "median",
+      "lci", "uci")
+    tab2 <- subset(tab2, select = -median)
         
     # Add totals for the entire subperiod
-    x <- aggregate(tab2[, c("median", "lci", "uci")], by = 
+    x <- aggregate(tab2[, c("mean", "lci", "uci")], by = 
       tab2[, c("scenario", "disease")], FUN = sum)
     x$subperiod <- "total"
-    x <- x[, c("scenario", "disease", "subperiod", "median", "lci", "uci")]
+    x <- x[, c("scenario", "disease", "subperiod", "mean", "lci", "uci")]
     tab2 <- rbind(tab2, x)
     
     # Output raw table
@@ -172,11 +192,11 @@
       row.names = FALSE)
     
     # Improve numbers format
-    tab2[, c("median", "lci", "uci")] <- apply(
-      tab2[, c("median", "lci", "uci")], 2, format, big.mark = ",")
-    tab2[, c("median", "lci", "uci")] <- apply(tab2[, c("median", "lci", "uci")],
+    tab2[, c("mean", "lci", "uci")] <- apply(
+      tab2[, c("mean", "lci", "uci")], 2, format, big.mark = ",")
+    tab2[, c("mean", "lci", "uci")] <- apply(tab2[, c("mean", "lci", "uci")],
       2, function(x) {trimws(as.character(x))} )
-    tab2$deaths <- paste(tab2$median, " (", tab2$lci, " to ", tab2$uci, ")", 
+    tab2$deaths <- paste(tab2$mean, " (", tab2$lci, " to ", tab2$uci, ")", 
       sep = "")
     tab2 <- tab2[, c("scenario", "disease", "subperiod", "deaths")]
   
@@ -197,19 +217,20 @@
       by = out_epid[, c("scenario", "age", "subperiod", "run")], FUN = sum)
     tab3 <- aggregate(list(deaths = tab3$deaths),
       by = tab3[, c("scenario", "age", "subperiod")], 
-      FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.5, 0.025, 0.975))))})
     tab3[, grep("deaths", colnames(tab3))] <- apply(
       tab3[, grep("deaths", colnames(tab3))], 2, round, 0)
     tab3 <- data.frame(tab3[, c("scenario", "age", "subperiod")],
       unlist(tab3$deaths))
-    colnames(tab3) <- c("scenario", "age", "subperiod", "median", "lci", 
+    colnames(tab3) <- c("scenario", "age", "subperiod", "mean", "median", "lci", 
       "uci")
+    tab3 <- subset(tab3, select = -median)
         
     # Add totals for the entire subperiod
-    x <- aggregate(tab3[, c("median", "lci", "uci")], by = 
+    x <- aggregate(tab3[, c("mean", "lci", "uci")], by = 
       tab3[, c("scenario", "age")], FUN = sum)
     x$subperiod <- "total"
-    x <- x[, c("scenario", "age", "subperiod", "median", "lci", "uci")]
+    x <- x[, c("scenario", "age", "subperiod", "mean", "lci", "uci")]
     tab3 <- rbind(tab3, x)
     
     # Output raw table
@@ -217,11 +238,11 @@
       row.names = FALSE)
     
     # Improve numbers format
-    tab3[, c("median", "lci", "uci")] <- apply(
-      tab3[, c("median", "lci", "uci")], 2, format, big.mark = ",")
-    tab3[, c("median", "lci", "uci")] <- apply(tab3[, c("median", "lci", "uci")],
+    tab3[, c("mean", "lci", "uci")] <- apply(
+      tab3[, c("mean", "lci", "uci")], 2, format, big.mark = ",")
+    tab3[, c("mean", "lci", "uci")] <- apply(tab3[, c("mean", "lci", "uci")],
       2, function(x) {trimws(as.character(x))} )
-    tab3$deaths <- paste(tab3$median, " (", tab3$lci, " to ", tab3$uci, ")", 
+    tab3$deaths <- paste(tab3$mean, " (", tab3$lci, " to ", tab3$uci, ")", 
       sep = "")
     tab3 <- tab3[, c("scenario", "age", "subperiod", "deaths")]
   

@@ -174,10 +174,6 @@ for (run_i in 1:max(runs$run)) {
     # Update progress bar
     setTxtProgressBar(pb, run_i)
 
-    # Identify random number from [0,1]
-    rx <- runs[run_i, "rx"]
-      # rx is the extent along the positive-negative spectrum, so 1-rx = inverse  
-
   #...................................      
   ## For each scenario...
   for (i in scenarios) {
@@ -210,7 +206,7 @@ for (run_i in 1:max(runs$run)) {
     x <- predict(fit, newdata = 
       ende[which(ende$year %in% unique(timeline_ende$year)), ], se.fit = TRUE)
     for (j in 1:length(x$fit)) 
-      {d[j] <- exp(qnorm(rx, x$fit[j], sd = x$se.fit[j]))}
+      {d[j] <- exp(qnorm(runif(1), x$fit[j], sd = x$se.fit[j]))}
     d_y <- data.frame(year = unique(timeline_ende$year), d_y = as.integer(d) )  
     
     # Distribute total deaths into each cause
