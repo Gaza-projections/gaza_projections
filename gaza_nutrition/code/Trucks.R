@@ -21,7 +21,7 @@ trucks_long <- mutate(trucks_long, date = as.Date(date))
 cumulative_truck_entry <- ggplot(trucks_long, aes(color = truck_type, y = cumulative_sum, x = date)) +
   geom_line(size = 1.5) +  # Increase line thickness
   scale_x_date(date_breaks = "2 weeks", date_labels = "%d %b %Y") +
-  labs(x = "Date", y = "", title = "Cumulative Trucks",
+  labs(x = "", y = "", title = "Cumulative Trucks",
        colour = "") +
   scale_colour_manual(values = palette,
                       breaks = c("cum_180", "cum_150", "cum_food_truck"),  # Change the order here
