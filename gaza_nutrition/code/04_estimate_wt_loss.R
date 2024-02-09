@@ -388,8 +388,8 @@ close(pb)
     x <- grep("percent_wt_loss", colnames(agg))
     agg[, x] <- -agg[, x]
     agg$scenario <- factor(agg$scenario, 
-      levels = c("worst", "central", "best"), labels =
-      c("reasonable-worst", "central", "reasonable-best"))
+      levels = c("best", "central", "worst"), labels =
+      c("Ceasefire", "Status Quo", "Escalation"))
     
     # Plot weight loss
     ggplot(data = agg, aes(x = date, y = percent_wt_loss_median, 
@@ -398,8 +398,8 @@ close(pb)
       geom_ribbon(aes(ymin = percent_wt_loss_lci, ymax = percent_wt_loss_uci),
         alpha = 0.1, colour = NA) +
       theme_bw() +
-      scale_colour_manual(values = palette_cb[c(4, 8, 12)]) +
-      scale_fill_manual(values = palette_cb[c(4, 8, 12)]) +
+      scale_colour_manual(values = palette_cb[c(12, 8, 4)]) +
+      scale_fill_manual(values = palette_cb[c(12, 8, 4)]) +
       scale_x_date(breaks = "1 month", date_labels = "%b-%Y") +
       scale_y_continuous("cumulative weight loss as percent of baseline",
         labels = percent, breaks = seq(-0.5, 0.5, by = 0.05)) +
