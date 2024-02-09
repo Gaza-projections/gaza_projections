@@ -1,4 +1,3 @@
-library(knitr)
 library(tidyverse)
 library(ggplot2)
 library(readxl)
@@ -28,7 +27,7 @@ severity_figure <- ggplot(severity, aes(
     y = "",
     fill = "Injury Type"
   ) +
-  scale_fill_manual(values = c("#FF6347", "#2A788EFF", "#FFA500", "#FFDAB9")) +  # Lighter red, orange, and yellow
+  scale_fill_manual(values = c("#440154FF", "#21908CFF", "#75D054FF", "#FDE725FF")) +  # Lighter red, orange, and yellow
   theme(legend.text = element_text(size = 9)) +
   theme(legend.position = "bottom") +
   guides(fill = guide_legend(ncol = 4))
@@ -45,8 +44,8 @@ ggsave("output/SeverityFigure.png", severity_figure, width = 22, height = 15, un
 injuries <- mutate(injuries, Date = as.Date(Date))
 
 # Create a vector of lighter colors for the lines
-light_green_palette <- c("#2A788EFF", "#2A788EFF")  
-light_red_palette <- c("#FF6347", "#FF6347")      # 
+light_green_palette <- c("#75D054FF", "#75D054FF")  
+light_red_palette <- c("#440154FF", "#440154FF")      # 
 
 # CUMULATIVE True Numbers
 cumulative_injuries_deaths <- ggplot(injuries, aes(x = Date)) +
