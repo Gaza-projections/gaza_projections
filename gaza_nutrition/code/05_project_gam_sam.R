@@ -84,13 +84,14 @@
 
     # Initialise output of each run
     out <- expand.grid(run = runs$run, scenario = scenarios, 
-      period = c("baseline", "to date", subperiods))
+      period = c("pre-war", "to date", subperiods))
     out[, c("sam", "gam")] <- NA
     out <- out[order(out$run, out$scenario, out$period), ]
     
       # add baseline SAM and GAM
-      out[which(out$period == "baseline"), "sam"] <- sam_base
-      out[which(out$period == "baseline"), "gam"] <- gam_base
+      out$period[ out$period == "baseline"] <- "pre-war"
+      out[which(out$period == "pre-war"), "sam"] <- sam_base
+      out[which(out$period == "pre-war"), "gam"] <- gam_base
     
     # Loop progress bar   
     pb <- txtProgressBar(min = 1, max = max(runs$run), style = 3)
@@ -188,8 +189,8 @@ close(pb)
       v.names = c("median", "lci", "uci"),
       times = c("severe acute malnutrition", "global acute malnutrition"))    
       agg$scenario <- factor(agg$scenario, 
-        levels = c("worst", "central", "best"), labels =
-        c("reasonable-worst", "central", "reasonable-best"))
+        levels = c("best", "central", "worst"), labels =
+        c("Ceasefire", "Status Quo", "Escalation"))
     
     # Plot
     ggplot(data = agg, aes(x = period, colour = scenario, fill = scenario)) +
@@ -206,8 +207,8 @@ close(pb)
       geom_text(aes(x = period, y = median * 1.05 + 0.02,
         label = scales::percent(median, accuracy = 0.1) ),
         colour = "grey20") +
-      scale_colour_manual(values = palette_cb[c(4, 8, 12)]) +
-      scale_fill_manual(values = palette_cb[c(4, 8, 12)])
+      scale_colour_manual(values = palette_cb[c(12, 8, 4)]) +
+      scale_fill_manual(values = palette_cb[c(12, 8, 4)])
 
     ggsave(paste(dir_path, "outputs/", "out_gam_sam_kids.png", sep=""),
       dpi = "print", units = "cm", height = 15, width = 22)       
