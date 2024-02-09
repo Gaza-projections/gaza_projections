@@ -6,7 +6,7 @@ library(viridis)
 
 # Set color palette
 palette_gen <- viridis(16)
-palette <- c("#2A788EFF", "#1F988BFF", "red")
+palette <- c("#2A788EFF", "#21908CFF", "#440154FF")
 
 # Read the data
 trucks <- read_excel("inputs/trucks.xlsx")
