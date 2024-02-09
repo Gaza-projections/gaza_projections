@@ -162,7 +162,7 @@ close(pb)
       scale_x_date("week starting", breaks = df$date, 
         date_labels = "%d-%b-%Y") +
       scale_y_continuous(expand = c(0, 50),
-        name = "daily caloric equivalent of food aid trucked in (Kcal)") +
+        name = "daily caloric equivalent of food aid trucked in (Kcal/capita)") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.grid.major.x = element_blank())
     
