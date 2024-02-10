@@ -75,4 +75,4 @@ cumulative_injuries_deaths <- ggplot(injuries, aes(x = Date)) +
 print(cumulative_injuries_deaths)
 
 # Save the plot
-ggsave("output/Cumulative_injuries.png", severity_figure, width = 22, height = 15, units = "cm")
+ggsave("outputs/Cumulative_injuries.png", severity_figure, width = 22, height = 15, units = "cm")
