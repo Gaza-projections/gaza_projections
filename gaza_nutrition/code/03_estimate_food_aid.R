@@ -97,17 +97,17 @@ for (run_i in 1:nrow(runs)) {
   #...................................      
   ## Select random quantities needed for run
 
-    # Identify random number from [0,1]
-    rx <- runs[run_i, "rx"]
-      # rx is the extent along the positive-negative spectrum, so 1-rx = inverse  
+    # # Identify random number from [0,1]
+    # rx <- runs[run_i, "rx"]
+    #   # rx is the extent along the positive-negative spectrum, so 1-rx = inverse  
     
     # Select number of people covered for 1 day per MT of food aid
     people_per_mt <- people_per_mt_range[1] + 
-      (1 - rx) * (people_per_mt_range[2] - people_per_mt_range[1])
+      runif(1) * (people_per_mt_range[2] - people_per_mt_range[1])
     
     # Select tonnage of truck
     mt_per_truck <- mt_per_truck_range[1] + 
-      (1 - rx) * (mt_per_truck_range[2] - mt_per_truck_range[1])
+      runif(1) * (mt_per_truck_range[2] - mt_per_truck_range[1])
     
   #...................................      
   ## Compute and output daily intake equivalent of food aid per day
@@ -131,45 +131,87 @@ for (run_i in 1:nrow(runs)) {
     
 } # close run_i loop
 close(pb)      
+
      
-
-#...............................................................................  
-### Visualising and outputting estimates
-#...............................................................................
-
   #...................................      
   ## Output daily estimates for subsequent scripts
   aid_to_date <- out_day
   write_rds(aid_to_date,
     paste(dir_path, "outputs/", "out_food_aid_to_date.rds", sep=""))
-    
+
+
+#...............................................................................  
+### Visualising estimates
+#...............................................................................
+
   #...................................      
-  ## Visualise weekly estimates
+  ## Visualise daily number of trucks, compared to pre-war range
+        
+    # Prepare data for plotting
+    df <- aggregate(list(n_trucks_food = df_tr$n_trucks_food),
+      by = list(date = df_tr$date), FUN = sum)
+
+    # Plot
+    plot1 <- ggplot(data = df, aes(x = date, y = n_trucks_food)) +
+      geom_step(colour = palette_periods[2], alpha = 0.8, linewidth = 1) +
+      geom_ribbon(aes(ymin = 150, ymax = 180), colour = palette_periods[1],
+        alpha = 0.1, fill = palette_periods[1], linetype = "21") +
+      theme_bw() +
+      scale_x_date("date", breaks = "1 week", date_labels = "%d-%b-%Y") +
+      scale_y_continuous( limits = c(0, NA), breaks = seq(0, 180, 30),
+        name = "number of food-transporting trucks per day")+
+      theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid.major.x = element_blank()) +
+      annotate("text", x = min(df$date) + 40, y = 165, 
+        label = "pre-war range") +
+      geom_segment(aes(x = min(date) + 21, xend = min(date) + 21,
+        y = 150, yend = 180), arrow = arrow(length = unit(4, "mm"), 
+        ends = "both"), colour = "grey20" )
+    
+    ggsave(paste(dir_path, "outputs/", "estimated_trucks.png", sep=""),
+      dpi = "print", units = "cm", height = 15, width = 22)  
+      
+  #...................................      
+  ## Visualise weekly estimates of food aid
     
     # Prepare data for plotting
     df <- aggregate(out_week$aid, by = list(date = out_week$week), FUN = 
-      function(x) quantile(x, c(0.50, 0.025, 0.975)) )
+      function(x) {return(c(mean(x), quantile(x, c(0.50, 0.025, 0.975))))} )
     df <- data.frame(df$date, unlist(df$x))
-    colnames(df) <- c("date", "median", "lci", "uci")
+    colnames(df) <- c("date", "mean", "median", "lci", "uci")
     
     # Plot
-    ggplot(data = df, aes(x = date)) +
-      geom_bar(aes(y = median), stat = "identity", fill = palette_cb[1],
-        colour = palette_cb[1], alpha = 0.5) +
-      geom_errorbar(aes(ymin = lci, ymax = uci), colour = palette_cb[1],
+    plot2 <- ggplot(data = df, aes(x = date)) +
+      geom_bar(aes(y = mean), stat = "identity", fill = palette_periods[2],
+        colour = palette_periods[2], alpha = 0.5) +
+      geom_errorbar(aes(ymin = lci, ymax = uci), colour = palette_periods[2],
         width = 3, linetype = "21") +
       theme_bw() +
       scale_x_date("week starting", breaks = df$date, 
         date_labels = "%d-%b-%Y") +
       scale_y_continuous(expand = c(0, 50),
-        name = "daily caloric equivalent of food aid trucked in (Kcal/capita)") +
+        name = "daily caloric equivalent trucked in (Kcal/capita)")+
       theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.grid.major.x = element_blank())
     
     ggsave(paste(dir_path, "outputs/", "estimated_food_aid.png", sep=""),
       dpi = "print", units = "cm", height = 15, width = 22)  
-######TO DO: Colour forecast weeks differently
 
+    
+  #...................................      
+  ## Combined plot
+    
+    # Plot  
+    ggarrange(plot1 + theme(axis.text.x = element_blank(), 
+      axis.title.x = element_blank(), axis.ticks.x = element_blank()), plot2, 
+      ncol = 1, nrow = 2, labels = c("A", "B"), align = "v")    
+    
+    # Save
+    ggsave(paste(dir_path, "outputs/", "estimated_food_trucks_combi.png", 
+      sep=""), dpi = "print", units = "cm", height = 23, width = 20)  
+
+    
+    
 #...............................................................................  
 ### ENDS
 #...............................................................................    

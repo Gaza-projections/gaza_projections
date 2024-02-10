@@ -163,10 +163,11 @@ close(pb)
     write_rds(out, paste(dir_path, "outputs/","out_gam_sam_all_runs.rds", 
       sep=""))
 
-    # Compute median and 95% percentile intervals of all estimated quantities    
+    # Compute mean, median, 95% percentile intervals of all estimated quantities    
     agg <- aggregate(out[, c("sam", "gam")], 
       by = out[, c("scenario", "period")],
-      FUN = function(x) {quantile(x, c(0.50, 0.025, 0.975), na.rm = TRUE)})
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.50, 0.025, 0.975), 
+        na.rm = TRUE)))})
 
     # Output percentile intervals
     write.csv(agg, paste(dir_path, "outputs/","out_gam_sam.csv", sep=""),
@@ -179,36 +180,148 @@ close(pb)
     agg <- data.frame(agg[, c("scenario", "period")], unlist(agg[["sam"]]),
       unlist(agg[["gam"]]))
     colnames(agg) <- c("scenario", "period", 
-      paste("sam", c("median", "lci", "uci"), sep = "_"),
-      paste("gam", c("median", "lci", "uci"), sep = "_")
+      paste("sam", c("mean", "median", "lci", "uci"), sep = "_"),
+      paste("gam", c("mean", "median", "lci", "uci"), sep = "_")
     )
+    agg <- subset(agg, select = -c(sam_median, gam_median))
     agg <- reshape(agg, direction = "long", timevar = "indicator",
-      varying = list(median = grep("_median", colnames(agg), value = TRUE), 
+      varying = list(mean = grep("_mean", colnames(agg), value = TRUE), 
         lci = grep("_lci", colnames(agg), value = TRUE),
         uci = grep("_uci", colnames(agg), value = TRUE)),
-      v.names = c("median", "lci", "uci"),
+      v.names = c("mean", "lci", "uci"),
       times = c("severe acute malnutrition", "global acute malnutrition"))    
-      agg$scenario <- factor(agg$scenario, 
-        levels = c("best", "central", "worst"), labels =
-        c("Ceasefire", "Status Quo", "Escalation"))
     
-    # Plot
-    ggplot(data = agg, aes(x = period, colour = scenario, fill = scenario)) +
-      geom_bar(aes(y = median), stat = "identity", alpha = 0.5) +
-      # geom_errorbar(aes(ymin = lci, ymax = uci),
-      #   width = 1, linetype = "21") +
-      theme_bw() +
-      facet_grid(indicator ~ scenario, scales = "free_y") +
-      theme(legend.position = "top",
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        panel.grid.major.x = element_blank()) +
-      scale_y_continuous("prevalence", labels = percent, 
-        breaks = seq(0, 1, 0.05)) +
-      geom_text(aes(x = period, y = median * 1.05 + 0.02,
-        label = scales::percent(median, accuracy = 0.1) ),
-        colour = "grey20") +
-      scale_colour_manual(values = palette_cb[c(12, 8, 4)]) +
-      scale_fill_manual(values = palette_cb[c(12, 8, 4)])
+    # Separate out pre-war and to date periods
+    x1 <- subset(agg, period == "pre-war" & scenario == "ceasefire")
+    x1$scenario <- ""
+    x2 <- subset(agg, period == "to date" & scenario == "ceasefire")
+    x2$scenario <- ""
+    x3 <- subset(agg, !period %in% c("to date", "pre-war"))
+    
+    # Limits for plots
+    lims <- c(
+      max(x3[which(x3$indicator == "global acute malnutrition"), "mean"]),
+      max(x3[which(x3$indicator == "severe acute malnutrition"), "mean"] ) )       
+    lims <- lims * 1.10
+    
+    # Plots
+      # pre-war, GAM
+      plot1gam <- ggplot(data = subset(x1, 
+        indicator == "global acute malnutrition"), aes(x = scenario)) +
+        geom_bar(aes(y = mean), stat = "identity", alpha = 0.5,
+          colour = palette_periods[1], fill = palette_periods[1]) +
+        theme_bw() +
+        facet_grid(. ~ period) +
+        theme(legend.position = "none", axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid.major.x = element_blank()) +
+        scale_y_continuous("prevalence", labels = percent, 
+          breaks = seq(0, 1, 0.05), limits = c(0, lims[1])) +
+        geom_text(aes(x = scenario, y = mean * 1.05 + 0.02,
+          label = scales::percent(mean, accuracy = 0.1) ),
+          colour = "grey20")
+        
+      # to date, GAM
+      plot2gam <- ggplot(data = subset(x2, 
+        indicator == "global acute malnutrition"), aes(x = scenario)) +
+        geom_bar(aes(y = mean), stat = "identity", alpha = 0.5,
+          colour = palette_periods[2], fill = palette_periods[2]) +
+        theme_bw() +
+        facet_grid(. ~ period) +
+        theme(legend.position = "none", axis.text.x = element_blank(),
+          axis.title.x = element_blank(), axis.title.y = element_blank(),
+          axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+          panel.grid.major.x = element_blank()) +
+        scale_y_continuous("prevalence", labels = percent, 
+          breaks = seq(0, 1, 0.05), limits = c(0, lims[1])) +
+        geom_text(aes(x = scenario, y = mean * 1.05 + 0.02,
+          label = scales::percent(mean, accuracy = 0.1) ),
+          colour = "grey20")
+        
+      # projection scenarios, GAM
+      plot3gam <- ggplot(data = subset(x3, 
+        indicator == "global acute malnutrition"), aes(x = scenario, 
+        fill = scenario, colour = scenario)) +
+        geom_bar(aes(y = mean), stat = "identity", alpha = 0.5) +
+        theme_bw() +
+        facet_grid(. ~ period) +
+        theme(legend.position = "none",
+          axis.text.x = element_text(angle = 45, hjust = 1),
+          axis.title.x = element_blank(), axis.title.y = element_blank(),
+          axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+          panel.grid.major.x = element_blank()) +
+        scale_y_continuous("prevalence", labels = percent, 
+          breaks = seq(0, 1, 0.05), limits = c(0, lims[1])) +
+        geom_text(aes(x = scenario, y = mean * 1.05 + 0.02,
+          label = scales::percent(mean, accuracy = 0.1) ),
+          colour = "grey20") +
+        scale_colour_manual(values = palette_periods[c(3,4,5)]) +
+        scale_fill_manual(values = palette_periods[c(3,4,5)])      
 
-    ggsave(paste(dir_path, "outputs/", "out_gam_sam_kids.png", sep=""),
+      # pre-war, SAM
+      plot1sam <- ggplot(data = subset(x1, 
+        indicator == "severe acute malnutrition"), aes(x = scenario)) +
+        geom_bar(aes(y = mean), stat = "identity", alpha = 0.5,
+          colour = palette_periods[1], fill = palette_periods[1]) +
+        theme_bw() +
+        facet_grid(. ~ period) +
+        theme(legend.position = "none", axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          panel.grid.major.x = element_blank()) +
+        scale_y_continuous("prevalence", labels = percent, 
+          breaks = seq(0, 1, 0.05), limits = c(0, lims[2])) +
+        geom_text(aes(x = scenario, y = mean * 1.02 + 0.02,
+          label = scales::percent(mean, accuracy = 0.1) ),
+          colour = "grey20")
+        
+      # to date, SAM
+      plot2sam <- ggplot(data = subset(x2, 
+        indicator == "severe acute malnutrition"), aes(x = scenario)) +
+        geom_bar(aes(y = mean), stat = "identity", alpha = 0.5,
+          colour = palette_periods[2], fill = palette_periods[2]) +
+        theme_bw() +
+        facet_grid(. ~ period) +
+        theme(legend.position = "none", axis.text.x = element_blank(),
+          axis.title.x = element_blank(), axis.title.y = element_blank(),
+          axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+          panel.grid.major.x = element_blank()) +
+        scale_y_continuous("prevalence", labels = percent, 
+          breaks = seq(0, 1, 0.05), limits = c(0, lims[2])) +
+        geom_text(aes(x = scenario, y = mean * 1.02 + 0.02,
+          label = scales::percent(mean, accuracy = 0.1) ),
+          colour = "grey20")
+        
+      # projection scenarios, SAM
+      plot3sam <- ggplot(data = subset(x3, 
+        indicator == "severe acute malnutrition"), aes(x = scenario, 
+        fill = scenario, colour = scenario)) +
+        geom_bar(aes(y = mean), stat = "identity", alpha = 0.5) +
+        theme_bw() +
+        facet_grid(. ~ period) +
+        theme(legend.position = "none",
+          axis.text.x = element_text(angle = 45, hjust = 1),
+          axis.title.x = element_blank(), axis.title.y = element_blank(),
+          axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+          panel.grid.major.x = element_blank()) +
+        scale_y_continuous("prevalence", labels = percent, 
+          breaks = seq(0, 1, 0.05), limits = c(0, lims[2])) +
+        geom_text(aes(x = scenario, y = mean * 1.02 + 0.02,
+          label = scales::percent(mean, accuracy = 0.1) ),
+          colour = "grey20") +
+        scale_colour_manual(values = palette_periods[c(3,4,5)]) +
+        scale_fill_manual(values = palette_periods[c(3,4,5)])      
+      
+            
+      # combined
+      plotgam <- ggarrange(plot1gam, plot2gam, plot3gam, ncol = 3, nrow = 1, 
+        align = "h", widths = c(1.5, 1, 6) )
+      plotsam <- ggarrange(plot1sam, plot2sam, plot3sam, ncol = 3, nrow = 1,
+        align = "h", widths = c(1.5, 1, 6) )
+      ggarrange(NULL, plotgam, plotsam, nrow = 3, vjust = 0, hjust = 0,
+        heights = c(0.05, 1, 1),
+        labels = c("", "Global Acute Malnutrition", "Severe Acute Malnutrition"),
+        font.label = list(size = 10))
+          
+    # Save
+    ggsave(paste(dir_path, "outputs/", "gam_sam_kids.png", sep=""),
       dpi = "print", units = "cm", height = 15, width = 22)       

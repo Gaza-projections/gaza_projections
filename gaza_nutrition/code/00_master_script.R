@@ -55,20 +55,23 @@
     # Initialise random numbers
     set.seed(123)
     
-    # # Colour-blind palette for graphing
-    # palette_cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
-    #   "#0072B2", "#D55E00", "#CC79A7")
-    palette_cb <- viridis(16)
-    show_col(palette_cb)
+    # Colour-blind palette for graphing
+      # general palette
+      palette_gen <- viridis(16)
+      show_col(palette_gen)
+          
+      # specific palette for the pre-war period, crisis to date period and 
+        # three scenarios
+      periods <- c("pre-war", "to date", "status quo", "escalation", "ceasefire")
+      
+      palette_periods <- c("azure4", palette_gen[c(2, 8, 4, 12)])
+      names(palette_periods) <- periods
+      show_col(palette_periods)
 
 
 #...............................................................................
 ### Sourcing dependent scripts
 #...............................................................................
-    
-  #...................................      
-  ## Read and prepare inputs
-  source(paste(dir_path, "code/", "01_read_prepare_inputs.r", sep="") )
     
   # #...................................      
   # ## Fit model of weight loss as a function of caloric intake deficit
@@ -76,7 +79,11 @@
  
   #...................................      
   ## Specify functions for weight change model
-  source(paste(dir_path, "code/", "02_specify_wt_functions.r", sep="") )
+  source(paste(dir_path, "code/", "01_specify_wt_functions.r", sep="") )
+
+  #...................................      
+  ## Read and prepare inputs
+  source(paste(dir_path, "code/", "02_read_prepare_inputs.r", sep="") )
     
   #...................................      
   ## Estimate caloric intake from food aid from crisis start to date

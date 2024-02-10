@@ -14,55 +14,6 @@
 #...............................................................................
 
   #...................................      
-  ## Add variables to survey dataset
-  
-    # Estimate baseline fat mass in adults surveyed
-    df_ad$f_start <- apply(df_ad, 1, f_fat)
-
-    # Resting metabolic rate per day
-    df_ad$rmr <- NA
-    
-    # Weight per day of adults (set to starting value at the beginning)
-    df_ad$wt_now <- df_ad$weight
-    
-    # Change in intake per day
-    df_ad$change_intake <- NA
-    
-    # Unfactor age category
-    df_ad$age_cat <- as.character(df_ad$age_cat)
-
-    
-  #...................................      
-  ## Alternative for faster computation: aggregated survey dataset
-    # means by age category, gender
-    
-    # Generate a weight for each individual (1/n), used later for averaging
-    df_ad$svy_wt <- 1/nrow(df_ad)
-    
-    # Aggregate all variables by age category and gender (means)
-    df_ad_agg <- aggregate(df_ad[, c("age", "weight", "height",
-      "intake_baseline")], by = df_ad[, c("gender", "age_cat")], FUN = mean)
-    
-    # Add category weights
-    x <- aggregate(list(svy_wt = df_ad$svy_wt), 
-      by = df_ad[, c("gender", "age_cat")], FUN = sum)
-    df_ad_agg <- merge(df_ad_agg, x, by = c("age_cat", "gender"), all.x = TRUE)
-    
-    # Add other needed variables
-      # estimate baseline fat mass in adults surveyed
-      df_ad_agg$f_start <- apply(df_ad_agg, 1, f_fat)
-  
-      # resting metabolic rate per day
-      df_ad_agg$rmr <- NA
-      
-      # weight per day of adults (set to starting value at the beginning)
-      df_ad_agg$wt_now <- df_ad_agg$weight
-      
-      # change in intake per day
-      df_ad_agg$change_intake <- NA
-    
-    
-  #...................................      
   ## Initialise objects required for weight change model
     
     # Timeline
@@ -119,23 +70,16 @@
   # by scenario and day in the timeline, for each simulation run
 #...............................................................................
   
-###>>>> USER INPUT HERE:
   #...................................      
-  ## Select which dataset to use, and initialise state matrices accordingly
-    # Xhoices: full survey dataset or aggregated (much faster)
+  ## Initialise state matrices accordingly
 
-    # Choose dataset
-    df_use <- df_ad_agg
-    # df_use <- df_ad
-    
-    # Initialise state matrices
-      # intake reduction per day in timeline
-      change_intake <- matrix(NA, nrow = nrow(df_use), ncol = nrow(timeline) )
-      colnames(change_intake) <- timeline$date
+    # Intake reduction per day in timeline
+    change_intake <- matrix(NA, nrow = nrow(df_ad), ncol = nrow(timeline) )
+    colnames(change_intake) <- timeline$date
   
-      # weight per day in timeline
-      wt_now <- matrix(NA, nrow = nrow(df_use), ncol = nrow(timeline) )
-      colnames(wt_now) <- timeline$date
+    # Weight per day in timeline
+    wt_now <- matrix(NA, nrow = nrow(df_ad), ncol = nrow(timeline) )
+    colnames(wt_now) <- timeline$date
 
 
 #(loop starts here)
@@ -150,7 +94,7 @@ for (run_i in 1:max(runs$run)) {
     # Reset time-changing objects
     change_intake[, ] <- NA
     wt_now[, ] <- NA
-    df_use$wt_now <- df_use$weight
+    df_ad$wt_now <- df_ad$weight
   
   #...................................      
   ## Select random quantities needed for run
@@ -199,36 +143,36 @@ for (run_i in 1:max(runs$run)) {
       # intake is either the baseline or the sum of food aid and other sources,
         # whichever is lower
       # first compute proportion of baseline intake met by stocks or agriculture
-      x <- df_use$intake_baseline %*% t(timeline_run_i$prop)
+      x <- df_ad$intake_baseline %*% t(timeline_run_i$prop)
       
       # then add food aid
       x <- sweep(x, 2, timeline_run_i$aid, "+")
       
       # then work out the minimum between baseline intake and current intake
-      x <- pmin(x, df_use$intake_baseline)
+      x <- pmin(x, df_ad$intake_baseline)
 
     # Compute intake reduction per day
-    change_intake <- sweep(x, 1, df_use$intake_baseline, "-")
+    change_intake <- sweep(x, 1, df_ad$intake_baseline, "-")
 
   #...................................      
   ## Estimate daily evolution of weight to date based on mechanistic model
   for (i  in 1:nrow(subset(timeline_run_i, period == "to_date"))) {
       
     # Update resting metabolic date
-    df_use$rmr <- apply(df_use, 1, f_rmr)
+    df_ad$rmr <- apply(df_ad, 1, f_rmr)
     
     # Update change in intake
-    df_use$change_intake <- change_intake[, i]
+    df_ad$change_intake <- change_intake[, i]
       
     # Update instantaneous weight
-    df_use$wt_now <- df_use$wt_now + apply(df_use, 1, f_hall)
+    df_ad$wt_now <- df_ad$wt_now + apply(df_ad, 1, f_hall)
     
     # Store new end-of-day weight
-    wt_now[, i] <- df_use$wt_now
+    wt_now[, i] <- df_ad$wt_now
           
   }  
     # Store weight at end of period to date
-    df_use$wt_to_date <- df_use$wt_now
+    df_ad$wt_to_date <- df_ad$wt_now
     
   #...................................      
   ## Project future intake and weight loss by scenario
@@ -238,7 +182,7 @@ for (run_i in 1:max(runs$run)) {
     # Reset time-changing objects
     change_intake[, days] <- NA
     wt_now[, days] <- NA
-    df_use$wt_now <- df_use$wt_to_date
+    df_ad$wt_now <- df_ad$wt_to_date
 
     # Add to the timeline food aid during projection period
     for (j in subperiods) {
@@ -252,32 +196,32 @@ for (run_i in 1:max(runs$run)) {
       # intake is either the baseline or the sum of food aid and other sources,
         # whichever is lower
       # first compute proportion of baseline intake met by stocks or agriculture
-      x <- df_use$intake_baseline %*% t(timeline_run_i[days, "prop"])
+      x <- df_ad$intake_baseline %*% t(timeline_run_i[days, "prop"])
       
       # then add food aid
       x <- sweep(x, 2, timeline_run_i[days, "aid"], "+")
       
       # # then work out the minimum between baseline intake and current intake
-      # x <- pmin(x, df_use$intake_baseline)
+      # x <- pmin(x, df_ad$intake_baseline)
       #   # not run, as assume people might compensate by eating more
       
     # Compute intake reduction per day
-    change_intake[, days] <- sweep(x, 1, df_use$intake_baseline, "-")
+    change_intake[, days] <- sweep(x, 1, df_ad$intake_baseline, "-")
     
     # Estimate daily evolution of weight to date based on mechanistic model
     for (j  in days) {
         
       # Update resting metabolic date
-      df_use$rmr <- apply(df_use, 1, f_rmr)
+      df_ad$rmr <- apply(df_ad, 1, f_rmr)
       
       # Update change in intake
-      df_use$change_intake <- change_intake[, j]
+      df_ad$change_intake <- change_intake[, j]
         
       # Update instantaneous weight
-      df_use$wt_now <- df_use$wt_now + apply(df_use, 1, f_hall)
+      df_ad$wt_now <- df_ad$wt_now + apply(df_ad, 1, f_hall)
       
       # Store new end-of-day weight
-      wt_now[, j] <- df_use$wt_now
+      wt_now[, j] <- df_ad$wt_now
     }
     
     # Output results of run by age, for this scenario
@@ -285,13 +229,13 @@ for (run_i in 1:max(runs$run)) {
       x <- wt_now[, days_out]
       
       # compute proportion of weight lost
-      x <- 1 - (x / df_use$weight)
+      x <- 1 - (x / df_ad$weight)
       
       # intake reduction: compute means at dates of interest
       for (j in days_out) { x <- cbind(x, rowMeans(change_intake[, 1:j])) }
       
       # add age categories and survey weights
-      x <- data.frame(df_use[, c("age_cat", "svy_wt")], x)
+      x <- data.frame(df_ad[, c("age_cat", "svy_wt")], x)
       colnames(x) <- c("age_cat", "svy_wt", out_cols)
       
       # compute weighted means by age group
@@ -321,14 +265,14 @@ for (run_i in 1:max(runs$run)) {
       
     # Output results of run by day (all ages), for this scenario
       # compute daily percent weight change
-      x <- 1 - (wt_now / df_use$weight)
+      x <- 1 - (wt_now / df_ad$weight)
       
       # aggregate by day
       out_i <- data.frame(percent_wt_loss = apply(x, 2, weighted.mean,
-        df_use$svy_wt), change_intake = NA)
+        df_ad$svy_wt), change_intake = NA)
       
       # compute mean intake change by day
-      x <- apply(change_intake, 2, weighted.mean, df_use$svy_wt)
+      x <- apply(change_intake, 2, weighted.mean, df_ad$svy_wt)
       out_i$change_intake <- cumsum(x) / seq_along(x)
       
       # add to overall output
@@ -355,14 +299,14 @@ close(pb)
     write_rds(out_daily, 
       paste(dir_path,"outputs/","out_wt_loss_daily_all_runs.rds", sep=""))
 
-    # Compute median and 95% percentile intervals of all estimated quantities
+    # Compute mean, median, 95% percentile intervals of all estimated quantities
     for(i in c("percent_wt_loss", "change_intake")) 
      {out_age[, i] <- as.numeric(out_age[, i])}
     agg <- aggregate(out_age[, c("percent_wt_loss", "change_intake")],
       by = out_age[, c("scenario", "period", "age_cat")],
-      FUN = function(x) {quantile(x, c(0.50, 0.025, 0.975))} )
+      FUN = function(x){return(c(mean(x), quantile(x, c(0.50, 0.025, 0.975))))})
 
-    # Output percentile intervals
+    # Output
     write.csv(agg, paste(dir_path, "outputs/","out_wt_loss_intake_adults.csv", 
       sep=""), row.names = FALSE)
     
@@ -376,30 +320,37 @@ close(pb)
   #...................................      
   ## Plot daily evolution, by scenario (all age groups)
   
-    # Aggregate daily output into median and 95% interval, by scenario and date
+    # Aggregate daily output into mean and 95% interval, by scenario and date
     agg <- aggregate(out_daily[, c("percent_wt_loss", "change_intake")],
       by = out_daily[, c("scenario", "date")], 
-      FUN = function(x) {quantile(x, c(0.50, 0.025, 0.975))} )
+      FUN = function(x){return(c(mean(x), quantile(x, c(0.50, 0.025, 0.975))))})
     agg <- data.frame(agg[, c("scenario", "date")], unlist(agg$percent_wt_loss),
       unlist(agg$change_intake))
     colnames(agg) <- c("scenario", "date", 
-      paste("percent_wt_loss", c("median", "lci", "uci"), sep = "_"),
-      paste("change_intake", c("median", "lci", "uci"), sep = "_") )
+      paste("percent_wt_loss", c("mean", "median", "lci", "uci"), sep = "_"),
+      paste("change_intake", c("mean", "median", "lci", "uci"), sep = "_") )
     x <- grep("percent_wt_loss", colnames(agg))
     agg[, x] <- -agg[, x]
-    agg$scenario <- factor(agg$scenario, 
-      levels = c("best", "central", "worst"), labels =
-      c("Ceasefire", "Status Quo", "Escalation"))
     
+    # Split to date period from projection-scenario periods
+    x <- subset(agg, date < date_start & scenario == "ceasefire")
+    x$scenario <- "to date"
+    agg <- subset(agg, date >= date_start)
+    agg <- rbind(agg, x)
+    agg$scenario <- factor(agg$scenario, levels = c("to date", "ceasefire",
+      "status quo", "escalation"))
+
     # Plot weight loss
-    ggplot(data = agg, aes(x = date, y = percent_wt_loss_median, 
-      colour =scenario, fill = scenario)) +
+    ggplot(data = agg, aes(x = date, y = percent_wt_loss_mean, 
+      colour = scenario, fill = scenario, shape = scenario)) +
       geom_line() +
+      geom_point(size = 0.75) +
       geom_ribbon(aes(ymin = percent_wt_loss_lci, ymax = percent_wt_loss_uci),
         alpha = 0.1, colour = NA) +
       theme_bw() +
-      scale_colour_manual(values = palette_cb[c(12, 8, 4)]) +
-      scale_fill_manual(values = palette_cb[c(12, 8, 4)]) +
+      scale_colour_manual(values = palette_periods[c(2,3,4,5)]) +
+      scale_fill_manual(values = palette_periods[c(2,3,4,5)]) +
+      scale_shape_manual(values = c(15,16,17,18)) +
       scale_x_date(breaks = "1 month", date_labels = "%b-%Y") +
       scale_y_continuous("cumulative weight loss as percent of baseline",
         labels = percent, breaks = seq(-0.5, 0.5, by = 0.05)) +
@@ -411,9 +362,9 @@ close(pb)
         label = stringr::str_wrap("projection months 1-3", 10)) +
       annotate("text", x = timeline[days_out[3], "date"], y = 0.075, 
         label = stringr::str_wrap("projection months 4-6", 10)) +
-      theme(legend.position = "top")
+      theme(legend.position = "top", legend.title = element_blank())
     
-    ggsave(paste(dir_path, "outputs/", "out_adult_daily_wt_loss.png", sep=""),
+    ggsave(paste(dir_path, "outputs/", "adult_daily_wt_loss.png", sep=""),
       dpi = "print", units = "cm", height = 15, width = 22)       
           
 #...............................................................................  
