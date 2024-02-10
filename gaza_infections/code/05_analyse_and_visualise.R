@@ -130,13 +130,13 @@
     # Format age
     out_epid$age <- gsub("to", " to ", out_epid$age)
 
-    
+
   #...................................      
   ## Investigate the stability of runs
   out_epid <- out_epid[order(out_epid$run, out_epid$scenario, 
     out_epid$disease), ]
-  ggplot(data = out_epid, aes(x = run, y = deaths, colour = scenario,
-    fill = scenario)) +
+  ggplot(data = subset(out_epid, age == "12 to 59mo"), aes(x = run, y = deaths,
+    colour = scenario, fill = scenario)) +
     geom_line(alpha = 0.7) +
     facet_grid(scenario ~ disease) +
     theme_bw() +
@@ -148,7 +148,6 @@
     dpi = "print", units = "cm", width = 30, height = 12)
   
   
-    
   #...................................      
   ## Tabulate deaths by scenario, disease, age group and subperiod
   tab1 <- aggregate(list(deaths = out_epid$deaths),by = out_epid[, c("scenario",
@@ -158,8 +157,6 @@
     tab1$deaths)
   colnames(tab1) <- c("scenario", "disease", "subperiod", "age",
     "deaths_mean", "deaths_median", "deaths_lci", "deaths_uci")
-  # tab1[, grep("deaths", colnames(tab1))] <- apply(
-  #   tab1[, grep("deaths", colnames(tab1))], 2, round, -0)
   write.csv(tab1, paste(dir_path, "outputs/out_tab_epid_all.csv", sep = "/"),
     row.names = FALSE)
 
@@ -255,6 +252,54 @@
     write.csv(tab3, paste(dir_path, "outputs/out_tab_epid_age_pretty.csv", 
       sep = "/"), row.names = FALSE)
 
+    
+  #...................................      
+  ## Tabulate deaths by scenario and subperiod
+    
+    # Aggregate
+    tab4 <- aggregate(list(deaths = out_epid$deaths),
+      by = out_epid[, c("scenario", "subperiod", "run")], FUN = sum)
+    tab4 <- aggregate(list(deaths = tab4$deaths),
+      by = tab4[, c("scenario", "subperiod")], 
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.5, 0.025, 0.975))))})
+    tab4[, grep("deaths", colnames(tab4))] <- apply(
+      tab4[, grep("deaths", colnames(tab4))], 2, round, 0)
+    tab4 <- data.frame(tab4[, c("scenario", "subperiod")],
+      unlist(tab4$deaths))
+    colnames(tab4) <- c("scenario", "subperiod", "mean", "median",
+      "lci", "uci")
+    tab4 <- subset(tab4, select = -median)
+        
+    # Add totals for the entire subperiod
+    x <- aggregate(tab4[, c("mean", "lci", "uci")], by = 
+      list(scenario = tab4$scenario), FUN = sum)
+    x$subperiod <- "total"
+    x <- x[, c("scenario", "subperiod", "mean", "lci", "uci")]
+    tab4 <- rbind(tab4, x)
+    
+    # Output raw table
+    write.csv(tab4, paste(dir_path, "outputs/out_tab_epid.csv", sep = "/"),
+      row.names = FALSE)
+    
+    # Improve numbers format
+    tab4[, c("mean", "lci", "uci")] <- apply(
+      tab4[, c("mean", "lci", "uci")], 2, format, big.mark = ",")
+    tab4[, c("mean", "lci", "uci")] <- apply(tab4[, c("mean", "lci", "uci")],
+      2, function(x) {trimws(as.character(x))} )
+    tab4$deaths <- paste(tab4$mean, " (", tab4$lci, " to ", tab4$uci, ")", 
+      sep = "")
+    tab4 <- tab4[, c("scenario", "subperiod", "deaths")]
+  
+    # Reshape wide  
+    tab4 <- reshape(tab4, direction = "wide", timevar = "scenario",
+      times = "deaths", idvar = "subperiod", 
+      varying = list(tab4$scenario) )
+    tab4 <- tab4[order(tab4$subperiod), ]
+    tab4 <- tab4[, c("subperiod", scenarios)]
+    write.csv(tab4, paste(dir_path, "outputs/out_tab_epid_pretty.csv", 
+      sep = "/"), row.names = FALSE)
+    
+    
   #...................................      
   ## Graph the proportion of runs in which >=100 deaths are observed, by disease
     
@@ -269,7 +314,7 @@
     df$scenario <- factor(df$scenario, levels = scenarios)
     
     # Plot
-    ggplot(df, aes(y = atleast100, x = scenario, colour = scenario, 
+    plot1 <- ggplot(df, aes(y = atleast100, x = scenario, colour = scenario, 
       fill = scenario)) +
       geom_bar(stat = "identity", alpha = 0.7) +
       theme_bw() +
@@ -286,7 +331,62 @@
     ggsave(paste(dir_path, 'outputs/' , "prob_epidemics_100deaths.png", sep=""),
       dpi = "print", units = "cm", width = 20, height = 20)
     
-        
+
+  #...................................      
+  ## Graph the proportion of runs with >=100(0)(0) epidemic deaths overall
+    
+    # Aggregate
+    df <- aggregate(list(deaths = out_epid$deaths),
+      by = out_epid[, c("scenario", "run")], FUN = sum)
+    
+    # Compute frequency of runs with >= 100(0)(0) deaths
+    df$atleast100 <- ifelse(df$deaths >= 100, TRUE, FALSE)
+    df$atleast1000 <- ifelse(df$deaths >= 1000, TRUE, FALSE)
+    df$atleast10000 <- ifelse(df$deaths >= 10000, TRUE, FALSE)
+    df <- aggregate(df[, grep("atleast", colnames(df))],
+      by = list(scenario = df$scenario), FUN = mean)      
+    df$scenario <- factor(df$scenario, levels = scenarios)
+    
+    # Reshape long
+    df <- reshape(df, direction = "long", v.names = "probability",
+      varying = grep("atleast", colnames(df)), idvar = "scenario",
+      times = c(100, 1000, 10000), timevar = "n_deaths")
+    df$n_deaths <- paste(">=", 
+      trimws(as.character(format(df$n_deaths, big.mark = ","))), sep = " ")
+    df$n_deaths <- factor(df$n_deaths, levels = c(">= 100", ">= 1,000",
+      ">= 10,000"))
+
+    # Plot
+    plot2 <- ggplot(df, aes(y = probability, x = n_deaths, colour = scenario, 
+      fill = scenario)) +
+      geom_bar(stat = "identity", alpha = 0.7) +
+      theme_bw() +
+      facet_wrap(. ~ scenario) +
+      theme(legend.position = "top",
+        panel.grid.major.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+      scale_colour_manual(values = palette_periods[3:5]) +
+      scale_fill_manual(values = palette_periods[3:5]) +
+      scale_y_continuous("probability of occurrence") +
+      scale_x_discrete(
+        "number of deaths (all epidemic-prone pathogens combined)")
+    
+    # Save
+    ggsave(paste(dir_path, 'outputs/' , "prob_epidemics_by_size.png", sep=""),
+      dpi = "print", units = "cm", width = 30, height = 15)
+       
+  #...................................      
+  ## Combined plot
+    
+    # Plot
+    ggarrange(plot1, NULL, plot2, common.legend = TRUE, 
+      labels = c("A", "", "B"), heights = c(1, 0.1, 0.5), ncol = 1, nrow = 3)
+    
+    # Save
+    ggsave(paste(dir_path, 'outputs/' , "prob_epidemics_combi.png", sep=""),
+      dpi = "print", units = "cm", width = 20, height = 25)
+
+                
 #...............................................................................   
 ### Analysing simulations for stable-transmission infections
 #...............................................................................
@@ -305,9 +405,9 @@
     out_ende$d_excess <- out_ende$d_crisis - out_ende$d_base
     
     # Output columns
-    cols <- c(paste("d_base", c("median", "lci", "uci"), sep = "_"),
-      paste("d_crisis", c("median", "lci", "uci"), sep = "_"),
-      paste("d_excess", c("median", "lci", "uci"), sep = "_"))
+    cols <- c(paste("d_base", c("mean", "lci", "uci"), sep = "_"),
+      paste("d_crisis", c("mean", "lci", "uci"), sep = "_"),
+      paste("d_excess", c("mean", "lci", "uci"), sep = "_"))
 
     
   #...................................      
@@ -359,7 +459,7 @@
       2, function(x) {trimws(as.character(x))} )
     for (i in c("base", "crisis", "excess")) {
       tab2[, paste("deaths", i, sep = "_")] <- 
-        paste(tab2[, paste("d", i, "median", sep = "_")], " (", 
+        paste(tab2[, paste("d", i, "mean", sep = "_")], " (", 
           tab2[, paste("d", i, "lci", sep = "_")], " to ",
           tab2[, paste("d", i, "uci", sep = "_")], ")", sep = "")       
     }
@@ -402,7 +502,7 @@
       2, function(x) {trimws(as.character(x))} )
     for (i in c("base", "crisis", "excess")) {
       tab3[, paste("deaths", i, sep = "_")] <- 
-        paste(tab3[, paste("d", i, "median", sep = "_")], " (", 
+        paste(tab3[, paste("d", i, "mean", sep = "_")], " (", 
           tab3[, paste("d", i, "lci", sep = "_")], " to ",
           tab3[, paste("d", i, "uci", sep = "_")], ")", sep = "")       
     }
@@ -414,6 +514,47 @@
       sep = "/"), row.names = FALSE)
     
     
+  #...................................      
+  ## Tabulate deaths by scenario and subperiod
+
+    # Aggregate
+    tab4 <- aggregate(out_ende[, grep("d_", colnames(out_ende))],
+      by = out_ende[, c("scenario", "subperiod", "run")], FUN = sum)
+    tab4 <- aggregate(tab4[, grep("d_", colnames(tab4))],
+      by = tab4[, c("scenario", "subperiod")], 
+      FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+    tab4 <- data.frame(tab4[, c("scenario", "subperiod")],
+      tab4$d_base, tab4$d_crisis, tab4$d_excess)
+    colnames(tab4) <- c("scenario", "subperiod", cols)
+    tab4[, grep("d_", colnames(tab4))] <- apply(
+      tab4[, grep("d_", colnames(tab4))], 2, round, 0)
+
+    # Add totals for the entire subperiod
+    x <- aggregate(tab4[, cols], by = list(scenario = tab4$scenario), FUN = sum)
+    x$subperiod <- "total"
+    x <- x[, c("scenario", "subperiod", cols)]
+    tab4 <- rbind(tab4, x)
+    
+    # Output raw table
+    write.csv(tab4, paste(dir_path, "outputs/out_tab_ende.csv", sep = "/"),
+      row.names = FALSE)
+    
+    # Improve numbers format
+    tab4[, cols] <- apply(tab4[, cols], 2, format, big.mark = ",")
+    tab4[, cols] <- apply(tab4[, cols],
+      2, function(x) {trimws(as.character(x))} )
+    for (i in c("base", "crisis", "excess")) {
+      tab4[, paste("deaths", i, sep = "_")] <- 
+        paste(tab4[, paste("d", i, "mean", sep = "_")], " (", 
+          tab4[, paste("d", i, "lci", sep = "_")], " to ",
+          tab4[, paste("d", i, "uci", sep = "_")], ")", sep = "")       
+    }
+    tab4 <- tab4[, c("scenario", "subperiod",
+      "deaths_base", "deaths_crisis", "deaths_excess")]
+  
+    # Write 
+    write.csv(tab4, paste(dir_path, "outputs/out_tab_ende_pretty.csv", 
+      sep = "/"), row.names = FALSE)
   
 
 #...............................................................................   
