@@ -80,23 +80,22 @@
       # list structure: [[run]][[scenario]][[subperiod]]
     sim <- list()
           
-    # Loop progress bar   
-    pb <- txtProgressBar(min = 1, max = max(runs$run), style = 3)
-
-    
+   
 #...............................................................................   
 ### Preparing simulation runs
 #...............................................................................
 
 # (run loop starts here)    
-for (run_i in 1:max(runs$run)) {
+
+with_progress({
+  p <- progressor(steps = max(runs$run))
+  sim <- future_lapply(1:max(runs$run), future.seed = TRUE, function(run_i) {
+    p()
 
   #...................................      
   ## Preparatory steps
 
     # Update progress bar
-    setTxtProgressBar(pb, run_i)
-  
     # Identify random numbers from [0,1]
     rx_r0 <- runs[run_i, "rx_r0"]
     rx_cfr <- runs[run_i, "rx_cfr"]
@@ -130,8 +129,10 @@ for (run_i in 1:max(runs$run)) {
   #...................................      
   ## Generate random parameter values for each scenario...
   
+  # preserve names
+  names(scenarios) <- scenarios
   # (scenario loop starts here)    
-  for (i in scenarios) {
+  scenario_sim <- lapply(scenarios, function(i) {
 
     # Attribute probabilities of outbreaks
     for (u in diseases_epid) {
@@ -245,12 +246,14 @@ for (run_i in 1:max(runs$run)) {
     } # (close j - subperiod loop) 
 
     # Attribute parameters table to this specific run and scenario
-    sim[[paste("run", run_i, sep = "_")]][[i]] <- sim_pars_run_i  
+    return(sim_pars_run_i)
     
-  } # (close i - scenario loop)   
+  }) # (close i - scenario loop)   
 
-} # (close run_i - run loop)
-close(pb)    
+  scenario_sim$id <- run_i
+  return(scenario_sim)
+}) # (close run_i - run loop)
+}) # (close withr)
       
       
 #...............................................................................
