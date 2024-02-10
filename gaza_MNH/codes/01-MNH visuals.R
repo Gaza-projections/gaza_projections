@@ -26,7 +26,7 @@ scenario_order <- c("ceasefire", "status quo", "escalation")
 
 # Read the CSV file (replace with your actual data of the final reduction)
 
-MNH <- read.csv("inputs/out_final_estimates.csv")
+MNH <- read.csv("outputs/out_final_estimates.csv")
 
 # Keep only rows where the disease is maternal, neonatal, or stillbirth
 MNH_sub <- subset(MNH, disease %in% c("maternal", "neonatal", "stillbirth"))
@@ -46,9 +46,9 @@ stillbirth_data <- data.frame(
   mean = c(340, 380, 453, 499),  # Replace with your actual values
   lci = rep(NA, 4),              # Set CI to NA for stillbirth
   uci = rep(NA, 4),              # Set CI to NA for stillbirth
-  module = rep("MNH", 4),       # Replace with your actual values
-  male = rep(NA, 4),             
-  female = rep(NA, 4),           
+  module = rep("MNH", 4),        # Replace with your actual values
+  male = rep(NA, 4),             # Replace with your actual values
+  female = rep(NA, 4),           # Replace with your actual values
   total = rep(NA, 4),            # Replace with your actual values
   risk = rep(NA, 4),             # Replace with your actual values
   surv = rep(NA, 4),             # Replace with your actual values
@@ -93,11 +93,11 @@ combined_plot_summarized <- ggplot(MNH_sub_summarized,
 # Print the combined plot for summarized data
 print(combined_plot_summarized)
 
-ggsave("output/MNH.png", combined_plot_summarized, width = 30, height = 15, units = "cm", bg = "white")
+ggsave("outputs/MNH.png", combined_plot_summarized, width = 30, height = 15, units = "cm", bg = "white")
 
 
 
-######### MNH figure 2######### 
+######### MNH figure 2 ######### 
 par(mfrow = c(1, 3), oma = c(5, 0, 0, 0), xpd = NA)
 
 # general palette
@@ -112,7 +112,7 @@ names(palette_periods) <- periods
 # Function to plot cumulative mortality for a given sheet and title
 plot_cumulative_mortality <- function(sheet, title) {
  
-   cumulative_mortality <- read_excel("inputs/cumulative mortality.xlsx", sheet = sheet)
+cumulative_mortality <- read_excel("outputs/cumulative mortality.xlsx", sheet = sheet)
   
   plot(cumulative_mortality$C, type = "l", lty = 2, col = viridis(7, option = "D", end = 0.8),
        xlab = "Months", ylab = title, xaxt = "n", lwd = 3)  # Adjust line thickness here
