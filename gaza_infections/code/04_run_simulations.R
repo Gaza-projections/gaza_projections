@@ -39,45 +39,29 @@
     timeline_sim <- merge(timeline_sim, pop, by = "demography_group", 
       all.x = TRUE)
   
-  #...................................      
-  ## Initialise output
-    
-    # For epidemic infections model  
-    out_epid <- data.frame()  
-    
-    # For stable-transmission infections model  
-    out_ende <- data.frame()  
-    
-            
+
 #...............................................................................   
 ### Running epidemic (SEIR model) simulations
 #...............................................................................
+#
+# (run loop starts here)
+with_progress({
+  p <- progressor(steps = length(sim))
+  out_epid <- future_lapply(sim, future.seed = TRUE, function(run_sim) {
 
-# (run loop starts here)    
-for (run_i in 1:max(runs$run)) {
+    p()
 
-  #...................................      
-  ## Preparatory steps
+  #...................................
+    lapply(scenarios, function(i) {
 
-    # Update progress bar
-    setTxtProgressBar(pb, run_i)
-
-  
-  #...................................      
-  ## For each scenario...
-  for (i in scenarios) {
-    
-    # Get parameter values for this run and scenario
-    sim_pars <- sim[[run_i]][[i]]
-    
     # For each epidemic-prone disease...
-    for (u in diseases_epid) {
+    lapply(diseases_epid, function(u) {
 
       # start fresh timeline
       timeline_ui <- timeline_sim
       
       # get parameter values for this run, scenario and disease
-      sim_pars_u <- subset(sim_pars, disease == u)      
+      sim_pars_u <- subset(run_sim[[i]], disease == u)      
 
         # binomial realisation of probability of an epidemic
         pu <- sim_pars_u[which(sim_pars_u$subperiod == "overall" & 
@@ -92,13 +76,6 @@ for (run_i in 1:max(runs$run)) {
         x <- aggregate(timeline_ui[,c("new_infections", "symptomatic",
           "deaths")],
           by = timeline_ui[, c("subperiod", "age")], FUN = sum)
-        x$run <- run_i
-        x$scenario <- i
-        x$disease <- u
-        out_epid <- rbind(out_epid, x)
-        
-        # advance to the next loop
-        next
       } # (close if y = 0 loop)
 
       # if y = 1, an outbreak occurs; function continues
@@ -168,42 +145,39 @@ for (run_i in 1:max(runs$run)) {
           rx_start_f = rx_start)
             
         # collect results  
-        x$run <- run_i
-        x$scenario <- i
-        x$disease <- u
-        out_epid <- rbind(out_epid, x)
       } # (close if y = 1 loop)
-    } # (close u - disease loop)
-  } # (close i - scenario loop)
-} # (close run_i - run loop)
-close(pb)    
-      
-  #...................................      
+      x$run <- run_sim$id
+      x$scenario <- i
+      x$disease <- u
+
+      return(x)
+    }) # (close u - disease loop)
+  }) # (close i - scenario loop)
+}) # (close run_i - run loop)
+}) # (close withr for progress bar)
+
+out_epid <- do.call(bind_rows, flatten(out_epid))
+
+  #...................................
   ## Save raw output
-  write_rds(out_epid, paste(dir_path, "outputs/", 
+  write_rds(out_epid, paste(dir_path, "outputs/",
     "out_epid_all_runs.rds", sep=""))
 
-
-#...............................................................................   
+#...............................................................................
 ### Running stable-transmission simulations
 #...............................................................................
 
-# (run loop starts here)    
-for (run_i in 1:max(runs$run)) {
+# (run loop starts here)
+with_progress({
+  p <- progressor(steps = length(sim))
+  out_ende <- future_lapply(sim, future.seed = TRUE, function(run_sim) {
 
-  #...................................      
-  ## Preparatory steps
-
-    # Update progress bar
-    setTxtProgressBar(pb, run_i)
-
-  #...................................      
+    p()
   ## For each scenario...
-  for (i in scenarios) {
-    
+  lapply(scenarios, function(i) {
+
     # Get parameter values for this run and scenario
-    sim_pars <- sim[[run_i]][[i]]
-    sim_pars <- sim_pars[which(sim_pars$parameter %in% c("r0_rr", "cfr_rr")), 
+    sim_pars <- run_sim[[i]][which(run_sim[[i]]$parameter %in% c("r0_rr", "cfr_rr")),
       c("disease", "parameter", "subperiod", "value_gen")]
 
     # Initialise fresh timeline
@@ -286,13 +260,13 @@ for (run_i in 1:max(runs$run)) {
     x <- aggregate(x[, c("d_base", "d_crisis")], by =
       x[, c("route", "disease", "subperiod", "age")], FUN = sum)    
     x$scenario <- i
-    x$run <- run_i
-    out_ende <- rbind(out_ende, x)
-      
-  } # (close i - scenario loop)
-} # (close run_i - run loop)  
-close(pb) 
+    x$run <- run_sim$id
+    return(x)
+  }) # (close i - scenario loop)
+}) # (close run_i - run loop)
+}) # (close withr for progress bar)
 
+out_ende <- do.call(bind_rows, flatten(out_ende))
   #...................................      
   ## Save raw output
   write_rds(out_ende, paste(dir_path, "outputs/", 

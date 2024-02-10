@@ -17,6 +17,7 @@
   ## Install or load required R packages
   pacman::p_load(
     flextable,   # To write tables in .docx format
+    future.apply,# To run loops in parallel
     ggplot2,     # Data visualization
     ggpubr,      # Arranging multiple plots into a single plot
     glmmTMB,     # For fitting generalised linear mixed models
@@ -25,6 +26,7 @@
     MASS,        # For various statistical functions
     paletteer,   # Nice colour palettes
     pak,         # Needed to install epidemics
+    progressr,   # Progressbar for future.apply
     readxl,      # Read Excel files
     reshape2,    # For converting between wide and long data structure
     scales,      # Scaling and formatting data for visualizations
@@ -73,6 +75,8 @@
 #...............................................................................  
 ### Sourcing other scripts
 #...............................................................................
+  # set up parallel computing
+  plan(multicore)
 
   #...................................      
   ## Source analysis functions
