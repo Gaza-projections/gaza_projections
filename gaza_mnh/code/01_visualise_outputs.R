@@ -52,9 +52,9 @@
           
       # specific palette for the pre-war period, crisis to date period and 
         # three scenarios
-      periods <-c("pre-war", "to date", "status quo", "escalation", "ceasefire")
+      periods <-c("pre-war", "to date", "ceasefire", "status quo", "escalation")
       
-      palette_periods <- c("azure4", palette_gen[c(2, 8, 4, 12)])
+      palette_periods <- c("azure4", palette_gen[c(2, 12, 8, 4)])
       names(palette_periods) <- periods
       show_col(palette_periods)
 
