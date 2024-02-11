@@ -16,8 +16,8 @@
   #...................................      
   ## Preliminary steps
 
-    # Compute median and 80% percentile interval of relative risks elsewhere
-    x <- quantile(bf$rr, c(0.10, 0.90, 0.50) )
+    # Compute median and 50% percentile interval of relative risks elsewhere
+    x <- quantile(bf$rr, c(0.75, 0.50, 0.25) )
 
     # Initialise output
     ebf <- data.frame(scenario = scenarios, median = NA, min = NA, max = NA)
