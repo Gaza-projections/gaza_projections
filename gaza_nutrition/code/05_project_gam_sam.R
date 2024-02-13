@@ -305,7 +305,7 @@ close(pb)
           panel.grid.major.x = element_blank()) +
         scale_y_continuous("prevalence", labels = percent, 
           breaks = seq(0, 1, 0.05), limits = c(0, lims[2])) +
-        geom_text(aes(x = scenario, y = mean * 1.02 + 0.02,
+        geom_text(aes(x = scenario, y = mean * 1.01 + 0.02,
           label = scales::percent(mean, accuracy = 0.1) ),
           colour = "grey20") +
         scale_colour_manual(values = palette_periods[c(3,4,5)]) +

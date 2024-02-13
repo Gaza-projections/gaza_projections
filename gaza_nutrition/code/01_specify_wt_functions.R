@@ -24,15 +24,15 @@ f_fat <- function(data = df_ad) {
   weight <- as.numeric(data[["weight"]])
   height <- as.numeric(data[["height"]])
   
-  # Females
-  if (gender == "f") {
+  # Males
+  if (gender == "m") {
     out <- (weight / 100) * 
       (0.14 * age + 37.31 * log(weight / 
       (height^2)) - 103.94)
   }
   
-  # Males  
-  if (gender == "m") {
+  # Females  
+  if (gender == "f") {
     out <- (weight / 100) * 
       (0.14 * age + 39.96 * log(weight / 
       (height^2)) - 102.01)
@@ -55,14 +55,14 @@ f_rmr <- function(data = df_ad) {
   # Read parameters
   gender <- data[["gender"]]
   age <- as.numeric(data[["age"]])
-  wt_now <- as.numeric(data[["wt_now"]])
+  weight <- as.numeric(data[["weight"]])
   height <- as.numeric(data[["height"]]) * 100 #(in cm)
     
   # Females
-  if (gender == "f") {out <- 9.99 * wt_now + 6.25 * height - 4.92 * age - 161}
+  if (gender == "f") {out <- 9.99 * weight + 6.25 * height - 4.92 * age - 161}
   
   # Males  
-  if (gender == "m"){out <- 9.99 * wt_now + 6.25 * height - 4.92 * age + 5}
+  if (gender == "m"){out <- 9.99 * weight + 6.25 * height - 4.92 * age + 5}
   
   # Return output
   return(out)
@@ -77,15 +77,15 @@ f_rmr <- function(data = df_ad) {
   # NOTE: parameter values converted from Joules to Kcal
 #...............................................................................
 
-f_hall <- function(data = df) {  
+f_hall <- function(data = df, f_fat_f = f_fat) {  
 
   #...................................      
   ## Define parameters
     # Fixed parameters
-    nu_f <- 0.179254
-    nu_l <- 0.229446
-    gamma_f <- 0.00310707
-    gamma_l <- 0.0219885
+    nu_f <- 179.254
+    nu_l <- 229.446
+    gamma_f <- 3.10707
+    gamma_l <- 21.9885
     rho_f <- 9440.727
     rho_l <- 1816.44
     beta_at <- 0.14
@@ -93,26 +93,38 @@ f_hall <- function(data = df) {
     forbes <- 10.4
     pal <- 1.5      
   
-    # Read changing parameters from data
+    # Read starting and time-changing parameters from data
     wt_start <- as.numeric(data[["weight"]])
-    wt_now <- as.numeric(data[["wt_now"]])
+    weight <- as.numeric(data[["wt_now"]])
     rmr <- as.numeric(data[["rmr"]])
     f_start <- as.numeric(data[["f_start"]])
     change_intake <- as.numeric(data[["change_intake"]])  
-
+    height <- as.numeric(data[["height"]])
+    gender <- data[["gender"]]
+    age <- as.numeric(data[["age"]])
+    
   #...................................      
   ## Compute components of main equation
     
     # alpha
-    alpha <- forbes / f_start  
-#####TO DO: improve alpha as dL/dF (maybe model using old starvation studies)
-
+#    alpha <- forbes / f_start  # simplification for modest weight gain (unused)
+      # first work out fat mass now
+      if (gender == "m") {f_now <- (weight / 100) * (0.14 * age + 37.31 * 
+        log(weight / (height^2)) - 103.94)
+      }
+      if (gender == "f") {f_now <- (weight / 100) * (0.14 * age + 39.96 * 
+        log(weight / (height^2)) - 102.01)
+      }
+        
+      # then work out alpha  
+      alpha <- forbes / f_now
+    
     # beta
     beta <- beta_at + beta_tef
-#####TO DO: but maybe beta_at should be at 0 after initial 14 days of wt loss
+#####TO DO: maybe beta_at should be at 0 after initial 14 days of wt loss
 
     # delta
-    delta <- ((1 - beta_tef) * pal - 1) * rmr / wt_now
+    delta <- ((1 - beta_tef) * pal - 1) * rmr / weight
     
     # rho
     rho <- (nu_f + rho_f + alpha * nu_l + alpha * rho_l)/ 
@@ -126,7 +138,7 @@ f_hall <- function(data = df) {
   ## Compute and output weight change per time step (main equation)
     
     # Weight change for this time step
-    change_wt <- change_intake / rho - (wt_now - wt_start) / tau
+    change_wt <- change_intake / rho - (weight - wt_start) / tau
 
     # Output
     return(change_wt)

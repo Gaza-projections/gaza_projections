@@ -37,28 +37,28 @@
     # Add age categories
     df_ad$age_cat <- cut(df_ad$age, breaks = c(40, 50, 60, 70, 120), 
       include.lowest = TRUE, right = FALSE)
-    
+      
+      # unfactor age category
+      df_ad$age_cat <- as.character(df_ad$age_cat)
+
     # Recode gender
     df_ad$gender <- ifelse(df_ad$gender == 1, "m", "f")
 
-  #...................................      
-  ## Add variables to survey dataset
-  
-    # Estimate baseline fat mass in adults surveyed
-    df_ad$f_start <- apply(df_ad, 1, f_fat)
-
-    # Resting metabolic rate per day
-    df_ad$rmr <- NA
-    
-    # Weight per day of adults (set to starting value at the beginning)
-    df_ad$wt_now <- df_ad$weight
-    
-    # Change in intake per day
-    df_ad$change_intake <- NA
-    
-    # Unfactor age category
-    df_ad$age_cat <- as.character(df_ad$age_cat)
-
+  # #...................................      
+  # ## Add variables to survey dataset
+  # 
+  #   # Estimate baseline fat mass in adults surveyed
+  #   df_ad$f_start <- apply(df_ad, 1, f_fat)
+  # 
+  #   # Resting metabolic rate per day
+  #   df_ad$rmr <- NA
+  #   
+  #   # Weight per day of adults (set to starting value at the beginning)
+  #   df_ad$wt_now <- df_ad$weight
+  #   
+  #   # Change in intake per day
+  #   df_ad$change_intake <- NA
+  #   
     
   #...................................      
   ## Aggregate dataset: means by age category, gender
