@@ -173,6 +173,30 @@ close(pb)
     write.csv(agg, paste(dir_path, "outputs/","out_gam_sam.csv", sep=""),
       row.names = FALSE)
     
+    # Make a prettier table
+    cols <- c("mean", "median", "lci", "uci")
+    x <- data.frame(agg[,c("scenario", "period")], sam = agg$sam, gam = agg$gam)
+    colnames(x) <- c("scenario", "period", paste("sam", cols, sep = "_"),
+      paste("gam", cols, sep = "_"))
+    x[, grep("sam", colnames(x))] <- apply(x[,grep("sam", colnames(x))], 2,
+      label_percent(accuracy = 0.1) )
+    x[, grep("gam", colnames(x))] <- apply(x[,grep("gam", colnames(x))], 2,
+      label_percent(accuracy = 0.1) )
+    x$sam <- paste(x$sam_mean, " (", x$sam_median, ", ", x$sam_lci, " to ",
+      x$sam_uci, ")", sep = "")
+    x$gam <- paste(x$gam_mean, " (", x$gam_median, ", ", x$gam_lci, " to ",
+      x$gam_uci, ")", sep = "")
+    x[, "sam"] <- ifelse(x$period == "pre-war", x$sam_mean, x$sam )
+    x[, "gam"] <- ifelse(x$period == "pre-war", x$gam_mean, x$gam )
+    x$scenario <- as.character(x$scenario)
+    x$scenario <- ifelse(x$period %in% c("pre-war", "to date"), NA, x$scenario)
+    x <- rbind(unique(subset(x, is.na(scenario))), subset(x, ! is.na(scenario)))
+    x <- x[, c("period", "scenario", "sam", "gam")]
+    
+    # Save
+    write.csv(x, paste(dir_path, "outputs/","out_gam_sam_pretty.csv", sep=""),
+      row.names = FALSE)    
+      
   #...................................      
   ## Visualise, by scenario and period
     
@@ -270,7 +294,7 @@ close(pb)
           panel.grid.major.x = element_blank()) +
         scale_y_continuous("prevalence", labels = percent, 
           breaks = seq(0, 1, 0.05), limits = c(0, lims[2])) +
-        geom_text(aes(x = scenario, y = mean * 1.02 + 0.02,
+        geom_text(aes(x = scenario, y = mean * 1.01 + 0.01,
           label = scales::percent(mean, accuracy = 0.1) ),
           colour = "grey20")
         
@@ -287,7 +311,7 @@ close(pb)
           panel.grid.major.x = element_blank()) +
         scale_y_continuous("prevalence", labels = percent, 
           breaks = seq(0, 1, 0.05), limits = c(0, lims[2])) +
-        geom_text(aes(x = scenario, y = mean * 1.02 + 0.02,
+        geom_text(aes(x = scenario, y = mean * 1.01 + 0.01,
           label = scales::percent(mean, accuracy = 0.1) ),
           colour = "grey20")
         
@@ -305,7 +329,7 @@ close(pb)
           panel.grid.major.x = element_blank()) +
         scale_y_continuous("prevalence", labels = percent, 
           breaks = seq(0, 1, 0.05), limits = c(0, lims[2])) +
-        geom_text(aes(x = scenario, y = mean * 1.01 + 0.02,
+        geom_text(aes(x = scenario, y = mean * 1.01 + 0.01,
           label = scales::percent(mean, accuracy = 0.1) ),
           colour = "grey20") +
         scale_colour_manual(values = palette_periods[c(3,4,5)]) +
