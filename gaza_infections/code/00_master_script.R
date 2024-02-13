@@ -72,11 +72,12 @@
       names(palette_periods) <- periods
       show_col(palette_periods)
 
+    # Set up parallel computing
+    plan(multisession)  # or  plan(multicore) if non-Windows
+
 #...............................................................................  
 ### Sourcing other scripts
 #...............................................................................
-  # set up parallel computing
-  plan(multicore)
 
   #...................................      
   ## Source analysis functions
