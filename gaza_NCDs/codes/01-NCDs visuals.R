@@ -6,7 +6,7 @@
 ## ----------- R SCRIPT TO VISUALISE OUTPUT AND PRODUCE GRAPHS  ------------- ##
 #...............................................................................
 
-# Francesco Checchi (January 2024)
+# Francesco Checchi, Zeina Jamaluddine (Febuary 2024)
 
 #...............................................................................
 ### Preparatory steps
@@ -26,7 +26,7 @@ pacman::p_load(
   viridis,     # Colour palettes
   zoo)         # For computing running means
 
-#...................................      
+##...................................      
 ## Starting setup
 
 # Clean up from previous code / runs
@@ -36,13 +36,21 @@ rm(list=ls(all=TRUE) )
 windowsFonts(Arial=windowsFont("Arial"))
 
 # Set working directory to where this file is stored
-
-setwd("C:/Users/zeina/London School of Hygiene and Tropical Medicine/Gaza Public Health Projections_Group - Documents/General/public health projections/04 - projections - in progress/11_02_2024_outputs")
-
-NCD <- read_excel("20240212_long_modules_new.xlsx")
+dir_path <- paste(dirname(rstudioapi::getActiveDocumentContext()$path  )
+                  , "/", sep = "")
+setwd(dir_path)
+print( getwd() )
+dir_path <- gsub("/code", "", dir_path)
 
 # Initialise random numbers
 set.seed(123)
+
+#...............................................................................
+
+#...................................      
+## Prepare for plotting
+# Set working directory to where this file is stored
+NCD <- read_excel("20240212_long_modules_new.xlsx")
 
 # Colour-blind palette for graphing
 # general palette
@@ -83,7 +91,6 @@ NCD_excess <- transform(NCD_excess,d_crisis_excess = "excess")
 
 
 
-
 # Set some parameters
 # scenarios
 scenarios <- c("ceasefire", "status quo", "escalation")    
@@ -111,7 +118,6 @@ df1$disease[df1$disease == "ischaemic stroke"] <- "stroke (hemorrhagic,ischaemic
 # Aggregate subperiods
 df1 <- aggregate(df1[, c("mean", "lci", "uci")], 
                 by = df1[, c("scenario", "disease", "category" )], FUN = sum)
-
 
 
 
@@ -157,4 +163,4 @@ print(plot)
 
 # Save
 
-ggsave("C:/Users/zeina/London School of Hygiene and Tropical Medicine/gaza_nutrition data/FC codes/output/NCD_excess.png", plot, width = 20, height = 20, units = "cm", bg = "white")
+ggsave("/output/NCD_excess.png", plot, width = 20, height = 20, units = "cm", bg = "white")
