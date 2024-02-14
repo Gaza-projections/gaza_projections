@@ -88,13 +88,15 @@ for ncd_name in NCDs:
 
     for t in range(500):
         if t == 0:
+            # Acute Phase when tau = 0
             HR_t_tlb = 1 - acute_tlb / 100
             HR_t_tub = 1 - acute_tub / 100
             HR_t_utlb = 1 - acute_utlb / 100
             HR_t_utub = 1 - acute_utub / 100
             HR_t_all.append([HR_t_tlb, HR_t_tub, HR_t_utlb, HR_t_utub])
         else:
-            HR_t_tlb = globals()[ncd_survival_function[ncd_name]](t, para1_tlb, para2_tlb)
+            # Continue Survive when tau > 0
+            HR_t_tlb = globals()[ncd_survival_function[ncd_name]](t, para1_tlb, para2_tlb) 
             HR_t_tub = globals()[ncd_survival_function[ncd_name]](t, para1_tub, para2_tub)
             HR_t_utlb = globals()[ncd_survival_function[ncd_name]](t, para1_utlb, para2_utlb)
             HR_t_utub = globals()[ncd_survival_function[ncd_name]](t, para1_utub, para2_utub)
@@ -103,7 +105,8 @@ for ncd_name in NCDs:
     df = pd.DataFrame(HR_t_all, columns=['HR_t_tlb', 'HR_t_tub', 'HR_t_utlb', 'HR_t_utub'])
 
     HR_ncds[ncd_name] = df
-
+  
+# Save the Hazard rate as the excel file
 with pd.ExcelWriter('HR_new_logistic_normal.xlsx', engine='openpyxl') as writer:
     # Iterate over the dictionary and create a DataFrame from each set of values
     # Each key represents a sheet name
