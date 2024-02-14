@@ -27,6 +27,9 @@
     # Read population data
     pop <- data.frame(readxl::read_excel(filename, sheet = "pop"))
     
+    # Read list of diseases
+    diseases <- data.frame(readxl::read_excel(filename,sheet = "list_diseases"))
+    
     
   # #...................................      
   # ## Read in or set other parameters
@@ -56,6 +59,9 @@
     
     # Identify scenarios
     scenarios <- c("ceasefire", "status quo", "escalation")
+    
+    # Identify epidemic diseases
+    epid_dis <- diseases[which(diseases$category == "epidemic"), "disease"]
     
     # Identify age groups
     ages_fine <- pop$age # groups we may have in the data
@@ -89,38 +95,27 @@
   ## Clean data
     
     # Change column names
-    colnames(df) <- gsub("deaths_", "", colnames(df))
-    
-    # Clean type of deaths
-    df$category <- df$d_crisis_excess
-    df <- subset(df, category %in% c("d_baseline", "d_crisis"))
-    df$category <- gsub("d_", "", df$category)
-    table(df$category)
+    colnames(df) <- gsub("d_", "", colnames(df))
     
     # Clean disease modules
-    table(df$Theme)
-    df$module <- df$Theme
-    df$module <- ifelse(df$module %in% c("Endemic", "Epidemic"), "infections",
+    table(df$theme)
+    df$module <- df$theme
+    df$module <- ifelse(df$module == "infection", "infections - endemic",
       df$module)
-    df$module <- ifelse(df$module == "Injuries", "injuries", df$module)
+    df$module <- ifelse(df$disease %in% epid_dis, "infections - epidemic",
+      df$module)
+    table(df$module, df$theme)
+    
     df$module <- ifelse(df$module == "NCD", "NCDs", df$module)
     table(df$module)    
 
     # Clean disease
     sort(unique(df$disease))
-    df$disease <- gsub("_", " ", df$disease)
-    df$disease <- ifelse(df$disease == "diabetes1", "diabetes type 1", 
-      df$disease)
-    df$disease <- ifelse(df$disease == "Influenza, para-influenza", 
-      "influenza", df$disease)
-    df$disease <- ifelse(df$disease == "kidney", "chronic kidney disease", 
-      df$disease)
-    df$disease <- ifelse(df$disease == "injuries total", "trauma injury", 
+    df$disease <- ifelse(df$disease == "trauma", "traumatic injury", 
       df$disease)
     sort(unique(df$disease))
         
     # Clean scenario
-    df$scenario <- df$Scenario
     table(df$scenario)
 
     # Clean subperiod
@@ -146,39 +141,41 @@
     df$age <- ifelse(df$age == "70-74", "70 to 74yo", df$age)
     df$age <- ifelse(df$age == "75-79", "75 to 79yo", df$age)
     df$age <- ifelse(df$age == ">80", "80 to 100yo", df$age)    
+    df$age <- gsub("  ", " ", df$age)
     sort(unique(df$age))
     base::setdiff(sort(unique(df$age)), ages) # outstanding
+    table(df[, c("age", "module")])
     
-    # # Fix mean/median columns (mislabelled)
-    # df[which(df$module == "NCDs"), "mean"] <- 
-    #   df[which(df$module == "NCDs"), "median"]
-    # df[which(df$module == "injuries"), "mean"] <- 
-    #   df[which(df$module == "injuries"), "median"]
-    # df[which(df$module == "MNH"), "mean"] <- 
-    #   df[which(df$module == "MNH"), "median"]
-    # table(is.na(df$mean))
-
     # Reduce columns
-    df <-df[, c("module", "disease", "scenario", "subperiod", "age", 
-      "mean", "lci", "uci")]
+    cols <- c("mean", "lci", "uci")
+    df <-df[, c("scenario", "module", "disease", "subperiod", "age", 
+      paste("base", cols, sep = "_"), paste("crisis", cols, sep = "_"),
+      paste("excess", cols, sep = "_"))]
  
+    # Set NA values to 0 when base is missing
+    x <- grep("base", colnames(df))
+    df[, x] <- na.replace(df[, x], 0)
+    
+    # Set crisis = excess when crisis is missing (injuries, epidemics)
+    x <- which(df$module %in% c("injuries", "infections - epidemic"))
+    df[x, grep("crisis", colnames(df))] <-  df[x, grep("excess", colnames(df))]   
     
   #...................................      
   ## Distribute some age groups into fine age strata
     
-    # <1 yo
-    x <- pop[which(pop$age %in% c("0mo", "1 to 11mo")), "total"]
-    x <- proportions(x)
-    tofix <- subset(df, age == "<1")
-    tofix1 <- tofix
-    tofix1[, c("mean", "lci", "uci")] <- tofix[, c("mean", "lci", "uci")] * x[1]
-    tofix1$age <- "0mo"
-    tofix2 <- tofix
-    tofix2[, c("mean", "lci", "uci")] <- tofix[, c("mean", "lci", "uci")] * x[2]
-    tofix2$age <- "1 to 11mo"    
-    tofix <- rbind(tofix1, tofix2)    
-    df <- subset(df, age != "<1")
-    df <- rbind(df, tofix)
+    # # <1 yo
+    # x <- pop[which(pop$age %in% c("0mo", "1 to 11mo")), "total"]
+    # x <- proportions(x)
+    # tofix <- subset(df, age == "<1")
+    # tofix1 <- tofix
+    # tofix1[, c("mean", "lci", "uci")] <- tofix[, c("mean", "lci", "uci")] * x[1]
+    # tofix1$age <- "0mo"
+    # tofix2 <- tofix
+    # tofix2[, c("mean", "lci", "uci")] <- tofix[, c("mean", "lci", "uci")] * x[2]
+    # tofix2$age <- "1 to 11mo"    
+    # tofix <- rbind(tofix1, tofix2)    
+    # df <- subset(df, age != "<1")
+    # df <- rbind(df, tofix)
     
     # 15-49 (females only)
     tofix <- subset(df, age == "15-49")
@@ -194,13 +191,16 @@
     
        # attribute this age group
       tofix_part <- tofix
-      tofix_part[, c("mean", "lci", "uci")] <- 
-        tofix_part[, c("mean", "lci", "uci")] * x[[i]]
+      for (j in c("base", "crisis", "excess")) {
+        tofix_part[, paste(j, cols, sep = "_")] <- 
+          tofix_part[, paste(j, cols, sep = "_")] * x[[i]]
+      }
       tofix_part$age <- i
       tofix_out <- rbind(tofix_out, tofix_part)
     }
     df <- subset(df, age != "15-49")
     df <- rbind(df, tofix_out)
+    table(df[, c("age", "module")])
     
   #...................................      
   ## Distribute some age groups into desired age strata
@@ -214,8 +214,10 @@
     df$age <- ifelse(is.na(df$age_target), df$age, df$age_target)
 
     # Aggregate
-    df <- aggregate(df[, c("mean", "lci", "uci")], by = 
-      df[, c("module", "disease", "scenario", "subperiod", "age")], 
+    df <- aggregate(df[, c(paste("base", cols, sep = "_"), 
+      paste("crisis", cols, sep = "_"),
+      paste("excess", cols, sep = "_"))], 
+      by = df[, c("module", "disease", "scenario", "subperiod", "age")], 
       FUN = sum)
     
     # Check
@@ -233,11 +235,10 @@
       all.x = TRUE)        
     table(df[, c("disease", "scenario")])
            
-    # Specify that deaths are 0 when blank (= baseline is zero)
-    df$mean <- ifelse(is.na(df$mean), 0, df$mean)
-    df$lci <- ifelse(is.na(df$lci), 0, df$lci)
-    df$uci <- ifelse(is.na(df$uci), 0, df$uci)
-    
+    # Specify that deaths are 0 when blank (= neonatal, maternal)
+    for (i in cols) {
+      df[, grep(i, colnames(df))] <- na.replace(df[, grep(i, colnames(df))], 0)}
+
     # Add missing module values
     x <- unique(df[, c("disease", "module")])
     x <- na.omit(x)
