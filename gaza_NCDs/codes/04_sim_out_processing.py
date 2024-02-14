@@ -46,7 +46,7 @@ def cum_1346_by_age_sce(ncd_name, res_total):
     df1.insert(0, 'Age', ncd_d['Age'])
 
     with pd.ExcelWriter(
-            'Output/' + ncd_name + '/scenario_total_13-46M_by_age_.xlsx',
+            'outputs/' + ncd_name + '/scenario_total_13-46M_by_age_.xlsx',
             engine='xlsxwriter') as writer:
         df1.to_excel(writer, sheet_name=ncd_name)
 
@@ -96,7 +96,7 @@ def cum_1346_by_age_base(ncd_name, baseline):
     # df1.to_excel(writer, sheet_name=ncd_name)
 
     with pd.ExcelWriter(
-            'Output/' + ncd_name + '/baseline_total_13-46M_by_age_.xlsx',
+            'outputs/' + ncd_name + '/baseline_total_13-46M_by_age_.xlsx',
             engine='xlsxwriter') as writer:
         df1.to_excel(writer, sheet_name=ncd_name)
 
@@ -147,7 +147,7 @@ def cum_1346_by_age_excess(ncd_name, excess):
     # df1.to_excel(writer, sheet_name=ncd_name)
 
     with pd.ExcelWriter(
-            'Output' + ncd_name + '/excess_death_13-46M_by_age_.xlsx',
+            'outputs/' + ncd_name + '/excess_death_13-46M_by_age_.xlsx',
             engine='xlsxwriter') as writer:
         df1.to_excel(writer, sheet_name=ncd_name)
 
@@ -197,7 +197,7 @@ def cum_1346_by_age_all_ncds(ncd_name, total_ncd):
 
     # df1.to_excel(writer, sheet_name=ncd_name)
 
-    with pd.ExcelWriter('Output/Total_ncd_1346M.xlsx',
+    with pd.ExcelWriter('outputs/Total_ncd_1346M.xlsx',
                         engine='xlsxwriter') as writer:
         df1.to_excel(writer, sheet_name=ncd_name)
 
@@ -206,7 +206,7 @@ ndc_data_dict = {}
 for s in ['Escalation', 'Status Quo', 'Ceasefire']:
     ndc_data_s = {}
     for ncd_name in ['CKD', 'IHD', 'HS', 'IS', 'Bcancer', 'Ccancer', 'Lcancer', 'DM1']:
-        excel_file = 'TI Model Out/scenario_excess_' + ncd_name + '.xlsx'
+        excel_file = 'outputs/Raw/scenario_excess_' + ncd_name + '.xlsx'
         xls = pd.ExcelFile(excel_file)
         df = pd.read_excel(xls, s, header=None)
         ndc_data_s[ncd_name] = df.values.T
@@ -230,7 +230,7 @@ for ncd_name in ['CKD', 'IHD', 'HS', 'IS', 'Bcancer', 'Ccancer', 'Lcancer', 'DM1
     cum_1346_by_age_base(ncd_name, baseline)
 
 for ncd_name in ['CKD', 'IHD', 'HS', 'IS', 'Bcancer', 'Ccancer', 'Lcancer', 'DM1']:
-    excel_file = 'Output/Raw/scenario_total_%s.xlsx' % ncd_name
+    excel_file = 'outputs/Raw/scenario_total_%s.xlsx' % ncd_name
     xls = pd.ExcelFile(excel_file)
     # Initialize an empty dictionary to store your arrays
     res_total = {}
@@ -246,7 +246,7 @@ for ncd_name in ['CKD', 'IHD', 'HS', 'IS', 'Bcancer', 'Ccancer', 'Lcancer', 'DM1
     cum_1346_by_age_sce(ncd_name, res_total)
 
 for ncd_name in ['CKD', 'IHD', 'HS', 'IS', 'Bcancer', 'Ccancer', 'Lcancer', 'DM1']:
-    excel_file = 'Output/Raw/scenario_excess_' + ncd_name + '.xlsx'
+    excel_file = 'outputs/Raw/scenario_excess_' + ncd_name + '.xlsx'
     xls = pd.ExcelFile(excel_file)
     # Initialize an empty dictionary to store your arrays
     excess = {}
@@ -320,5 +320,5 @@ for s in ['Ceasefire', 'Status Quo', 'Escalation']:
     df_age_total['AGE'] = age_all
     df_age_total[s] = total
 
-df_age_total.to_excel('Output/Total_ncd_Age.xlsx')
+df_age_total.to_excel('outputs/Total_ncd_Age.xlsx')
 
