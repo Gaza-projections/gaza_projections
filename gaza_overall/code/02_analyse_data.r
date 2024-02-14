@@ -247,7 +247,8 @@
       sep = "_"))]
     write.csv(tab1, paste(dir_path,"outputs/out_tab_age_wide_excess_pretty.csv", 
       sep = "/"), row.names = FALSE)
-     
+  
+       
     
 #...............................................................................  
 ### Producing graphs of the estimates
@@ -415,13 +416,21 @@
     df_plot$scenario <- factor(df_plot$scenario, levels = scenarios)
     df_plot$category <- factor(df_plot$category, 
       levels = c(scenarios, "baseline"))
-    df_plot$cdr1000y_label <- scales::label_number(accuracy = 0.1)(
-      df_plot$cdr1000y_mean)
-    df_plot$cdr10000d_label <- scales::label_number(accuracy = 0.01)(
-      df_plot$cdr10000d_mean)
+    df_plot$cdr1000y_label <- paste(scales::label_number(accuracy = 0.1)(
+      df_plot$cdr1000y_mean), " (95%CI ", 
+      scales::label_number(accuracy = 0.1)(
+      df_plot$cdr1000y_lci), " to ", 
+      scales::label_number(accuracy = 0.1)(
+      df_plot$cdr1000y_uci), ")", sep = "")
+    df_plot$cdr10000d_label <- paste(scales::label_number(accuracy = 0.01)(
+      df_plot$cdr10000d_mean), " (95%CI ", 
+      scales::label_number(accuracy = 0.01)(
+      df_plot$cdr10000d_lci), " to ", 
+      scales::label_number(accuracy = 0.01)(
+      df_plot$cdr10000d_uci), ")", sep = "")
 
     # Plot - per 1000 person-years
-    ggplot(data = df_plot, aes(y = cdr1000y_mean, x = scenario, 
+    plot_1000y <- ggplot(data = df_plot, aes(y = cdr1000y_mean, x = scenario, 
       colour = category, fill = category)) +
       geom_bar(stat = "identity", position = "stack", alpha = 0.5) +
       # geom_errorbar(aes(ymin = cdr1000y_lci, ymax = cdr1000y_uci), width = 0.2,
@@ -430,21 +439,21 @@
       scale_colour_manual(values = palette_periods[c(1,3,4,5)]) +
       scale_fill_manual(values = palette_periods[c(1,3,4,5)]) +
       scale_y_continuous("crude death rate per 1000 person-years",
-        breaks = seq(0, 300, 20), expand = expansion(mult = c(0, 0.05))) +
+        breaks = seq(0, 300, 20), expand = expansion(mult = c(0, 0.07))) +
       scale_x_discrete(expand = expansion(mult = c(0.5, 0.3))) +
       theme(legend.position = "none", panel.grid.major.x = element_blank()) +
-      geom_hline(aes(yintercept = 2.7), colour = palette_gen[5],
+      geom_hline(aes(yintercept = 2.72), colour = palette_gen[5],
         linetype = "21") +
       geom_text(aes(x = scenario, y = cdr1000y_mean, label = cdr1000y_label),
-        nudge_y = c(5, 5, 5, 2.5, 2.5, 2.5)) +
-      annotate("text", x = 0.25, y = 6, colour = palette_gen[5], size = 3, 
-        label = stringr::str_wrap("pre-war mean CDR (2.72)", 15))
+        nudge_y = c(7.55, 7.5, 7.5, 5, 5, 5)) +
+      annotate("text", x = 0.25, y = 9, colour = palette_gen[5], size = 3, 
+        label = stringr::str_wrap("pre-war mean CDR (2.7)", 15))
     
     ggsave(paste(dir_path, 'outputs/', "cdr_1000py.png", sep = ""),
-      dpi = "print", units = "cm", height = 12, width = 20)
+      dpi = "print", units = "cm", height = 8, width = 20)
     
     # Plot - per 10,000 person-days
-    ggplot(data = df_plot, aes(y = cdr10000d_mean, x = scenario, 
+    plot_10000d <- ggplot(data = df_plot, aes(y = cdr10000d_mean, x = scenario, 
       colour = category, fill = category)) +
       geom_bar(stat = "identity", position = "stack", alpha = 0.5) +
       # geom_errorbar(aes(ymin = cdr1000y_lci, ymax = cdr1000y_uci), width = 0.2,
@@ -459,15 +468,55 @@
       geom_hline(aes(yintercept = 0.0745), colour = palette_gen[5],
         linetype = "21") +
       geom_text(aes(x = scenario, y = cdr10000d_mean, label = cdr10000d_label),
-        nudge_y = c(0.1, 0.1, 0.1, 0.08, 0.08, 0.08)) +
-      annotate("text", x = 0.25, y = 0.2, colour = palette_gen[5], size = 3, 
+        nudge_y = c(0.2, 0.2, 0.2, 0.12, 0.12, 0.12)) +
+      annotate("text", x = 0.25, y = 0.3, colour = palette_gen[5], size = 3, 
         label = stringr::str_wrap("pre-war mean CDR (0.07)", 15))
     
     ggsave(paste(dir_path, 'outputs/', "cdr_10000pd.png", sep = ""),
-      dpi = "print", units = "cm", height = 12, width = 20)
+      dpi = "print", units = "cm", height = 8, width = 20)
     
+    # Combined age-specific and crude death rate plot
+    ggarrange(plot3, plot_1000y, nrow = 2, heights =
+      c(1, 0.5), labels = c("A", "B"), hjust = -3, vjust = c(3, -1.5))
      
+    ggsave(paste(dir_path, 'outputs/', 
+      "age_specific_and_cdr_combi.png", sep = ""),
+      dpi = "print", units = "cm", height = 22, width = 20)
+
+ 
+  #...................................
+  ## Plot the proportion of excess deaths by age, by scenario
     
+    # Prepare data for plotting
+    df_plot <- aggregate(list(excess = df$excess_mean), by = 
+      df[, c("scenario", "age")], FUN = sum)
+    x <- aggregate(list(tot_excess = df$excess_mean), by = 
+      list(scenario = df$scenario), FUN = sum)
+    df_plot <- merge(df_plot, x, by = "scenario", all.x = TRUE)
+    df_plot$prop <- df_plot$excess / df_plot$tot_excess
+    df_plot$prop_label <- scales::label_percent(accuracy = 0.1)(
+      df_plot$prop)
+    df_plot$scenario <- factor(df_plot$scenario, levels = scenarios)
+    
+    # Plot
+    ggplot(data = df_plot, aes(x = age, y = prop, colour = scenario,
+      fill = scenario)) +
+      geom_bar(alpha = 0.5, stat = "identity") +
+      theme_bw() +
+      scale_colour_manual(values = palette_periods[scenarios]) +
+      scale_fill_manual(values = palette_periods[scenarios]) +
+      scale_y_continuous(name = "percentage of all excess deaths",
+        breaks = seq(0, 1, 0.025), labels = scales::percent) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "none", panel.grid.major.x = element_blank()) +
+      facet_wrap(scenario ~ ., ncol = 1) +
+      geom_text(aes(x = age, y = prop, label = prop_label), size = 3,
+        nudge_y = 0.01)
+    
+    ggsave(paste(dir_path, 'outputs/', 
+      "age_distribution_deaths.png", sep = ""),
+      dpi = "print", units = "cm", height = 20, width = 20)
+           
 #...............................................................................
 ### ENDS
 #...............................................................................
