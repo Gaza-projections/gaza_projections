@@ -185,11 +185,11 @@ for k_Scenario=1:3                                  % 1-worst, 2-central, 3-best
 end
 
 % Save all runs results for Baseline
-filename = sprintf('outputs/baseline_%s.csv', NCD);
+filename = sprintf('outputs/Raw/baseline_%s.csv', NCD);
 writematrix(D_C_BL, filename);
 
 % Save all runs results for Total death by scenarios
-filename = sprintf('outputs/scenario_total_%s.xlsx', NCD);
+filename = sprintf('outputs/Raw/scenario_total_%s.xlsx', NCD);
 % Loop through each cell in the cell array
 for i = 1:length(D_C_total)
     % Write each table to a different sheet named 'Sheet1', 'Sheet2', ...
@@ -197,7 +197,7 @@ for i = 1:length(D_C_total)
 end
 
 % Save all runs results for Excess Death by scenarios
-filename = sprintf('outputs/scenario_excess_%s.xlsx', NCD);
+filename = sprintf('outputs/Raw/scenario_excess_%s.xlsx', NCD);
 % Loop through each cell in the cell array
 for i = 1:length(D_C_excs)
     % Write each table to a different sheet named 'Sheet1', 'Sheet2', ...
