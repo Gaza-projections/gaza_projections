@@ -1,13 +1,14 @@
-function simple_simulation()
+function ncd_simulation()
 
 set(0,'defaultAxesFontSize',18)
 
 % DATA
 Scenario_names = {'Escalation','Status Quo','Ceasefire'};
-months         = {'23 Oct','23 Nov','23 Dec','24 Jan',...
-    '24 Feb','24 Mar','24 Apr','24 May','24 Jun','24 Jul'};
-Nt             = length(months);
-periods        = {'Months 1-3 (Feb-Apr)','Months 4-6 (May-Jul)'};
+months         = {'23 Oct','23 Nov','23 Dec','24 Jan','24 Feb','24 Mar','24 Apr','24 May','24 Jun','24 Jul'};
+Nt             = length(months); % total simulation period = 4 (current war till Feb) and 6 mo projection period
+periods        = {'Months 1-3 (Feb-Apr)','Months 4-6 (May-Jul)'}; % two main periods 
+
+%-------------------- IMPORT NCD BASELINE DEATH ---------------------------
 ts_past        = (2015:2022)';                     % years of death data
 Ds_past        = {
     'CKD',    [NaN NaN 107 153 169 192 211  233 ]  % CKD
@@ -17,147 +18,46 @@ Ds_past        = {
     'Bcancer',[182 147 159 192 195 213 210  216 ]  % Bcancer
     'Lcancer',[270 264 261 311 278 294 293  287 ]  % Lcancer
     'Ccancer',[45  43  36  40  49  44  51   51  ]  % Ccancer
-    'DM1',    [0   0   0   0   0   0   0    0   ]  % DM1
     };
 
-age_distribution = struct(...
-    'CKD',     [0.000, 0.000, 0.001, 0.002, 0.004, 0.008, 0.013, 0.009, 0.015, 0.031, 0.043, 0.029, 0.107, 0.107, 0.117, 0.103, 0.137, 0.274, 1.000], ...
-    'Bcancer', [0, 0, 0, 0, 0.001, 0.003, 0.010, 0.028, 0.056, 0.071, 0.102, 0.132, 0.134, 0.120, 0.103, 0.090, 0.077, 0.073, 1.000], ...
-    'Ccancer', [0, 0, 0.001, 0.001, 0.003, 0.005, 0.009, 0.012, 0.019, 0.033, 0.055, 0.095, 0.112, 0.116, 0.138, 0.138, 0.123, 0.141, 1.000], ...
-    'Lcancer', [0, 0, 0, 0.001, 0.003, 0.004, 0.006, 0.010, 0.016, 0.028, 0.057, 0.095, 0.125, 0.147, 0.146, 0.139, 0.122, 0.101, 1.000], ...
-    'DM2',     [0.000, 0.000, 0.000, 0.000, 0.000, 0.001, 0.002, 0.002, 0.004, 0.009, 0.019, 0.036, 0.073, 0.102, 0.129, 0.154, 0.166, 0.299, 1.000], ...
-    'IHD',     [0.000, 0.000, 0.000, 0.000, 0.001, 0.002, 0.003, 0.006, 0.008, 0.018, 0.034, 0.050, 0.078, 0.094, 0.099, 0.115, 0.130, 0.361, 1.000], ...
-    'COPD',    [0.000, 0.003, 0.000, 0.001, 0.001, 0.000, 0.001, 0.003, 0.006, 0.012, 0.015, 0.044, 0.085, 0.094, 0.115, 0.135, 0.139, 0.345, 1.000], ...
-    'IS',      [0.000, 0.000, 0.000, 0.000, 0.000, 0.001, 0.002, 0.002, 0.004, 0.008, 0.012, 0.026, 0.044, 0.064, 0.079, 0.129, 0.156, 0.475, 1.000], ...
-    'HS',      [0.000, 0.000, 0.000, 0.000, 0.000, 0.001, 0.002, 0.002, 0.004, 0.008, 0.012, 0.026, 0.044, 0.064, 0.079, 0.129, 0.155, 0.475, 1.000], ...
-    'DM1',     [0.007	0.028	0.030	0.029	0.102	0.083	0.083	0.075	0.055	0.120	0.100	0.075	0.068	0.049	0.040	0.029	0.016	0.012	1.000]);
-age_groups = {'<1', '1-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75-79', '>80', 'Total'};
-n_age      = length(age_groups);
-
+%----------------- IMPORT COVERAGE RATE OVER TIME -------------------------
 cs_names   = {'CKD','CVD','Cancer','DM'};
 
-cs_all_LBs = {              % Oct-Jul
-    [                       % CKD
-    0.8	0.8	0.8
-    0.4	0.4	0.4
-    0.3	0.3	0.3
-    0.3	0.3	0.3
-    0.05	0.15	0.5
-    0.05	0.15	0.5
-    0.05	0.15	0.5
-    0.05	0.15	0.6
-    0.05	0.15	0.6
-    0.05	0.15	0.6
-    ],
-    [                       % CVD
-    0.5	0.5	0.5
-    0.2	0.2	0.2
-    0.1	0.1	0.1
-    0.1	0.1	0.1
-    0.05	0.1	0.3
-    0.05	0.1	0.3
-    0.05	0.1	0.3
-    0.05	0.1	0.4
-    0.05	0.1	0.4
-    0.05	0.1	0.4 ],
-    [                       % Cancer
-    0.3	0.3	0.3
-    0.01	0.01	0.01
-    0.01	0.01	0.01
-    0.01	0.01	0.01
-    0.01	0.01	0.2
-    0.01	0.01	0.2
-    0.01	0.01	0.2
-    0.01	0.01	0.4
-    0.01	0.01	0.4
-    0.01	0.01	0.4
-    ],
-    [                       % DM
-    0.9	0.9	0.9
-    0.9	0.9	0.9
-    0.9	0.9	0.9
-    0.9	0.9	0.9
-    0.6	0.7	0.9
-    0.6	0.7	0.9
-    0.6	0.7	0.9
-    0.6	0.7	0.9
-    0.6	0.7	0.9
-    0.6	0.7	0.9
-    ]
-    };
+filePath = 'inputs/NCD_M2_model_para_1.26.2024.xlsx';
+sheetName = 'coverage rate'; % Specify the sheet name
 
-cs_all_UBs = {              % Oct-Jul
-    [                       % CKD
-    0.8	0.8	0.8
-    0.4	0.4	0.4
-    0.3	0.3	0.3
-    0.3	0.3	0.3
-    0.05	0.2	0.5
-    0.05	0.2	0.5
-    0.05	0.2	0.5
-    0.05	0.2	0.6
-    0.05	0.2	0.6
-    0.05	0.2	0.6
-    ],
-    [                       % CVD
-    0.5	0.5	0.5
-    0.2	0.2	0.2
-    0.1	0.1	0.1
-    0.1	0.1	0.1
-    0.05	0.1	0.3
-    0.05	0.1	0.3
-    0.05	0.1	0.3
-    0.05	0.1	0.4
-    0.05	0.1	0.4
-    0.05	0.1	0.4 ],
-    [                       % Cancer
-    0.3	0.3	0.3
-    0.05	0.05	0.05
-    0.05	0.06	0.06
-    0.05	0.07	0.07
-    0.05	0.05	0.4
-    0.05	0.05	0.4
-    0.05	0.05	0.4
-    0.05	0.05	0.5
-    0.05	0.05	0.5
-    0.05	0.05	0.5
-    ],
-    [                       % DM
-    1	1	1
-    1	1	1
-    1	1	1
-    1	1	1
-    0.7	0.8	1
-    0.7	0.8	1
-    0.7	0.8	1
-    0.7	0.8	1
-    0.7	0.8	1
-    0.7	0.8	1
-    ]
-    };
+% Read the entire sheet
+dataTable = readtable(filePath, 'Sheet', sheetName);
 
+% Initialize cell arrays for LBs and UBs
+cs_all_LBs = cell(4, 1); 
+cs_all_UBs = cell(4, 1);
 
-NCD_params = { % HS is the only one with different BL values, 
-    {'CKD',...
-    [100, 100, 0.0151],[100, 100, 0.0151],[100, 100, 0.0301],[100, 100, 0.0283]},
-    {'Bcancer',...
-    [100, 100, 0.0037],[100, 100, 0.0037],[100, 100, 0.0067],[100, 100, 0.0067]},
-    {'Ccancer',...
-    [100, 100, 0.0098],[100, 100, 0.0098],[100, 100, 0.0118],[100, 100, 0.0118]},
-    {'Lcancer',...
-    [100, 100, 0.0194],[100, 100, 0.0194],[100, 100, 0.0399],[100, 100, 0.0399]},
-    {'IHD',...
-    [94.3, 94, 0.0079],[97.2, 94, 0.0079],[60,  100, 0.0108],[60,  100, 0.0108]},
-    {'HS',...
-    [68,   50, 0.0075],[68,   70, 0.0075],[51,   42, 0.0079],[51,   42, 0.0079]},
-    {'IS',...
-    [93,   88, 0.0084],[93,   88, 0.0084],[88,   82, 0.0135],[88,   82, 0.0135]},
-    {'DM1',...
-    [100,100,1/75.6/12],[100,100,1/75.6/12],[100,100,1/1.3/12],[100,100,1/2.6/12]}
-    };
-% 75.6 here is the average life expectancy for the gaza population
+for i = 1:4
+    
+    row_name = 'Worst' + "_" + cs_names(i) + "_" + 'lb';
+    r1 = dataTable.(row_name);
+    row_name = 'Central' + "_" + cs_names(i) + "_" + 'lb';
+    r2 = dataTable.(row_name);
+    row_name = 'Best' + "_" + cs_names(i) + "_" + 'lb';
+    r3 = dataTable.(row_name);
+    cs_all_LBs{i} = [r1, r2, r3];
+    
+end
 
+for i = 1:4
+    
+    row_name = 'Worst' + "_" + cs_names(i) + "_" + 'ub';
+    r1 = dataTable.(row_name);
+    row_name = 'Central' + "_" + cs_names(i) + "_" + 'ub';
+    r2 = dataTable.(row_name);
+    row_name = 'Best' + "_" + cs_names(i) + "_" + 'ub';
+    r3 = dataTable.(row_name);
+    cs_all_UBs{i} = [r1, r2, r3];
+    
+end
 
+%----------------- LINK EACH NCD WITH ITS CATEGORY ------------------------
 
 NCD_catagories = {
     'DM1',    'DM'     % 1 
@@ -174,12 +74,14 @@ NCD_catagories = {
     'Lcancer','Cancer' % 12
     };
 
-% Choose the NCD using the 1st column of NCD_categories
-k_NCD_categories = 4;
-NCD              = NCD_catagories{k_NCD_categories,1}; % name of the NCD
+%-------------------- PREPARE FOR THE MAIN SIMULATION ---------------------
+% Choose the NCD for simulation
+k_NCD_categories = 8;
+% name of the NCD
+NCD              = NCD_catagories{k_NCD_categories,1}; 
 
-% Read all HR by time
-filename = 'HR_new_logistic_normal.xlsx';
+% Read Harzard Rate over time
+filename = 'inputs/HR_new_logistic_normal.xlsx'; % pre-calculated HR (tau = 0-500mo)
 sheetName = NCD;
 HR_ALL_t = readtable(filename, 'Sheet', sheetName);
 
@@ -188,45 +90,26 @@ HR_tub  = HR_ALL_t.HR_t_tub;
 HR_utlb = HR_ALL_t.HR_t_utlb;
 HR_utub = HR_ALL_t.HR_t_utub;
 
+% In the simulation, we have two strategies:
+% For DM1 we start the simulation from Prevalence = 2023 OCT DM1 prevalence
+% For other NCDs, we start the simulation from Prevalence = 0
 if strcmp(NCD,'DM1')
-    flag_single_cohort = 1;                            % put prevalence into one cohort
+    flag_single_cohort = 1;                            
 else
     flag_single_cohort = 0;
 end
 
-% collect names of NCDs from each dictionary
-n_NCD_params = length(NCD_params);
-for k=1:n_NCD_params
-    NCD_params_names{k} = NCD_params{k}{1};
-end
+% Read Treatment Coverage Rate for NCD
+NCD_category = NCD_catagories{k_NCD_categories,2};          % category of the NCD
+k_cs         = find(string(cs_names)==string(NCD_category));
+cs_all_LB    = cs_all_LBs{k_cs};                            % coverage
+cs_all_UB    = cs_all_UBs{k_cs};
 
+% Linear Regression to get 2023 Baseline Death
 n_Ds_past = length(Ds_past);
 for k=1:n_Ds_past
     Ds_past_names{k} = Ds_past{k,1};
 end
-
-% Nsims need to be modified so the D_mult is approximately 1 (see below)
-Nsims  = {'CKD',25;'IHD',473;'HS',29;'IS',24;'Bcancer',30;'Ccancer',6;...
-    'Lcancer',25;'DM1',2947}; % array of Nsim (number per cohort)
-n_Nsims = size(Nsims,1);
-for k=1:n_Nsims
-    Nsims_names{k} = Nsims{k,1};             % collect the names corresponding to each Nsim
-end
-
-% Extract the data and other information
-NCD_category = NCD_catagories{k_NCD_categories,2};          % category of the NCD
-k_NCD_params = find(string(NCD_params_names)==string(NCD));
-h0           = NCD_params{k_NCD_params}{2}(end);            % hazard rates
-hL           = NCD_params{k_NCD_params}{4}(end);
-hU           = NCD_params{k_NCD_params}{5}(end);
-hAs          = zeros(4,2);                                  % acute rates
-for j=1:4
-    hAs(j,:) = NCD_params{k_NCD_params}{j+1}(1:2);
-end
-
-k_cs         = find(string(cs_names)==string(NCD_category));
-cs_all_LB    = cs_all_LBs{k_cs};                            % coverage
-cs_all_UB    = cs_all_UBs{k_cs};
 
 k_Ds_past   = find(string(Ds_past_names)==NCD);
 D_past      = Ds_past{k_Ds_past,2}';                        % death rate
@@ -237,6 +120,7 @@ n_past      = length(t_past);
 D_regress   = regress(D_past,[ones(n_past,1) t_past]);      % regress
 D_2023      = D_regress(1) + 2023*D_regress(2);             % use regression to predict 2023
 
+% Visualize the baseline death trend
 flag_plot_D_past = 0;                                       % set to 1 to plot the deaths
 if flag_plot_D_past
     fig = figure(805); fig.Name = 'Deaths past';
@@ -246,12 +130,23 @@ if flag_plot_D_past
     keyboard
 end
 
+% Dummy Incidence Rate to align simulated baseline death with actual baseline death
+% Nsims (monthly incidence mean) need to be modified so the D_mult is approximately 1
+Nsims  = {'CKD',25;'IHD',473;'HS',58;'IS',26;'Bcancer',30;'Ccancer',6;'Lcancer',25;'DM1',2947}; 
+n_Nsims = size(Nsims,1);
+for k=1:n_Nsims
+    Nsims_names{k} = Nsims{k,1};             % collect the names corresponding to each Nsim
+end
+
 k_Nsims = find(string(Nsims_names)==string(NCD));           % get Nsim
 Nsim    = round(Nsims{k_Nsims,2});
 
+
+%-------------------- SIMULATION FOR THREE SCENARIOS ----------------------
 % Simulation parameters
 % number of simulation runs
-nsim = 1000;        
+nsim = 100;
+
 if flag_single_cohort
     tC   = 1;                % DM1 start with everyone in the initial cohort
 else
@@ -263,7 +158,7 @@ nt   = tC + tnow + 6 + 1;    % use larger number to see long-term trends
 for k_Scenario=1:3                                  % 1-worst, 2-central, 3-best
     fig_ttl = sprintf('%s, %s',NCD,Scenario_names{k_Scenario});
     fig_no  = 809+k_Scenario;
-    [D_mean0, D_mean_BL0, D_C0, D_BL0, D_exc0] = f_D(nt,tC,Nsim,nsim,h0,hL,hU,hAs,...
+    [D_mean0, D_mean_BL0, D_C0, D_BL0, D_exc0] = f_D(nt,tC,Nsim,nsim,...
         cs_all_LB,cs_all_UB,flag_single_cohort,k_Scenario,fig_no,fig_ttl, ...
         HR_tlb,HR_tub,HR_utlb,HR_utub);
     if flag_single_cohort
@@ -289,16 +184,20 @@ for k_Scenario=1:3                                  % 1-worst, 2-central, 3-best
     D_exc_CI{k_Scenario} = max(0,D_C_excs{k_Scenario}(:,round(nsim*[0.025 0.975])));
 end
 
-filename = sprintf('TI Model Out/baseline_%s.csv', NCD);
+% Save all runs results for Baseline
+filename = sprintf('outputs/baseline_%s.csv', NCD);
 writematrix(D_C_BL, filename);
-filename = sprintf('TI Model Out/scenario_total_%s.xlsx', NCD);
+
+% Save all runs results for Total death by scenarios
+filename = sprintf('outputs/scenario_total_%s.xlsx', NCD);
 % Loop through each cell in the cell array
 for i = 1:length(D_C_total)
     % Write each table to a different sheet named 'Sheet1', 'Sheet2', ...
     writematrix(D_C_total{i}, filename, 'Sheet', Scenario_names{i});
 end
 
-filename = sprintf('TI Model Out/scenario_excess_%s.xlsx', NCD);
+% Save all runs results for Excess Death by scenarios
+filename = sprintf('outputs/scenario_excess_%s.xlsx', NCD);
 % Loop through each cell in the cell array
 for i = 1:length(D_C_excs)
     % Write each table to a different sheet named 'Sheet1', 'Sheet2', ...
@@ -307,51 +206,10 @@ end
 
 
 
-
-
-Y = [D_exc{1} D_exc_CI{1} D_exc{2} D_exc_CI{2} D_exc{3} D_exc_CI{3} D_mean_BL D_C_BL_CI];
-fprintf('\n----- %s: Monthly baseline death -----\n',NCD)
-fprintf('month, Baseline, lower CI, upper CI\n')
-for t=1:Nt
-    fprintf('%s, %6.2f, %6.2f, %6.2f\n',...
-    months{t},Y(t,end-2:end))
-end
-fprintf('\n----- %s: Monthly excess death -----\n',NCD)
-fprintf('month, Escalation,  Escalation lower CI,  Escalation upper CI, Status Quo, Status Quo lower CI, Status Quo upper CI, Ceasefire, Ceasefire lower CI, Ceasefire upper CI\n')
-for t=1:Nt
-    fprintf('%s, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f\n',...
-    months{t},Y(t,1:end-3))
-end
-Y_periods(1,:) = sum(Y(tnow:tnow+2,  [1:3:3*3]));
-Y_periods(2,:) = sum(Y(tnow+3:tnow+5,[1:3:3*3]));
-
-for t_period=1:2
-    fprintf('\n----- %s: Excess death by age, %s -----\n',NCD,periods{t_period})
-    fprintf('age, Escalation, Escalation lower CI, Escalation upper CI, Status Quo, Status Quo lower CI, Status Quo upper CI, Ceasefire, Ceasefire lower CI, Ceasefire upper CI\n')
-    for a=1:n_age
-        age_dist = getfield(age_distribution,NCD);
-        age_D    = Y_periods(t_period,:)*age_dist(a);
-        age_D_CI = zeros(3);
-        for j=1:3
-            Dj   = age_D(j);
-            age_D_CI(:,j) = max(0,...
-                [Dj (Dj-1.96*sqrt(Dj)) (Dj+1.96*sqrt(Dj))]);
-        end
-        fprintf('%s, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f\n',...
-            age_groups{a},age_D_CI)
-    end
-end
-
- keyboard
-
-
+%-------------------- MAIN SIMULATION FUNCTION ----------------------------
 function [D_mean, D_mean_BL, D_C, D_BL, D_exc] = f_D(...
-    nt,tC,Nsim,nsim,h0,hL,hU,hAs,cs_all_LB,cs_all_UB,flag_single_cohort,k_Scenario,fig_no,fig_ttl, ...
+    nt,tC,Nsim,nsim,cs_all_LB,cs_all_UB,flag_single_cohort,k_Scenario,fig_no,fig_ttl, ...
         HR_tlb,HR_tub,HR_utlb,HR_utub)
-
-%----------------- SIMPLE HAZARD ----------------------------
-HRL    = hL/h0;                % hazard ratio lower
-HRU    = hU/h0;                %              upper
 
 nc     = size(cs_all_LB,1);    % number of months in cs_all
 cs_LB  = zeros(nt,1);
@@ -370,7 +228,6 @@ D_BLsim = zeros(nt,nsim);
 D_excsim= zeros(nt,nsim);
 
 for k=1:nsim
-    % Print progress
     D   = zeros(nt,1);  % deaths at every time step, D(nt) is at the start of the war
     D_BL= zeros(nt,1);
     D_exc = zeros(nt,1);
@@ -385,37 +242,8 @@ for k=1:nsim
 
     cs  = cs_LB + rand*(cs_UB - cs_LB);  % coverage  ~ U(cs_LB,cs_UB)
     
-%     hs  = h0*(cs + HR*(1-cs));           % hazard rate: cs=1 => h = h0, cs=0 => h = h0*HR
-    
-%     hAt  = 1 - (hAs(1, 1) + rand*diff(hAs(1:2, 1)))/100;
-%     hAut = 1 - (hAs(3, 1) + rand*diff(hAs(3:4, 1)))/100;
-%     
-%     hA = hAt*cs + hAut*(1-cs);
-%     
-%     mAt  = 1 - (hAs(1, 2) + rand*diff(hAs(1:2, 2)))/100;
-%     mAut = 1 - (hAs(3, 2) + rand*diff(hAs(3:4, 2)))/100;
-%     
-%     mA = mAt * cs + mAut * (1-cs);
-    
-    %hA_BL = 1 - (hAs(1,1)            + rand*diff(hAs(1,:))           )/100;  % acute hazard BL
-    %hA    = 1 - (hAs(k_Scenario+1,1) + rand*diff(hAs(k_Scenario+1,:)))/100;
 
     for t0=1:nt               % for all incidence
-        % begin by subtracting the deaths from acute hazard
-%         r     = rand(Nsim,1);
-%         dA    = 0;
-%         dA_BL = 0;
-%         if hA>0               % acute hazard > 0
-%             dA       = sum(r<hA(t0));
-%             D(t0)    = D(t0)    + dA;
-%             P(t0,t0) = P(t0,t0) - dA;
-%         end
-%         if hAt>0            % acute hazard at BL > 0
-%             dA_BL       = sum(r<hAt);
-%             D_BL(t0)    = D_BL(t0)    + dA_BL;
-%             P_BL(t0,t0) = P_BL(t0,t0) - dA_BL;
-%         end
-%         D_exc(t0) = D_exc(t0) + dA - dA_BL;      % excess in this cohort (same as D_BL - D)
 
         for t=t0:nt                              % for every time step after t0
             
