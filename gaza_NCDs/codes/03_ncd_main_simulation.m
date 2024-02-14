@@ -10,14 +10,17 @@ periods        = {'Months 1-3 (Feb-Apr)','Months 4-6 (May-Jul)'}; % two main per
 
 %-------------------- IMPORT NCD BASELINE DEATH ---------------------------
 ts_past        = (2015:2022)';                     % years of death data
+filePath = 'NCD_M2_model_para_1.26.2024.xlsx';
+sheetName = 'Total Baseline Death'; % Specify the sheet name
+df_bd = readtable(filePath, 'Sheet', sheetName); % read the baseline death data
 Ds_past        = {
-    'CKD',    [NaN NaN 107 153 169 192 211  233 ]  % CKD
-    'IHD',    [NaN NaN NaN NaN NaN NaN 1173 1532]  % IHD
-    'HS',     [NaN NaN 312 382 329 336 310  351 ]  % HS
-    'IS',     [NaN NaN 255 313 269 275 253  287 ]  % IS
-    'Bcancer',[182 147 159 192 195 213 210  216 ]  % Bcancer
-    'Lcancer',[270 264 261 311 278 294 293  287 ]  % Lcancer
-    'Ccancer',[45  43  36  40  49  44  51   51  ]  % Ccancer
+    'CKD',    df_bd.CKD % CKD
+    'IHD',    df_bd.IHD  % IHD
+    'HS',     df_bd.HS  % HS
+    'IS',     df_bd.IS  % IS
+    'Bcancer',df_bd.Bcancer  % Bcancer
+    'Lcancer',df_bd.Lcancer  % Lcancer
+    'Ccancer',df_bd.Ccancer  % Ccancer
     };
 
 %----------------- IMPORT COVERAGE RATE OVER TIME -------------------------
