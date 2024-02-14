@@ -1,7 +1,7 @@
 function ncd_simulation()
 
 set(0,'defaultAxesFontSize',18)
-
+% Before run the main simulation please make sure you change the name into valid name for MATLAB
 % DATA
 Scenario_names = {'Escalation','Status Quo','Ceasefire'};
 months         = {'23 Oct','23 Nov','23 Dec','24 Jan','24 Feb','24 Mar','24 Apr','24 May','24 Jun','24 Jul'};
