@@ -1,0 +1,157 @@
+scenario,period,age,gender,mean,lci,uci
+ceasefire,months 1 to 3,0mo,male,1.398471847,1.352185692,1.461086449
+escalation,months 1 to 3,0mo,male,5.548542003,0,25.7951541
+status quo,months 1 to 3,0mo,male,3.473320145,0,19.68202271
+ceasefire,months 4 to 6,0mo,male,0.829180635,0.797190151,0.877976955
+escalation,months 4 to 6,0mo,male,5.548542003,0,25.7951541
+status quo,months 4 to 6,0mo,male,3.473320145,0,19.68202271
+ceasefire,months 1 to 3,1 to 11mo,male,15.10349595,14.60360547,15.77973365
+escalation,months 1 to 3,1 to 11mo,male,284.5233037,249.9197368,322.837545
+status quo,months 1 to 3,1 to 11mo,male,221.2107028,190.8606043,252.1227077
+ceasefire,months 4 to 6,1 to 11mo,male,8.955150853,8.609653635,9.482151115
+escalation,months 4 to 6,1 to 11mo,male,284.5233037,249.9197368,322.837545
+status quo,months 4 to 6,1 to 11mo,male,221.2107028,190.8606043,252.1227077
+ceasefire,months 1 to 3,12 to 59mo,male,86.14586578,83.29463862,90.00292526
+escalation,months 1 to 3,12 to 59mo,male,1630.270353,1431.902385,1843.672165
+status quo,months 1 to 3,12 to 59mo,male,1269.154036,1099.894474,1441.699283
+ceasefire,months 4 to 6,12 to 59mo,male,51.07752709,49.10691332,54.08338043
+escalation,months 4 to 6,12 to 59mo,male,1630.270353,1431.902385,1843.672165
+status quo,months 4 to 6,12 to 59mo,male,1269.154036,1099.894474,1441.699283
+ceasefire,months 1 to 3,5 to 9yo,male,97.8930293,94.65299843,102.2760514
+escalation,months 1 to 3,5 to 9yo,male,1870.029548,1645.479422,2116.49047
+status quo,months 1 to 3,5 to 9yo,male,1459.670098,1271.492348,1653.152935
+ceasefire,months 4 to 6,5 to 9yo,male,58.04264442,55.80331059,61.45838685
+escalation,months 4 to 6,5 to 9yo,male,1870.029548,1645.479422,2116.49047
+status quo,months 4 to 6,5 to 9yo,male,1459.670098,1271.492348,1653.152935
+ceasefire,months 1 to 3,10 to 14yo,male,104.0463054,100.6026155,108.7048318
+escalation,months 1 to 3,10 to 14yo,male,1992.193253,1754.632227,2252.76663
+status quo,months 1 to 3,10 to 14yo,male,1556.039781,1359.040941,1762.01418
+ceasefire,months 4 to 6,10 to 14yo,male,61.69103921,59.31094726,65.32148546
+escalation,months 4 to 6,10 to 14yo,male,1992.193253,1754.632227,2252.76663
+status quo,months 4 to 6,10 to 14yo,male,1556.039781,1359.040941,1762.01418
+ceasefire,months 1 to 3,15 to 19yo,male,99.15165396,95.86996555,103.5910292
+escalation,months 1 to 3,15 to 19yo,male,1898.009999,1671.48658,2146.704805
+status quo,months 1 to 3,15 to 19yo,male,1482.374499,1294.621141,1678.747011
+ceasefire,months 4 to 6,15 to 19yo,male,58.78890699,56.52078173,62.24856611
+escalation,months 4 to 6,15 to 19yo,male,1898.009999,1671.48658,2146.704805
+status quo,months 4 to 6,15 to 19yo,male,1482.374499,1294.621141,1678.747011
+ceasefire,months 1 to 3,20 to 29yo,male,232.9854097,225.2741363,243.4170024
+escalation,months 1 to 3,20 to 29yo,male,4458.594344,3925.91786,5044.054565
+status quo,months 1 to 3,20 to 29yo,male,3481.938853,3039.799268,3943.623573
+ceasefire,months 4 to 6,20 to 29yo,male,138.1414937,132.8118792,146.2709607
+escalation,months 4 to 6,20 to 29yo,male,4458.594344,3925.91786,5044.054565
+status quo,months 4 to 6,20 to 29yo,male,3481.938853,3039.799268,3943.623573
+ceasefire,months 1 to 3,30 to 39yo,male,185.9967557,179.840697,194.3244977
+escalation,months 1 to 3,30 to 39yo,male,3549.189451,3120.739917,4018.614629
+status quo,months 1 to 3,30 to 39yo,male,2769.506495,2409.175888,3136.303337
+ceasefire,months 4 to 6,30 to 39yo,male,110.2810244,106.0262901,116.770935
+escalation,months 4 to 6,30 to 39yo,male,3549.189451,3120.739917,4018.614629
+status quo,months 4 to 6,30 to 39yo,male,2769.506495,2409.175888,3136.303337
+ceasefire,months 1 to 3,40 to 49yo,male,89.08265666,86.13422857,93.0712068
+escalation,months 1 to 3,40 to 49yo,male,1681.200323,1477.516095,1904.319222
+status quo,months 1 to 3,40 to 49yo,male,1307.773223,1129.180961,1489.037536
+ceasefire,months 4 to 6,40 to 49yo,male,52.81880642,50.78101264,55.92713204
+escalation,months 4 to 6,40 to 49yo,male,1681.200323,1477.516095,1904.319222
+status quo,months 4 to 6,40 to 49yo,male,1307.773223,1129.180961,1489.037536
+ceasefire,months 1 to 3,50 to 59yo,male,64.32970497,62.20054183,67.20997666
+escalation,months 1 to 3,50 to 59yo,male,1178.533655,1015.644929,1353.352668
+status quo,months 1 to 3,50 to 59yo,male,908.8688731,767.693475,1059.429396
+ceasefire,months 4 to 6,50 to 59yo,male,38.14230919,36.67074696,40.38693993
+escalation,months 4 to 6,50 to 59yo,male,1178.533655,1015.644929,1353.352668
+status quo,months 4 to 6,50 to 59yo,male,908.8688731,767.693475,1059.429396
+ceasefire,months 1 to 3,60 to 69yo,male,42.51354415,41.10644503,44.41702805
+escalation,months 1 to 3,60 to 69yo,male,752.5045363,628.2469072,878.0191275
+status quo,months 1 to 3,60 to 69yo,male,574.2912894,465.6189138,693.5447566
+ceasefire,months 4 to 6,60 to 69yo,male,25.20709129,24.2345806,26.69049943
+escalation,months 4 to 6,60 to 69yo,male,752.5045363,628.2469072,878.0191275
+status quo,months 4 to 6,60 to 69yo,male,574.2912894,465.6189138,693.5447566
+ceasefire,months 1 to 3,70 to 79yo,male,19.99814741,19.33625539,20.89353622
+escalation,months 1 to 3,70 to 79yo,male,300.6420815,199.4629396,399.8770773
+status quo,months 1 to 3,70 to 79yo,male,216.8115081,125.2797353,313.9624138
+ceasefire,months 4 to 6,70 to 79yo,male,11.85728307,11.39981916,12.55507046
+escalation,months 4 to 6,70 to 79yo,male,300.6420815,199.4629396,399.8770773
+status quo,months 4 to 6,70 to 79yo,male,216.8115081,125.2797353,313.9624138
+ceasefire,months 1 to 3,80 to 100yo,male,5.314193019,5.138305629,5.552128506
+escalation,months 1 to 3,80 to 100yo,male,22.59537638,0,98.6751283
+status quo,months 1 to 3,80 to 100yo,male,14.09896305,0,75.79412864
+ceasefire,months 4 to 6,80 to 100yo,male,3.150886411,3.029322575,3.336312429
+escalation,months 4 to 6,80 to 100yo,male,22.59537638,0,98.6751283
+status quo,months 4 to 6,80 to 100yo,male,14.09896305,0,75.79412864
+ceasefire,months 1 to 3,0mo,female,1.258624662,1.216967123,1.314977804
+escalation,months 1 to 3,0mo,female,4.537311,0,22.95841964
+status quo,months 1 to 3,0mo,female,2.834264227,0,17.51649282
+ceasefire,months 4 to 6,0mo,female,0.746262571,0.717471136,0.79017926
+escalation,months 4 to 6,0mo,female,4.537311,0,22.95841964
+status quo,months 4 to 6,0mo,female,2.834264227,0,17.51649282
+ceasefire,months 1 to 3,1 to 11mo,female,13.84487129,13.38663835,14.46475585
+escalation,months 1 to 3,1 to 11mo,female,260.3945283,228.3555514,295.4665433
+status quo,months 1 to 3,1 to 11mo,female,202.3579775,174.5839363,230.9086405
+ceasefire,months 4 to 6,1 to 11mo,female,8.208888282,7.892182498,8.691971855
+escalation,months 4 to 6,1 to 11mo,female,260.3945283,228.3555514,295.4665433
+status quo,months 4 to 6,1 to 11mo,female,202.3579775,174.5839363,230.9086405
+ceasefire,months 1 to 3,12 to 59mo,female,79.5730481,76.93936587,83.13581895
+escalation,months 1 to 3,12 to 59mo,female,1504.264526,1321.535398,1701.160819
+status quo,months 1 to 3,12 to 59mo,female,1170.700915,1013.388709,1331.65108
+ceasefire,months 4 to 6,12 to 59mo,female,47.18037811,45.36011961,49.95688874
+escalation,months 4 to 6,12 to 59mo,female,1504.264526,1321.535398,1701.160819
+status quo,months 4 to 6,12 to 59mo,female,1170.700915,1013.388709,1331.65108
+ceasefire,months 1 to 3,5 to 9yo,female,98.31257085,95.05865414,102.7143774
+escalation,months 1 to 3,5 to 9yo,female,1878.072473,1652.582738,2125.575206
+status quo,months 1 to 3,5 to 9yo,female,1465.95434,1276.990708,1660.27244
+ceasefire,months 4 to 6,5 to 9yo,female,58.29139861,56.04246764,61.72177994
+escalation,months 4 to 6,5 to 9yo,female,1878.072473,1652.582738,2125.575206
+status quo,months 4 to 6,5 to 9yo,female,1465.95434,1276.990708,1660.27244
+ceasefire,months 1 to 3,10 to 14yo,female,84.1880052,81.40157865,87.95740423
+escalation,months 1 to 3,10 to 14yo,female,1611.494798,1419.13569,1822.717288
+status quo,months 1 to 3,10 to 14yo,female,1258.58567,1099.114259,1425.336189
+ceasefire,months 4 to 6,10 to 14yo,female,49.9166742,47.99084711,52.85421269
+escalation,months 4 to 6,10 to 14yo,female,1611.494798,1419.13569,1822.717288
+status quo,months 4 to 6,10 to 14yo,female,1258.58567,1099.114259,1425.336189
+ceasefire,months 1 to 3,15 to 19yo,female,68.38527332,66.12188033,71.44712736
+escalation,months 1 to 3,15 to 19yo,female,1307.505341,1151.270621,1479.667573
+status quo,months 1 to 3,15 to 19yo,female,1020.839954,890.2194164,1156.246876
+ceasefire,months 4 to 6,15 to 19yo,female,40.54693303,38.9825984,42.9330731
+escalation,months 4 to 6,15 to 19yo,female,1307.505341,1151.270621,1479.667573
+status quo,months 4 to 6,15 to 19yo,female,1020.839954,890.2194164,1156.246876
+ceasefire,months 1 to 3,20 to 29yo,female,154.6709863,149.5517375,161.5961613
+escalation,months 1 to 3,20 to 29yo,female,2956.125722,2602.501781,3345.280484
+status quo,months 1 to 3,20 to 29yo,female,2307.757791,2011.505242,2613.774538
+ceasefire,months 4 to 6,20 to 29yo,female,91.70737818,88.16923074,97.10425123
+escalation,months 4 to 6,20 to 29yo,female,2956.125722,2602.501781,3345.280484
+status quo,months 4 to 6,20 to 29yo,female,2307.757791,2011.505242,2613.774538
+ceasefire,months 1 to 3,30 to 39yo,female,116.7723992,112.9075053,122.0007185
+escalation,months 1 to 3,30 to 39yo,female,2221.223237,1951.781809,2512.840491
+status quo,months 1 to 3,30 to 39yo,female,1731.723036,1504.616079,1962.806422
+ceasefire,months 4 to 6,30 to 39yo,female,69.23658298,66.56537764,73.31107575
+escalation,months 4 to 6,30 to 39yo,female,2221.223237,1951.781809,2512.840491
+status quo,months 4 to 6,30 to 39yo,female,1731.723036,1504.616079,1962.806422
+ceasefire,months 1 to 3,40 to 49yo,female,64.32970497,62.20054183,67.20997666
+escalation,months 1 to 3,40 to 49yo,female,1206.136485,1054.390221,1368.34313
+status quo,months 1 to 3,40 to 49yo,female,936.4717034,806.8477245,1071.139607
+ceasefire,months 4 to 6,40 to 49yo,female,38.14230919,36.67074696,40.38693993
+escalation,months 4 to 6,40 to 49yo,female,1206.136485,1054.390221,1368.34313
+status quo,months 4 to 6,40 to 49yo,female,936.4717034,806.8477245,1071.139607
+ceasefire,months 1 to 3,50 to 59yo,female,51.88330553,50.16608917,54.20630726
+escalation,months 1 to 3,50 to 59yo,female,939.926876,801.9334172,1087.360272
+status quo,months 1 to 3,50 to 59yo,female,722.4363675,604.2869519,850.415191
+ceasefire,months 4 to 6,50 to 59yo,female,30.76260154,29.57575462,32.57294503
+escalation,months 4 to 6,50 to 59yo,female,939.926876,801.9334172,1087.360272
+status quo,months 4 to 6,50 to 59yo,female,722.4363675,604.2869519,850.415191
+ceasefire,months 1 to 3,60 to 69yo,female,38.03843424,36.77945082,39.74155141
+escalation,months 1 to 3,60 to 69yo,female,666.7133351,549.3043999,783.9088234
+status quo,months 1 to 3,60 to 69yo,female,507.2593773,407.3802362,618.2004262
+ceasefire,months 4 to 6,60 to 69yo,female,22.55371326,21.68357212,23.88097318
+escalation,months 4 to 6,60 to 69yo,female,666.7133351,549.3043999,783.9088234
+status quo,months 4 to 6,60 to 69yo,female,507.2593773,407.3802362,618.2004262
+ceasefire,months 1 to 3,70 to 79yo,female,14.96364876,14.4683869,15.633625
+escalation,months 1 to 3,70 to 79yo,female,204.12698,110.4468233,296.3121091
+status quo,months 1 to 3,70 to 79yo,female,141.400607,55.09672577,231.5028465
+ceasefire,months 4 to 6,70 to 79yo,female,8.87223279,8.52993462,9.394353419
+escalation,months 4 to 6,70 to 79yo,female,204.12698,110.4468233,296.3121091
+status quo,months 4 to 6,70 to 79yo,female,141.400607,55.09672577,231.5028465
+ceasefire,months 1 to 3,80 to 100yo,female,7.41190079,7.166584167,7.74375818
+escalation,months 1 to 3,80 to 100yo,female,44.16985585,0,139.6092542
+status quo,months 1 to 3,80 to 100yo,female,26.74763913,0,108.7827282
+ceasefire,months 4 to 6,80 to 100yo,female,4.394657363,4.225107802,4.653277862
+escalation,months 4 to 6,80 to 100yo,female,44.16985585,0,139.6092542
+status quo,months 4 to 6,80 to 100yo,female,26.74763913,0,108.7827282

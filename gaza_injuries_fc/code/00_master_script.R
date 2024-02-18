@@ -6,8 +6,6 @@
 ## --- R SCRIPT TO READ DATASETS AND PARAMETERS, AND CALL OTHER SCRIPTS  ---- ##
 #...............................................................................
 
-                          # LSHTM (January 2024)
-                          # francesco.checchi@lshtm_ac.uk 
 
 #...............................................................................
 ### Preparatory steps
@@ -16,8 +14,11 @@
   #...................................      
   ## Install or load required R packages
   pacman::p_load(
+    actuar,      # To provide additional survival distributions
     betareg,     # To fit beta regression
     boot,        # To get the inverse logit
+    fitdistrplus,# To fit survival functions
+    flexsurv,    # To fit survival curves
     flextable,   # To write tables in .docx format
     ggplot2,     # Data visualization
     ggpubr,      # Arranging multiple plots into a single plot
@@ -74,11 +75,25 @@
   source(paste(dir_path, "code/01_read_prepare_data.R", sep =""))
 
   #...................................
+  ## Prepare simulations
+  source(paste(dir_path, "code/02_prepare_simulations.R", sep =""))
+
+  #...................................
+  ## Implement estimation for the ceasefire scenario
+  source(paste(dir_path, "code/03_estimate_cf_scenario.R", sep =""))
+ 
+  #...................................
+  ## Implement estimation for the status quo and escalation scenarios
+  source(paste(dir_path, "code/04_estimate_sq_es_scenarios.R", sep =""))
+
+  #...................................
   ## Analyse and visualise data
-  source(paste(dir_path, "code/02_prepare_simulation.R", sep =""))
+  source(paste(dir_path, "code/05_analyse_visualise.R", sep =""))
 
-
-
+      
+      
+      
+      
 #...............................................................................  
 ### ENDS
 #...............................................................................

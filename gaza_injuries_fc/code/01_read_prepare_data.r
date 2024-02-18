@@ -24,6 +24,8 @@
     # Read general parameters
     gen_pars <- data.frame(readxl::read_excel(filename, sheet = "general"))
 
+    # Read proportion surviving injuries by time, out of all who die of injuries
+    surv <- data.frame(readxl::read_excel(filename, sheet = "surv"))
 
   #...................................      
   ## Read in or set other parameters
@@ -62,6 +64,14 @@
 
       # total population
       pop_tot <- sum(pop$pop)
+      
+    # Identify CFR of injuries who do not die immediately, by scenario
+    cfr_cf <- as.numeric(gen_pars[which(gen_pars$parameter == "cfr_cf"),
+      "value_gen"])
+    cfr_sq <- as.numeric(gen_pars[which(gen_pars$parameter == "cfr_sq"),
+      "value_gen"])
+    cfr_es <- as.numeric(gen_pars[which(gen_pars$parameter == "cfr_es"),
+      "value_gen"])
     
 #...............................................................................  
 ### Reading in and preparing data
@@ -90,17 +100,25 @@
     daily$d_unrwa_cum <- cumsum(daily$d_unrwa)
     daily$dr_unrwa_cum <- daily$d_unrwa_cum * 1000 / daily$pop_unrwa
     
-    # Compute cumulative general population deaths and difference in days
-    x <- na.omit(daily[, c("date", "d")])
-    x$d_cum <- cumsum(x$d)
-    x$t_since <- c(1, diff(x$date))
-
+    # Compute cumulative general population deaths and injuries
+    
+    x1 <- na.omit(daily[, c("date", "d")])
+    x1$d_cum <- cumsum(x1$d)
+    x2 <- na.omit(daily[, c("date", "i")])
+    x2$i_cum <- cumsum(x2$i)
+    
+    # Compute difference in days between each death / injury observation
+    x1$t_since_d <- c(1, diff(x1$date))
+    x2$t_since_i <- c(1, diff(x2$date))
+    
     # Add to overall database
-    daily <- merge(daily, x[, c("date", "d_cum", "t_since")], 
+    daily <- merge(daily, x1[, c("date", "d_cum", "t_since_d")], 
+      by = "date", all.x = TRUE)
+    daily <- merge(daily, x2[, c("date", "i_cum", "t_since_i")], 
       by = "date", all.x = TRUE)
     
-    # Compute person-time since last observation
-    daily$ptime <- daily$pop * daily$t_since
+    # Compute person-time since last death observation
+    daily$ptime <- daily$pop * daily$t_since_d
   
     # Add time and reformat date
     daily$time <- 1:nrow(daily)
@@ -115,6 +133,18 @@
     # Compute ratio of general and UNRWA cumulative death rate
     daily$pc <- daily$dr_cum / daily$dr_unrwa_cum
     range(daily$pc, na.rm = TRUE)
+    
+    # Interpolate daily deaths to fill NA values
+    x <- na.omit(daily[, c("date", "d_cum")])
+    daily$d_cum_ipol <- approx(x = x$date, y = x$d_cum, xout <- daily$date)$y
+    daily$d_ipol <- c(daily[1, "d_cum_ipol"], diff(daily$d_cum_ipol))
+    
+    # Interpolate daily injuries to fill NA values
+    x <- na.omit(daily[, c("date", "i_cum")])
+    daily$i_cum_ipol <- approx(x = x$date, y = x$i_cum, xout <- daily$date)$y
+    daily$i_ipol <- c(daily[1, "i_cum_ipol"], diff(daily$i_cum_ipol))
+    
+    
     
   #...................................      
   ## IDPs in shelters
@@ -158,20 +188,13 @@
     proj$age <- factor(proj$age, levels = ages)
     proj$gender <- factor(proj$gender, levels = c("male", "female") )
     proj <- proj[order(proj$age, proj$gender), ]
-              
+
   #...................................      
   ## MoH line list of deaths, with age and gender
 
     # Read data
     moh_d <- data.frame(readxl::read_excel(filename, sheet = "moh_list"))
-    moh_d$gender <- factor(moh_d$gender, levels = c("male", "female"))    
-
-  #...................................      
-  ## Injury types (compiled from MoH)
-
-    # Read data
-    moh_i <- data.frame(readxl::read_excel(filename, sheet = "injury_types"))
-    
+    moh_d$gender <- factor(moh_d$gender, levels = c("male", "female"))
     
   #...................................      
   ## Data on all deaths and unexploded ordnance deaths from 2014 war
