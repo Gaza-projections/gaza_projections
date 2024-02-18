@@ -214,7 +214,7 @@
     # Simplify
     moh_d$age <- factor(moh_d$age, levels = ages)
     moh_d$gender <- factor(moh_d$gender, levels = c("male", "female"))
-    moh_d <- moh_d[, c("gender", "age", "prop")]
+    moh_d <- moh_d[, c("gender", "age", "n", "prop")]
     
 
 #...............................................................................  
@@ -249,8 +249,8 @@
     # Work out periods
     ci_base$period <- ifelse(ci_base$date >= date_mid, subperiods[2], 
       ci_base$period)
-    ci_base$period <- ifelse(ci_base$date %in% date_start : (date_mid - 1), 
-      subperiods[1], ci_base$period)
+    ci_base$period <- ifelse(ci_base$date %in% 
+      as.Date(date_start : (date_mid - 1)), subperiods[1], ci_base$period)
     ci_base$period <- ifelse(ci_base$date > date_end, "post", ci_base$period)
     table(ci_base$period)    
 
@@ -268,7 +268,7 @@
     ci_base$d_other <- sum(proj$d_other)
     
     # Initialise deaths due to wounds
-    ci_base$d_w <- NA
+    ci_base$d_dow <- NA
     
     # Add covariates of prop_counted model
     x <- daily
@@ -327,7 +327,7 @@
     
     # Initialise output
     out_pm <- data.frame(run = 1:runs,
-      rx_d_other = runif(runs, min = 0, max = 0.5), p_m = NA)
+      rx_d_other = runif(runs, min = 0, max = 0.5), p_m = NA, prop_dow = NA)
     
     # Loop progress bar   
     pb <- txtProgressBar(min = 1, max = runs, style = 3)
@@ -350,11 +350,15 @@
 
     # Compute p_m (see model equations)
     x <- subset(ci_i, period == "to date")
-    A <- sum(x$i_counted) * cfr_sq - d_dow_after
-    p_m <- (sum(x$d_counted) - A) / (sum(x$i_counted) - A)
+    A <- sum(x$i_counted, na.rm = TRUE) * cfr_sq - d_dow_after
+    p_m <- (sum(x$d_counted, na.rm = TRUE) - A) / 
+      (sum(x$i_counted, na.rm = TRUE) - A)
+    
+    # Compute mean proportion who die of wounds in to date period
+    prop_dow <- mean(x$d_counted * (1 - p_m) / x$d_counted, na.rm = TRUE)
     
     # Output
-    out_pm[run_i, "p_m"] <- p_m
+    out_pm[run_i, c("p_m", "prop_dow")] <- c(p_m, prop_dow)
   }  
 close(pb)             
 

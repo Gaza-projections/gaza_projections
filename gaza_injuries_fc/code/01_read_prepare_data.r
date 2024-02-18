@@ -60,7 +60,9 @@
     # Identify population
     x <- gen_pars[which(gen_pars$parameter == "pop"), 
       grep("value_a", colnames(gen_pars))]
-    pop <- data.frame(age = gsub("value_a", "", names(x)), pop = unlist(x) )
+    pop <- data.frame(age = gsub("value_a", "", names(x)), pop = unlist(x),
+      prop_m = unlist(gen_pars[which(gen_pars$parameter == "prop_m"), 
+      grep("value_a", colnames(gen_pars))]) )
 
       # total population
       pop_tot <- sum(pop$pop)

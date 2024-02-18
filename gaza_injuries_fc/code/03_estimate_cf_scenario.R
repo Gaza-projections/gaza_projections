@@ -34,15 +34,13 @@
     # Initialise runs and random numbers / values
     df_runs <- data.frame(run = 1:runs,
       rx_d_other = runif(runs, min = 0, max = 0.5), 
-      rx_p_m = sample(out_pm$p_m, runs, replace = TRUE)
+      rx_p_m = sample(out_pm$p_m, runs, replace = TRUE),
+      rx_rr_cfr = runif(runs, min = 1, max = 2) # RR for CFR if uncounted
     )
 
     # Initialise output of each run
     out_cf <- expand.grid(run = 1:runs, period = subperiods,
       age = ages, gender = c("male", "female"))
-
-      # add injuries
-      out_cf$d_dow <- NA
 
       # sort
       out_cf <- out_cf[order(out_cf$run, out_cf$period, 
@@ -66,12 +64,14 @@
     ci_i$prop_counted <- suppressWarnings(inv.logit(rnorm(nrow(ci_i), 
       mean = ci_i$prop_counted_pred, sd = ci_i$prop_counted_pred_se)))
     
-    # Compute true injuries and deaths
+    # Compute true injuries
     ci_i$i_all <- ci_i$i_counted / ci_i$prop_counted 
     
-    # Deaths from wounds, by tau
-    ci_i[, paste("d", 1:730, sep = "")] <- 
-      ci_i[, paste("d", 1:730, sep = "")] * ci_i$i_all * (1 - p_m)
+    # Deaths from wounds, by tau (weighted for % counted)
+    x <- ci_i[, paste("d", 1:730, sep = "")] * ci_i$i_all * (1 - p_m)
+    ci_i[, paste("d", 1:730, sep = "")] <- x * ci_i$prop_counted +
+      x * (1 - ci_i$prop_counted) * df_runs[run_i, "rx_rr_cfr"]
+      
     
   #...................................
   ## Compute deaths due to wounds over time
@@ -126,7 +126,8 @@ close(pb)
     x <- apply(x, 2, sample)
     df_runs <- data.frame(run = 1:runs, 
       rx_d_other = runif(runs, min = 0, max = 0.5),
-      rx_pc = as.vector(x)
+      rx_pc = as.vector(x),
+      rx_prop_dow = sample(out_pm$prop_dow, runs, replace = TRUE)
       )
       
     # Initialise output of each run
@@ -136,6 +137,7 @@ close(pb)
       # add ordnance deaths and injuries
       out_ord$d_ord <- NA
       out_ord$i_ord <- NA
+      out_ord$d_ord_dow <- NA
       
       # sort
       out_ord <- out_ord[order(out_ord$run, out_ord$period, out_ord$age, 
@@ -166,6 +168,9 @@ for (run_i in 1:runs) {
     # Update progress bar
     setTxtProgressBar(pb, run_i)  
 
+    # Generate proportion of deaths that die of wounds
+    prop_dow <- df_runs[run_i, "rx_prop_dow"]
+    
     # Generate a random proportion counted
     prop_counted <- df_runs[run_i, "rx_pc"]   
 
@@ -191,22 +196,25 @@ for (run_i in 1:runs) {
     k <- (sum(dist$all) / d_2014)
     dist$i_ord <- k * dist$prop * i_ord_2014
     
+    # Compute ordnance deaths that die of wounds
+    dist$d_ord_dow <- dist$d_ord * prop_dow
+    
     # Divide equally into subperiods
     dist1 <- dist
-    dist1[, c("d_ord", "i_ord")] <- 
-      dist1[, c("d_ord", "i_ord")] *  days_period/2
+    dist1[, c("d_ord", "i_ord", "d_ord_dow")] <- 
+      dist1[, c("d_ord", "i_ord", "d_ord_dow")] *  days_period/2
     dist1$period <- "months 1 to 3"
     dist2 <- dist
-    dist2[, c("d_ord", "i_ord")] <- 
-      dist2[, c("d_ord", "i_ord")] *  days_period/2
+    dist2[, c("d_ord", "i_ord", "d_ord_dow")] <- 
+      dist2[, c("d_ord", "i_ord", "d_ord_dow")] *  days_period/2
     dist2$period <- "months 4 to 6"
     dist <- rbind(dist1, dist2)
     dist$period <- factor(dist$period, levels = subperiods)
     
     # Store results in output
     dist <- dist[order(dist$period, dist$age, dist$gender), ]
-    out_ord[which(out_ord$run == run_i), c("d_ord", "i_ord")] <- 
-      dist[, c("d_ord", "i_ord")]
+    out_ord[which(out_ord$run == run_i), c("d_ord", "i_ord", "d_ord_dow")] <- 
+      dist[, c("d_ord", "i_ord", "d_ord_dow")]
 
 } # close run_i loop
 close(pb) 
