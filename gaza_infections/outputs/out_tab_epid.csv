@@ -1,0 +1,10 @@
+"scenario","subperiod","mean","lci","uci"
+"ceasefire","months 1 to 3",1523,0,19155
+"escalation","months 1 to 3",3399,0,43365
+"status quo","months 1 to 3",2412,0,29933
+"ceasefire","months 4 to 6",3503,0,39586
+"escalation","months 4 to 6",8058,0,85552
+"status quo","months 4 to 6",6051,0,70390
+"ceasefire","total",5026,0,58741
+"escalation","total",11457,0,128917
+"status quo","total",8463,0,100323

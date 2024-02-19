@@ -3,10 +3,10 @@
 #...............................................................................
 
 #...............................................................................
-## ----- R SCRIPT TO RUN SIMULATIONS FOR EPIDEMIC AND ENDEMIC INFECTIONS ---- ##
+## --- R SCRIPT TO RUN SIMULATIONS FOR ENDEMIC INFECTIONS - PERIOD TO DATE -- ##
 #...............................................................................
 
-
+ 
 #...............................................................................   
 ### Initialising objects needed for the simulations
 #...............................................................................
@@ -36,134 +36,9 @@
     timeline_sim <- merge(timeline_sim, pop, by = "demography_group", 
       all.x = TRUE)
   
-
-#...............................................................................   
-### Running epidemic (SEIR model) simulations
+ 
 #...............................................................................
-#
-# (run loop starts here)
-with_progress({
-  p <- progressor(steps = length(sim))
-  out_epid <- future_lapply(sim, future.seed = TRUE, function(run_sim) {
-
-    p()
-
-  #...................................
-    lapply(scenarios, function(i) {
-
-    # For each epidemic-prone disease...
-    lapply(diseases_epid, function(u) {
-
-      # start fresh timeline
-      timeline_ui <- timeline_sim
-      
-      # get parameter values for this run, scenario and disease
-      sim_pars_u <- subset(run_sim[[i]], disease == u)      
-
-        # binomial realisation of probability of an epidemic
-        pu <- sim_pars_u[which(sim_pars_u$subperiod == "overall" & 
-          sim_pars_u$parameter == "pu"), "value_gen"]  
-        y <- rbinom(1, 1, prob = pu)
-      
-      # if y = 0, no outbreak: end loop here
-      if (y == 0) {
-      
-        # collect output with 0 infections, cases and deaths
-        timeline_ui[, c("new_infections", "symptomatic", "deaths")] <- 0
-        x <- aggregate(timeline_ui[,c("new_infections", "symptomatic",
-          "deaths")],
-          by = timeline_ui[, c("subperiod", "age")], FUN = sum)
-      } # (close if y = 0 loop)
-
-      # if y = 1, an outbreak occurs; function continues
-      if (y == 1) {
-                      
-        # add parameters
-          # random number defining epidemic start
-          rx_start <- runif(1)
-          
-          # R0
-          r0 <- sim_pars_u[which(sim_pars_u$parameter == "r0"), 
-            c("subperiod", "value_gen")]
-          colnames(r0) <- c("subperiod", "r0")
-          timeline_ui <- merge(timeline_ui, r0, by = "subperiod", all.x = TRUE)
-    
-          # infectiousness period
-          tau <- sim_pars_u[which(sim_pars_u$parameter == "tau"), 
-            c("subperiod", "value_gen")]
-          colnames(tau) <- c("subperiod", "tau")
-          timeline_ui <- merge(timeline_ui, tau, by = "subperiod", all.x = TRUE)
-          
-          # pre-infectious period
-          pre_tau <- sim_pars_u[which(sim_pars_u$parameter == "pre_tau"), 
-            c("subperiod", "value_gen")]
-          colnames(pre_tau) <- c("subperiod", "pre_tau")
-          timeline_ui <- merge(timeline_ui, pre_tau, by ="subperiod",
-            all.x = TRUE)
-          
-          # proportion of symptomatics
-          pd <- sim_pars_u[which(sim_pars_u$parameter == "pd"), 
-            c("subperiod", "value_gen")]
-          colnames(pd) <- c("subperiod", "pd")
-          timeline_ui <- merge(timeline_ui, pd, by = "subperiod", all.x = TRUE)
-          
-          # CFR values by subperiod and age group
-          cfr <- sim_pars_u[which(sim_pars_u$parameter == "cfr" & 
-            sim_pars_u$subperiod %in% subperiods),
-            c("subperiod", grep("value_a", colnames(sim_pars_u), value = TRUE))]
-          cfr <- reshape(cfr, direction = "long",
-            varying = list(colnames(cfr)[colnames(cfr) != "subperiod"]),
-            timevar = "age", v.names = "cfr",
-            idvar = "subperiod",
-            times = colnames(cfr)[colnames(cfr) != "subperiod"]
-          )
-          cfr$age <- gsub("value_a", "", cfr$age)
-          timeline_ui <- merge(timeline_ui, cfr, by = c("subperiod", "age"), 
-            all.x = TRUE)
-          
-          # STARTING proportion susceptible to infection
-          si <- si_list[[u]][[i]]
-          si <- reshape(si, direction = "long", varying = list(ages),
-            timevar = "age", v.names = "si", idvar = "month", times = ages
-          )
-          timeline_ui <- merge(timeline_ui, si, by = c("month", "age"), 
-            all.x = TRUE)
-          
-          # proportion susceptible to severe disease
-          sd <- sd_list[[u]][[i]]
-          sd <- reshape(sd, direction = "long", varying = list(ages),
-            timevar = "age", v.names = "sd", idvar = "month", times = ages
-          )
-          timeline_ui <- merge(timeline_ui, sd, by = c("month", "age"), 
-            all.x = TRUE)
-        
-        # run SEIR model
-        x <- f_seir(disease_f = u, scenario_f = i, timeline_f = timeline_ui,
-          rx_start_f = rx_start)
-            
-        # collect results  
-      } # (close if y = 1 loop)
-      x$run <- run_sim$id
-      x$scenario <- i
-      x$disease <- u
-
-      return(x)
-    }) # (close u - disease loop)
-  }) # (close i - scenario loop)
-}) # (close run_i - run loop)
-}) # (close withr for progress bar)
-
-out_epid <- do.call(bind_rows, flatten(out_epid))
-
-  #...................................
-  ## Save raw output
-  write_rds(out_epid, paste(dir_path, "outputs/",
-    "out_epid_all_runs.rds", sep=""))
-
-  
-  
-#...............................................................................
-### Running stable-transmission simulations
+### Running stable-transmission simulations for to date period
 #...............................................................................
 
 # (run loop starts here)
@@ -187,15 +62,17 @@ with_progress({
       x <- sim_pars[which(sim_pars$parameter == "r0_rr"), 
         c("disease", "subperiod", "value_gen")]
       colnames(x) <- c("disease", "subperiod", "r0_rr")
-      timeline_runi_i <- merge(timeline_runi_i, x,
-        by = c("disease", "subperiod"), all.x = TRUE)
+      x <- subset(x, subperiod == "months 1 to 3")
+      timeline_runi_i <- merge(timeline_runi_i, x[, c("disease", "r0_rr")],
+        by = "disease", all.x = TRUE)
     
       # CFR
       x <- sim_pars[which(sim_pars$parameter == "cfr_rr"), 
         c("disease", "subperiod", "value_gen")]
       colnames(x) <- c("disease", "subperiod", "cfr_rr")
-      timeline_runi_i <- merge(timeline_runi_i, x,
-        by = c("disease", "subperiod"), all.x = TRUE)
+      x <- subset(x, subperiod == "months 1 to 3")
+      timeline_runi_i <- merge(timeline_runi_i, x[, c("disease", "cfr_rr")],
+        by = "disease", all.x = TRUE)
       
     # Generate a random number of infectious disease deaths by year
     d <- c()
@@ -255,9 +132,9 @@ with_progress({
 ##### WILL NEED TO ADD CHANGING SUSCEPTIBILITY IN LATER EDITIONS    
     
     # Aggregate and collect output by subperiod
-    x <- subset(timeline_runi_i, subperiod %in% subperiods)
+    x <- subset(timeline_runi_i, subperiod == "to date")
     x <- aggregate(x[, c("d_base", "d_crisis")], by =
-      x[, c("route", "disease", "subperiod", "age")], FUN = sum)    
+      x[, c("route", "disease", "month", "year", "age")], FUN = sum)    
     x$scenario <- i
     x$run <- run_sim$id
     return(x)
@@ -266,12 +143,31 @@ with_progress({
 }) # (close withr for progress bar)
 
 out_ende <- do.call(bind_rows, flatten(out_ende))
+
   #...................................      
-  ## Save raw output
-  write_rds(out_ende, paste(dir_path, "outputs/", 
-    "out_ende_all_runs.rds", sep=""))
+  ## Tabulate deaths by scenario, age, month and year
 
+    # Aggregate
+    out_ende <- subset(out_ende, scenario == "status quo")
+    out <- aggregate(out_ende[, grep("d_", colnames(out_ende))],
+      by = out_ende[, c("age", "month", "year", "run")], FUN = sum)
+    out <- aggregate(out[, grep("d_", colnames(out))],
+      by = out[, c("age", "month", "year")], 
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.025, 0.975))) )} )
+    out <- data.frame(out[, c("age", "month", "year")],
+      out$d_base, out$d_crisis)
+    colnames(out) <- c("age", "month", "year", 
+      paste("base", c("mean", "lci", "uci"), sep = "_"),
+      paste("crisis", c("mean", "lci", "uci"), sep = "_")
+    )
 
+    # Generate start date of month
+    out$month_start <- ymd(paste(out$year, out$month, "07", sep = "-"))
+    
+    # Save
+    write.csv(out, paste(dir_path, "outputs/out_ende_to_date.csv", 
+      sep = "/"), row.names = FALSE)    
+  
 #...............................................................................   
 ### ENDS
 #...............................................................................

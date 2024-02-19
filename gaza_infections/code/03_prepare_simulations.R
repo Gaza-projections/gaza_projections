@@ -6,9 +6,6 @@
 ## --------- R SCRIPT TO PREPARE SIMULATIONS FOR INFECTIONS MODEL  ---------- ##
 #...............................................................................
 
-                          # LSHTM (January 2024)
-                          # francesco.checchi@lshtm_ac.uk 
-
 
 #...............................................................................   
 ### Initialising objects needed for the simulation

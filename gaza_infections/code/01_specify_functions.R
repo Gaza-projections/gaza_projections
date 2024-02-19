@@ -6,9 +6,6 @@
 ## ------- R SCRIPT TO DEFINE SPECIFIC FUNCTIONS NEEDED FOR ANALYSIS  ------- ##
 #...............................................................................
 
-                          # LSHTM (January 2024)
-                          # francesco.checchi@lshtm_ac.uk 
-
 
 #...............................................................................   
 ### Function to calculate the calibration and information scores for each 

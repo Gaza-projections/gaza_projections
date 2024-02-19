@@ -6,9 +6,6 @@
 ## -- R SCRIPT TO ANALYSE AND VISUALISE SIMULATIONS FOR INFECTIONS MODEL  --- ##
 #...............................................................................
 
-                          # LSHTM (January 2024)
-                          # francesco.checchi@lshtm_ac.uk 
-
 
 #...............................................................................   
 ### Visualising expert-elicited parameter distributions
@@ -130,7 +127,25 @@
     # Format age
     out_epid$age <- gsub("to", " to ", out_epid$age)
 
+  #...................................
+  ## If aggregation has already been done, adjust for multiple risks of deaths
+    
+    # Specify file path
+    filename <- paste(dir_path, 'inputs/',"out_adjustment_factors.csv", sep="")
+    
+  if (file.exists(filename)) {
+    
+    # Read adjustment factors
+    adj <- read.csv(filename)
+    adj <- adj[, c("age", "scenario", "subperiod", "crisis_adj")]
 
+    # Apply adjustment to all results in the output
+    out_epid <- merge(out_epid, adj, by = c("age", "scenario", "subperiod"), 
+      all.x = TRUE)
+    out_epid$deaths <- out_epid$deaths * out_epid$crisis_adj
+  }
+ 
+    
   #...................................      
   ## Investigate the stability of runs
   out_epid <- out_epid[order(out_epid$run, out_epid$scenario, 
@@ -409,6 +424,27 @@
       paste("d_crisis", c("mean", "lci", "uci"), sep = "_"),
       paste("d_excess", c("mean", "lci", "uci"), sep = "_"))
 
+  #...................................
+  ## If aggregation has already been done, adjust for multiple risks of deaths
+    
+    # Specify file path
+    filename <- paste(dir_path, 'inputs/',"out_adjustment_factors.csv", sep="")
+    
+  if (file.exists(filename)) {
+    
+    # Read adjustment factors
+    adj <- read.csv(filename)
+    adj <- adj[, c("age", "scenario", "subperiod", "base_adj", "crisis_adj",
+      "excess_adj")]
+
+    # Apply adjustment to all results in the output
+    out_ende <- merge(out_ende, adj, by = c("age", "scenario", "subperiod"), 
+      all.x = TRUE)
+    out_ende$d_base  <- out_ende$d_base * out_ende$base_adj
+    out_ende$d_crisis  <- out_ende$d_crisis * out_ende$crisis_adj
+    out_ende$d_excess  <- out_ende$d_excess * out_ende$excess_adj
+
+  }
     
   #...................................      
   ## Tabulate deaths by scenario, disease, age group and subperiod
@@ -435,7 +471,7 @@
       by = out_ende[, c("scenario", "disease", "subperiod", "run")], FUN = sum)
     tab2 <- aggregate(tab2[, grep("d_", colnames(tab2))],
       by = tab2[, c("scenario", "disease", "subperiod")], 
-      FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.025, 0.975))) )} )
     tab2 <- data.frame(tab2[, c("scenario", "disease", "subperiod")],
       tab2$d_base, tab2$d_crisis, tab2$d_excess)
     colnames(tab2) <- c("scenario", "disease", "subperiod", cols)
@@ -478,7 +514,7 @@
       by = out_ende[, c("scenario", "age", "subperiod", "run")], FUN = sum)
     tab3 <- aggregate(tab3[, grep("d_", colnames(tab3))],
       by = tab3[, c("scenario", "age", "subperiod")], 
-      FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.025, 0.975))) )} )
     tab3 <- data.frame(tab3[, c("scenario", "age", "subperiod")],
       tab3$d_base, tab3$d_crisis, tab3$d_excess)
     colnames(tab3) <- c("scenario", "age", "subperiod", cols)
@@ -522,7 +558,7 @@
       by = out_ende[, c("scenario", "subperiod", "run")], FUN = sum)
     tab4 <- aggregate(tab4[, grep("d_", colnames(tab4))],
       by = tab4[, c("scenario", "subperiod")], 
-      FUN = function(x) {quantile(x, c(0.5, 0.025, 0.975) )} )
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.025, 0.975))) )} )
     tab4 <- data.frame(tab4[, c("scenario", "subperiod")],
       tab4$d_base, tab4$d_crisis, tab4$d_excess)
     colnames(tab4) <- c("scenario", "subperiod", cols)

@@ -1,100 +1,100 @@
-"scenario","disease","subperiod","median","lci","uci"
+"scenario","disease","subperiod","mean","lci","uci"
 "ceasefire","bacterial dysentery","months 1 to 3",0,0,0
-"escalation","bacterial dysentery","months 1 to 3",0,0,0
-"status quo","bacterial dysentery","months 1 to 3",0,0,0
-"ceasefire","cholera","months 1 to 3",0,0,38420
-"escalation","cholera","months 1 to 3",0,0,83610
-"status quo","cholera","months 1 to 3",0,0,99960
-"ceasefire","diphtheria","months 1 to 3",0,0,0
-"escalation","diphtheria","months 1 to 3",0,0,80060
-"status quo","diphtheria","months 1 to 3",0,0,20
+"escalation","bacterial dysentery","months 1 to 3",0,0,1
+"status quo","bacterial dysentery","months 1 to 3",0,0,1
+"ceasefire","cholera","months 1 to 3",1177,0,15237
+"escalation","cholera","months 1 to 3",2546,0,41173
+"status quo","cholera","months 1 to 3",1878,0,27402
+"ceasefire","diphtheria","months 1 to 3",0,0,1
+"escalation","diphtheria","months 1 to 3",0,0,2
+"status quo","diphtheria","months 1 to 3",0,0,1
 "ceasefire","hepatitis A","months 1 to 3",0,0,0
 "escalation","hepatitis A","months 1 to 3",0,0,0
 "status quo","hepatitis A","months 1 to 3",0,0,0
-"ceasefire","hepatitis E","months 1 to 3",0,0,0
-"escalation","hepatitis E","months 1 to 3",0,0,0
-"status quo","hepatitis E","months 1 to 3",0,0,0
-"ceasefire","measles","months 1 to 3",0,0,0
-"escalation","measles","months 1 to 3",0,0,0
-"status quo","measles","months 1 to 3",0,0,0
-"ceasefire","meningococcal meningitis","months 1 to 3",0,0,30
-"escalation","meningococcal meningitis","months 1 to 3",0,0,150
-"status quo","meningococcal meningitis","months 1 to 3",0,0,160
+"ceasefire","hepatitis E","months 1 to 3",0,0,2
+"escalation","hepatitis E","months 1 to 3",0,0,3
+"status quo","hepatitis E","months 1 to 3",0,0,3
+"ceasefire","measles","months 1 to 3",34,0,114
+"escalation","measles","months 1 to 3",137,0,2075
+"status quo","measles","months 1 to 3",75,0,553
+"ceasefire","meningococcal meningitis","months 1 to 3",2,0,8
+"escalation","meningococcal meningitis","months 1 to 3",11,0,40
+"status quo","meningococcal meningitis","months 1 to 3",4,0,12
 "ceasefire","pertussis","months 1 to 3",0,0,0
 "escalation","pertussis","months 1 to 3",0,0,0
 "status quo","pertussis","months 1 to 3",0,0,0
-"ceasefire","polio - vaccine-derived","months 1 to 3",0,0,0
-"escalation","polio - vaccine-derived","months 1 to 3",0,0,18530
-"status quo","polio - vaccine-derived","months 1 to 3",0,0,20340
-"ceasefire","polio - wildtype","months 1 to 3",0,0,0
-"escalation","polio - wildtype","months 1 to 3",0,0,5220
-"status quo","polio - wildtype","months 1 to 3",0,0,0
-"ceasefire","typhoid fever","months 1 to 3",0,0,0
-"escalation","typhoid fever","months 1 to 3",0,0,0
-"status quo","typhoid fever","months 1 to 3",0,0,0
-"ceasefire","bacterial dysentery","months 4 to 6",0,0,0
-"escalation","bacterial dysentery","months 4 to 6",0,0,10
-"status quo","bacterial dysentery","months 4 to 6",0,0,10
-"ceasefire","cholera","months 4 to 6",0,0,117000
-"escalation","cholera","months 4 to 6",0,0,132620
-"status quo","cholera","months 4 to 6",0,0,128870
-"ceasefire","diphtheria","months 4 to 6",0,0,23940
-"escalation","diphtheria","months 4 to 6",0,0,296220
-"status quo","diphtheria","months 4 to 6",0,0,155140
+"ceasefire","polio - vaccine-derived","months 1 to 3",178,0,998
+"escalation","polio - vaccine-derived","months 1 to 3",418,0,6367
+"status quo","polio - vaccine-derived","months 1 to 3",266,0,1897
+"ceasefire","polio - wildtype","months 1 to 3",132,0,115
+"escalation","polio - wildtype","months 1 to 3",286,0,2458
+"status quo","polio - wildtype","months 1 to 3",189,0,617
+"ceasefire","typhoid fever","months 1 to 3",0,0,1
+"escalation","typhoid fever","months 1 to 3",0,0,1
+"status quo","typhoid fever","months 1 to 3",0,0,1
+"ceasefire","bacterial dysentery","months 4 to 6",0,0,3
+"escalation","bacterial dysentery","months 4 to 6",0,0,6
+"status quo","bacterial dysentery","months 4 to 6",0,0,5
+"ceasefire","cholera","months 4 to 6",2418,0,35313
+"escalation","cholera","months 4 to 6",5525,0,78488
+"status quo","cholera","months 4 to 6",4421,0,64269
+"ceasefire","diphtheria","months 4 to 6",0,0,2
+"escalation","diphtheria","months 4 to 6",1,0,9
+"status quo","diphtheria","months 4 to 6",0,0,4
 "ceasefire","hepatitis A","months 4 to 6",0,0,0
 "escalation","hepatitis A","months 4 to 6",0,0,0
 "status quo","hepatitis A","months 4 to 6",0,0,0
-"ceasefire","hepatitis E","months 4 to 6",0,0,10
-"escalation","hepatitis E","months 4 to 6",0,0,70
-"status quo","hepatitis E","months 4 to 6",0,0,50
-"ceasefire","measles","months 4 to 6",0,0,0
-"escalation","measles","months 4 to 6",0,0,0
-"status quo","measles","months 4 to 6",0,0,0
-"ceasefire","meningococcal meningitis","months 4 to 6",0,0,1730
-"escalation","meningococcal meningitis","months 4 to 6",0,0,5530
-"status quo","meningococcal meningitis","months 4 to 6",0,0,3140
+"ceasefire","hepatitis E","months 4 to 6",2,0,25
+"escalation","hepatitis E","months 4 to 6",3,0,45
+"status quo","hepatitis E","months 4 to 6",2,0,35
+"ceasefire","measles","months 4 to 6",226,0,3097
+"escalation","measles","months 4 to 6",656,0,7587
+"status quo","measles","months 4 to 6",379,0,4639
+"ceasefire","meningococcal meningitis","months 4 to 6",22,0,257
+"escalation","meningococcal meningitis","months 4 to 6",132,0,1722
+"status quo","meningococcal meningitis","months 4 to 6",44,0,558
 "ceasefire","pertussis","months 4 to 6",0,0,0
-"escalation","pertussis","months 4 to 6",0,0,0
+"escalation","pertussis","months 4 to 6",0,0,1
 "status quo","pertussis","months 4 to 6",0,0,0
-"ceasefire","polio - vaccine-derived","months 4 to 6",0,0,470
-"escalation","polio - vaccine-derived","months 4 to 6",0,0,27190
-"status quo","polio - vaccine-derived","months 4 to 6",0,0,25980
-"ceasefire","polio - wildtype","months 4 to 6",0,0,11120
-"escalation","polio - wildtype","months 4 to 6",0,0,25570
-"status quo","polio - wildtype","months 4 to 6",0,0,22870
-"ceasefire","typhoid fever","months 4 to 6",0,0,0
-"escalation","typhoid fever","months 4 to 6",0,0,10
-"status quo","typhoid fever","months 4 to 6",0,0,10
-"ceasefire","bacterial dysentery","total",0,0,0
-"escalation","bacterial dysentery","total",0,0,10
-"status quo","bacterial dysentery","total",0,0,10
-"ceasefire","cholera","total",0,0,155420
-"escalation","cholera","total",0,0,216230
-"status quo","cholera","total",0,0,228830
-"ceasefire","diphtheria","total",0,0,23940
-"escalation","diphtheria","total",0,0,376280
-"status quo","diphtheria","total",0,0,155160
+"ceasefire","polio - vaccine-derived","months 4 to 6",461,0,7009
+"escalation","polio - vaccine-derived","months 4 to 6",976,0,14542
+"status quo","polio - vaccine-derived","months 4 to 6",668,0,10541
+"ceasefire","polio - wildtype","months 4 to 6",374,0,6072
+"escalation","polio - wildtype","months 4 to 6",764,0,12448
+"status quo","polio - wildtype","months 4 to 6",535,0,9433
+"ceasefire","typhoid fever","months 4 to 6",0,0,3
+"escalation","typhoid fever","months 4 to 6",0,0,5
+"status quo","typhoid fever","months 4 to 6",0,0,4
+"ceasefire","bacterial dysentery","total",0,0,3
+"escalation","bacterial dysentery","total",0,0,7
+"status quo","bacterial dysentery","total",0,0,6
+"ceasefire","cholera","total",3595,0,50550
+"escalation","cholera","total",8071,0,119661
+"status quo","cholera","total",6299,0,91671
+"ceasefire","diphtheria","total",0,0,3
+"escalation","diphtheria","total",1,0,11
+"status quo","diphtheria","total",0,0,5
 "ceasefire","hepatitis A","total",0,0,0
 "escalation","hepatitis A","total",0,0,0
 "status quo","hepatitis A","total",0,0,0
-"ceasefire","hepatitis E","total",0,0,10
-"escalation","hepatitis E","total",0,0,70
-"status quo","hepatitis E","total",0,0,50
-"ceasefire","measles","total",0,0,0
-"escalation","measles","total",0,0,0
-"status quo","measles","total",0,0,0
-"ceasefire","meningococcal meningitis","total",0,0,1760
-"escalation","meningococcal meningitis","total",0,0,5680
-"status quo","meningococcal meningitis","total",0,0,3300
+"ceasefire","hepatitis E","total",2,0,27
+"escalation","hepatitis E","total",3,0,48
+"status quo","hepatitis E","total",2,0,38
+"ceasefire","measles","total",260,0,3211
+"escalation","measles","total",793,0,9662
+"status quo","measles","total",454,0,5192
+"ceasefire","meningococcal meningitis","total",24,0,265
+"escalation","meningococcal meningitis","total",143,0,1762
+"status quo","meningococcal meningitis","total",48,0,570
 "ceasefire","pertussis","total",0,0,0
-"escalation","pertussis","total",0,0,0
+"escalation","pertussis","total",0,0,1
 "status quo","pertussis","total",0,0,0
-"ceasefire","polio - vaccine-derived","total",0,0,470
-"escalation","polio - vaccine-derived","total",0,0,45720
-"status quo","polio - vaccine-derived","total",0,0,46320
-"ceasefire","polio - wildtype","total",0,0,11120
-"escalation","polio - wildtype","total",0,0,30790
-"status quo","polio - wildtype","total",0,0,22870
-"ceasefire","typhoid fever","total",0,0,0
-"escalation","typhoid fever","total",0,0,10
-"status quo","typhoid fever","total",0,0,10
+"ceasefire","polio - vaccine-derived","total",639,0,8007
+"escalation","polio - vaccine-derived","total",1394,0,20909
+"status quo","polio - vaccine-derived","total",934,0,12438
+"ceasefire","polio - wildtype","total",506,0,6187
+"escalation","polio - wildtype","total",1050,0,14906
+"status quo","polio - wildtype","total",724,0,10050
+"ceasefire","typhoid fever","total",0,0,4
+"escalation","typhoid fever","total",0,0,6
+"status quo","typhoid fever","total",0,0,5

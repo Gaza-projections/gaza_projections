@@ -1,118 +1,118 @@
-"scenario","age","subperiod","d_base_median","d_base_lci","d_base_uci","d_crisis_median","d_crisis_lci","d_crisis_uci","d_excess_median","d_excess_lci","d_excess_uci"
-"ceasefire","0mo","months 1 to 3",0,0,0,1,0,6,1,0,5
+"scenario","age","subperiod","d_base_mean","d_base_lci","d_base_uci","d_crisis_mean","d_crisis_lci","d_crisis_uci","d_excess_mean","d_excess_lci","d_excess_uci"
+"ceasefire","0mo","months 1 to 3",0,0,0,2,0,6,1,0,5
 "escalation","0mo","months 1 to 3",0,0,0,2,0,7,2,0,7
 "status quo","0mo","months 1 to 3",0,0,0,2,0,6,2,0,6
-"ceasefire","1 to 11mo","months 1 to 3",3,2,3,14,3,62,12,0,59
-"escalation","1 to 11mo","months 1 to 3",3,2,3,21,4,76,19,2,73
-"status quo","1 to 11mo","months 1 to 3",3,2,3,21,3,70,18,1,67
-"ceasefire","10 to 14yo","months 1 to 3",1,1,1,5,1,23,4,0,22
-"escalation","10 to 14yo","months 1 to 3",1,1,1,7,1,29,6,1,27
-"status quo","10 to 14yo","months 1 to 3",1,1,1,7,1,26,6,0,25
-"ceasefire","12 to 59mo","months 1 to 3",12,10,15,63,12,269,51,2,254
-"escalation","12 to 59mo","months 1 to 3",12,10,15,91,17,330,79,7,315
-"status quo","12 to 59mo","months 1 to 3",12,10,15,90,15,304,78,5,289
-"ceasefire","15 to 19yo","months 1 to 3",1,1,1,5,1,22,4,0,21
-"escalation","15 to 19yo","months 1 to 3",1,1,1,7,1,27,6,1,26
-"status quo","15 to 19yo","months 1 to 3",1,1,1,7,1,25,6,0,23
-"ceasefire","20 to 29yo","months 1 to 3",3,3,4,14,3,65,11,0,61
-"escalation","20 to 29yo","months 1 to 3",3,3,4,19,4,80,16,1,76
-"status quo","20 to 29yo","months 1 to 3",3,3,4,19,4,73,16,1,69
-"ceasefire","30 to 39yo","months 1 to 3",7,6,8,27,5,124,21,0,116
-"escalation","30 to 39yo","months 1 to 3",7,6,8,34,8,153,28,2,145
-"status quo","30 to 39yo","months 1 to 3",7,6,8,35,7,140,28,1,132
-"ceasefire","40 to 49yo","months 1 to 3",7,6,9,30,6,138,23,0,129
-"escalation","40 to 49yo","months 1 to 3",7,6,9,38,9,170,30,3,161
-"status quo","40 to 49yo","months 1 to 3",7,6,9,38,8,156,30,1,146
-"ceasefire","5 to 9yo","months 1 to 3",4,3,4,15,3,69,12,0,65
-"escalation","5 to 9yo","months 1 to 3",4,3,4,20,4,85,16,1,81
-"status quo","5 to 9yo","months 1 to 3",4,3,4,20,4,78,16,1,74
-"ceasefire","50 to 59yo","months 1 to 3",15,12,18,59,12,269,44,-1,251
-"escalation","50 to 59yo","months 1 to 3",15,12,18,72,17,332,57,5,314
-"status quo","50 to 59yo","months 1 to 3",15,12,18,73,15,303,58,2,285
-"ceasefire","60 to 69yo","months 1 to 3",17,14,21,68,13,310,51,-1,289
-"escalation","60 to 69yo","months 1 to 3",17,14,21,82,20,381,66,6,361
-"status quo","60 to 69yo","months 1 to 3",17,14,21,84,17,348,67,3,327
-"ceasefire","70 to 79yo","months 1 to 3",25,21,31,106,21,480,80,0,449
-"escalation","70 to 79yo","months 1 to 3",25,21,31,134,31,590,109,9,559
-"status quo","70 to 79yo","months 1 to 3",25,21,31,135,26,540,110,5,509
-"ceasefire","80 to 100yo","months 1 to 3",33,28,41,134,26,614,101,-2,573
-"escalation","80 to 100yo","months 1 to 3",33,28,41,165,39,756,131,11,715
-"status quo","80 to 100yo","months 1 to 3",33,28,41,167,34,690,133,6,649
+"ceasefire","1 to 11mo","months 1 to 3",3,2,3,18,3,62,16,0,59
+"escalation","1 to 11mo","months 1 to 3",3,2,3,27,4,76,25,2,73
+"status quo","1 to 11mo","months 1 to 3",3,2,3,25,3,70,22,1,67
+"ceasefire","10 to 14yo","months 1 to 3",1,1,1,7,1,23,6,0,22
+"escalation","10 to 14yo","months 1 to 3",1,1,1,10,1,29,9,1,27
+"status quo","10 to 14yo","months 1 to 3",1,1,1,9,1,26,8,0,25
+"ceasefire","12 to 59mo","months 1 to 3",12,10,15,80,12,269,67,2,254
+"escalation","12 to 59mo","months 1 to 3",12,10,15,118,17,329,106,7,315
+"status quo","12 to 59mo","months 1 to 3",12,10,15,107,15,304,95,5,289
+"ceasefire","15 to 19yo","months 1 to 3",1,1,1,6,1,22,5,0,21
+"escalation","15 to 19yo","months 1 to 3",1,1,1,9,1,27,8,1,26
+"status quo","15 to 19yo","months 1 to 3",1,1,1,8,1,25,7,0,23
+"ceasefire","20 to 29yo","months 1 to 3",3,3,4,19,3,65,15,0,61
+"escalation","20 to 29yo","months 1 to 3",3,3,4,26,4,80,23,1,76
+"status quo","20 to 29yo","months 1 to 3",3,3,4,24,4,73,21,1,69
+"ceasefire","30 to 39yo","months 1 to 3",7,6,8,36,5,124,29,0,116
+"escalation","30 to 39yo","months 1 to 3",7,6,8,49,8,153,42,2,144
+"status quo","30 to 39yo","months 1 to 3",7,6,8,44,7,139,38,1,131
+"ceasefire","40 to 49yo","months 1 to 3",8,6,9,40,6,138,32,0,129
+"escalation","40 to 49yo","months 1 to 3",8,6,9,54,9,170,46,3,161
+"status quo","40 to 49yo","months 1 to 3",8,6,9,49,8,155,41,1,146
+"ceasefire","5 to 9yo","months 1 to 3",4,3,4,20,3,69,16,0,65
+"escalation","5 to 9yo","months 1 to 3",4,3,4,28,4,85,24,1,81
+"status quo","5 to 9yo","months 1 to 3",4,3,4,25,4,78,21,1,73
+"ceasefire","50 to 59yo","months 1 to 3",15,12,18,77,12,269,62,-1,251
+"escalation","50 to 59yo","months 1 to 3",15,12,18,104,17,330,89,5,312
+"status quo","50 to 59yo","months 1 to 3",15,12,18,95,15,301,80,2,284
+"ceasefire","60 to 69yo","months 1 to 3",17,14,21,88,13,308,71,-1,288
+"escalation","60 to 69yo","months 1 to 3",17,14,21,119,20,378,102,6,358
+"status quo","60 to 69yo","months 1 to 3",17,14,21,108,17,345,91,3,325
+"ceasefire","70 to 79yo","months 1 to 3",26,21,31,137,21,475,112,0,445
+"escalation","70 to 79yo","months 1 to 3",26,21,31,187,30,578,162,9,550
+"status quo","70 to 79yo","months 1 to 3",26,21,31,170,26,531,145,5,502
+"ceasefire","80 to 100yo","months 1 to 3",34,28,40,169,25,590,138,-2,558
+"escalation","80 to 100yo","months 1 to 3",34,28,40,225,37,712,195,11,683
+"status quo","80 to 100yo","months 1 to 3",34,28,40,206,32,656,176,5,625
 "ceasefire","0mo","months 4 to 6",0,0,0,1,0,3,1,0,3
-"escalation","0mo","months 4 to 6",0,0,0,1,0,4,1,0,4
+"escalation","0mo","months 4 to 6",0,0,0,2,0,4,2,0,4
 "status quo","0mo","months 4 to 6",0,0,0,1,0,3,1,0,3
-"ceasefire","1 to 11mo","months 4 to 6",1,1,2,7,1,33,6,0,32
-"escalation","1 to 11mo","months 4 to 6",1,1,2,16,2,44,14,1,42
-"status quo","1 to 11mo","months 4 to 6",1,1,2,13,2,38,12,1,37
-"ceasefire","10 to 14yo","months 4 to 6",1,1,1,3,0,13,2,0,12
-"escalation","10 to 14yo","months 4 to 6",1,1,1,6,1,18,5,0,17
-"status quo","10 to 14yo","months 4 to 6",1,1,1,5,1,15,4,0,14
-"ceasefire","12 to 59mo","months 4 to 6",5,5,7,30,5,143,25,1,136
-"escalation","12 to 59mo","months 4 to 6",5,5,7,67,10,189,61,6,182
-"status quo","12 to 59mo","months 4 to 6",5,5,7,58,8,164,52,4,157
-"ceasefire","15 to 19yo","months 4 to 6",0,0,1,2,0,10,2,0,9
-"escalation","15 to 19yo","months 4 to 6",0,0,1,4,1,14,4,0,13
-"status quo","15 to 19yo","months 4 to 6",0,0,1,4,1,12,3,0,11
-"ceasefire","20 to 29yo","months 4 to 6",1,1,2,5,1,25,4,0,24
-"escalation","20 to 29yo","months 4 to 6",1,1,2,10,2,34,9,1,33
-"status quo","20 to 29yo","months 4 to 6",1,1,2,9,1,29,8,0,27
-"ceasefire","30 to 39yo","months 4 to 6",2,2,2,7,1,37,5,0,35
-"escalation","30 to 39yo","months 4 to 6",2,2,2,15,3,52,13,1,50
-"status quo","30 to 39yo","months 4 to 6",2,2,2,13,2,43,11,0,41
-"ceasefire","40 to 49yo","months 4 to 6",3,2,3,8,2,47,6,-1,44
-"escalation","40 to 49yo","months 4 to 6",3,2,3,18,4,66,15,1,63
-"status quo","40 to 49yo","months 4 to 6",3,2,3,16,3,54,13,0,51
-"ceasefire","5 to 9yo","months 4 to 6",1,1,1,4,1,21,3,0,20
-"escalation","5 to 9yo","months 4 to 6",1,1,1,9,2,29,8,1,28
+"ceasefire","1 to 11mo","months 4 to 6",1,1,2,9,1,33,8,0,32
+"escalation","1 to 11mo","months 4 to 6",1,1,2,19,2,44,18,1,42
+"status quo","1 to 11mo","months 4 to 6",1,1,2,15,2,38,13,1,37
+"ceasefire","10 to 14yo","months 4 to 6",1,1,1,3,0,13,3,0,12
+"escalation","10 to 14yo","months 4 to 6",1,1,1,7,1,18,7,0,17
+"status quo","10 to 14yo","months 4 to 6",1,1,1,5,1,15,5,0,14
+"ceasefire","12 to 59mo","months 4 to 6",5,5,7,38,5,143,32,1,136
+"escalation","12 to 59mo","months 4 to 6",5,5,7,81,10,188,75,6,182
+"status quo","12 to 59mo","months 4 to 6",5,5,7,62,8,163,57,4,157
+"ceasefire","15 to 19yo","months 4 to 6",0,0,1,3,0,10,2,0,9
+"escalation","15 to 19yo","months 4 to 6",0,0,1,6,1,13,5,0,13
+"status quo","15 to 19yo","months 4 to 6",0,0,1,4,1,11,4,0,11
+"ceasefire","20 to 29yo","months 4 to 6",1,1,2,6,1,25,5,0,24
+"escalation","20 to 29yo","months 4 to 6",1,1,2,13,2,34,12,1,33
+"status quo","20 to 29yo","months 4 to 6",1,1,2,10,1,29,9,0,27
+"ceasefire","30 to 39yo","months 4 to 6",2,2,2,9,1,37,7,0,35
+"escalation","30 to 39yo","months 4 to 6",2,2,2,20,3,52,18,1,49
+"status quo","30 to 39yo","months 4 to 6",2,2,2,14,2,43,12,0,40
+"ceasefire","40 to 49yo","months 4 to 6",3,2,3,11,2,47,8,-1,44
+"escalation","40 to 49yo","months 4 to 6",3,2,3,24,4,66,22,1,62
+"status quo","40 to 49yo","months 4 to 6",3,2,3,18,3,54,15,0,51
+"ceasefire","5 to 9yo","months 4 to 6",1,1,1,5,1,21,4,0,20
+"escalation","5 to 9yo","months 4 to 6",1,1,1,11,2,29,10,1,28
 "status quo","5 to 9yo","months 4 to 6",1,1,1,8,1,24,7,0,23
-"ceasefire","50 to 59yo","months 4 to 6",5,4,6,15,3,88,10,-1,82
-"escalation","50 to 59yo","months 4 to 6",5,4,6,33,7,125,28,2,118
-"status quo","50 to 59yo","months 4 to 6",5,4,6,29,5,102,24,1,95
-"ceasefire","60 to 69yo","months 4 to 6",9,8,11,27,6,155,18,-2,144
-"escalation","60 to 69yo","months 4 to 6",9,8,11,58,12,219,48,4,208
-"status quo","60 to 69yo","months 4 to 6",9,8,11,51,9,178,42,1,167
-"ceasefire","70 to 79yo","months 4 to 6",13,11,16,44,9,241,30,-2,225
-"escalation","70 to 79yo","months 4 to 6",13,11,16,94,18,337,81,7,320
-"status quo","70 to 79yo","months 4 to 6",13,11,16,83,14,277,70,3,261
-"ceasefire","80 to 100yo","months 4 to 6",18,15,22,53,11,303,35,-4,281
-"escalation","80 to 100yo","months 4 to 6",18,15,22,113,23,427,96,8,405
-"status quo","80 to 100yo","months 4 to 6",18,15,22,101,17,348,83,2,326
-"ceasefire","0mo","total",0,0,0,2,0,9,2,0,8
-"escalation","0mo","total",0,0,0,3,0,11,3,0,11
+"ceasefire","50 to 59yo","months 4 to 6",5,4,6,20,3,88,15,-1,82
+"escalation","50 to 59yo","months 4 to 6",5,4,6,45,7,124,40,2,118
+"status quo","50 to 59yo","months 4 to 6",5,4,6,33,5,101,27,1,95
+"ceasefire","60 to 69yo","months 4 to 6",9,8,11,35,6,155,26,-2,143
+"escalation","60 to 69yo","months 4 to 6",9,8,11,79,12,217,70,4,206
+"status quo","60 to 69yo","months 4 to 6",9,8,11,57,9,177,48,1,166
+"ceasefire","70 to 79yo","months 4 to 6",14,11,16,56,9,239,43,-2,224
+"escalation","70 to 79yo","months 4 to 6",14,11,16,124,18,330,111,7,315
+"status quo","70 to 79yo","months 4 to 6",14,11,16,91,14,273,78,3,257
+"ceasefire","80 to 100yo","months 4 to 6",18,15,22,67,11,294,50,-4,276
+"escalation","80 to 100yo","months 4 to 6",18,15,22,149,22,406,133,8,390
+"status quo","80 to 100yo","months 4 to 6",18,15,22,108,17,334,92,2,317
+"ceasefire","0mo","total",0,0,0,3,0,9,2,0,8
+"escalation","0mo","total",0,0,0,4,0,11,4,0,11
 "status quo","0mo","total",0,0,0,3,0,9,3,0,9
-"ceasefire","1 to 11mo","total",4,3,5,21,4,95,18,0,91
-"escalation","1 to 11mo","total",4,3,5,37,6,120,33,3,115
-"status quo","1 to 11mo","total",4,3,5,34,5,108,30,2,104
-"ceasefire","10 to 14yo","total",2,2,2,8,1,36,6,0,34
-"escalation","10 to 14yo","total",2,2,2,13,2,47,11,1,44
-"status quo","10 to 14yo","total",2,2,2,12,2,41,10,0,39
-"ceasefire","12 to 59mo","total",17,15,22,93,17,412,76,3,390
-"escalation","12 to 59mo","total",17,15,22,158,27,519,140,13,497
-"status quo","12 to 59mo","total",17,15,22,148,23,468,130,9,446
-"ceasefire","15 to 19yo","total",1,1,2,7,1,32,6,0,30
-"escalation","15 to 19yo","total",1,1,2,11,2,41,10,1,39
-"status quo","15 to 19yo","total",1,1,2,11,2,37,9,0,34
-"ceasefire","20 to 29yo","total",4,4,6,19,4,90,15,0,85
-"escalation","20 to 29yo","total",4,4,6,29,6,114,25,2,109
-"status quo","20 to 29yo","total",4,4,6,28,5,102,24,1,96
-"ceasefire","30 to 39yo","total",9,8,10,34,6,161,26,0,151
-"escalation","30 to 39yo","total",9,8,10,49,11,205,41,3,195
-"status quo","30 to 39yo","total",9,8,10,48,9,183,39,1,173
-"ceasefire","40 to 49yo","total",10,8,12,38,8,185,29,-1,173
-"escalation","40 to 49yo","total",10,8,12,56,13,236,45,4,224
-"status quo","40 to 49yo","total",10,8,12,54,11,210,43,1,197
-"ceasefire","5 to 9yo","total",5,4,5,19,4,90,15,0,85
-"escalation","5 to 9yo","total",5,4,5,29,6,114,24,2,109
-"status quo","5 to 9yo","total",5,4,5,28,5,102,23,1,97
-"ceasefire","50 to 59yo","total",20,16,24,74,15,357,54,-2,333
-"escalation","50 to 59yo","total",20,16,24,105,24,457,85,7,432
-"status quo","50 to 59yo","total",20,16,24,102,20,405,82,3,380
-"ceasefire","60 to 69yo","total",26,22,32,95,19,465,69,-3,433
-"escalation","60 to 69yo","total",26,22,32,140,32,600,114,10,569
-"status quo","60 to 69yo","total",26,22,32,135,26,526,109,4,494
-"ceasefire","70 to 79yo","total",38,32,47,150,30,721,110,-2,674
-"escalation","70 to 79yo","total",38,32,47,228,49,927,190,16,879
-"status quo","70 to 79yo","total",38,32,47,218,40,817,180,8,770
-"ceasefire","80 to 100yo","total",51,43,63,187,37,917,136,-6,854
-"escalation","80 to 100yo","total",51,43,63,278,62,1183,227,19,1120
-"status quo","80 to 100yo","total",51,43,63,268,51,1038,216,8,975
+"ceasefire","1 to 11mo","total",4,3,5,27,4,95,24,0,91
+"escalation","1 to 11mo","total",4,3,5,46,6,120,43,3,115
+"status quo","1 to 11mo","total",4,3,5,40,5,108,35,2,104
+"ceasefire","10 to 14yo","total",2,2,2,10,1,36,9,0,34
+"escalation","10 to 14yo","total",2,2,2,17,2,47,16,1,44
+"status quo","10 to 14yo","total",2,2,2,14,2,41,13,0,39
+"ceasefire","12 to 59mo","total",17,15,22,118,17,412,99,3,390
+"escalation","12 to 59mo","total",17,15,22,199,27,517,181,13,497
+"status quo","12 to 59mo","total",17,15,22,169,23,467,152,9,446
+"ceasefire","15 to 19yo","total",1,1,2,9,1,32,7,0,30
+"escalation","15 to 19yo","total",1,1,2,15,2,40,13,1,39
+"status quo","15 to 19yo","total",1,1,2,12,2,36,11,0,34
+"ceasefire","20 to 29yo","total",4,4,6,25,4,90,20,0,85
+"escalation","20 to 29yo","total",4,4,6,39,6,114,35,2,109
+"status quo","20 to 29yo","total",4,4,6,34,5,102,30,1,96
+"ceasefire","30 to 39yo","total",9,8,10,45,6,161,36,0,151
+"escalation","30 to 39yo","total",9,8,10,69,11,205,60,3,193
+"status quo","30 to 39yo","total",9,8,10,58,9,182,50,1,171
+"ceasefire","40 to 49yo","total",11,8,12,51,8,185,40,-1,173
+"escalation","40 to 49yo","total",11,8,12,78,13,236,68,4,223
+"status quo","40 to 49yo","total",11,8,12,67,11,209,56,1,197
+"ceasefire","5 to 9yo","total",5,4,5,25,4,90,20,0,85
+"escalation","5 to 9yo","total",5,4,5,39,6,114,34,2,109
+"status quo","5 to 9yo","total",5,4,5,33,5,102,28,1,96
+"ceasefire","50 to 59yo","total",20,16,24,97,15,357,77,-2,333
+"escalation","50 to 59yo","total",20,16,24,149,24,454,129,7,430
+"status quo","50 to 59yo","total",20,16,24,128,20,402,107,3,379
+"ceasefire","60 to 69yo","total",26,22,32,123,19,463,97,-3,431
+"escalation","60 to 69yo","total",26,22,32,198,32,595,172,10,564
+"status quo","60 to 69yo","total",26,22,32,165,26,522,139,4,491
+"ceasefire","70 to 79yo","total",40,32,47,193,30,714,155,-2,669
+"escalation","70 to 79yo","total",40,32,47,311,48,908,273,16,865
+"status quo","70 to 79yo","total",40,32,47,261,40,804,223,8,759
+"ceasefire","80 to 100yo","total",52,43,62,236,36,884,188,-6,834
+"escalation","80 to 100yo","total",52,43,62,374,59,1118,328,19,1073
+"status quo","80 to 100yo","total",52,43,62,314,49,990,268,7,942

@@ -6,10 +6,7 @@
 ## --- R SCRIPT TO READ DATASETS AND PARAMETERS, AND CALL OTHER SCRIPTS  ---- ##
 #...............................................................................
 
-                          # LSHTM (January 2024)
-                          # francesco.checchi@lshtm_ac.uk 
-
-
+ 
 #...............................................................................  
 ### Reading in required parameters
 #...............................................................................
@@ -264,14 +261,14 @@
         }
       }
     
-#####################
-    # Correct diphtheria values - implausible
-# NEED TO IMPROVE MODEL FOR NEXT ITERATION
-    for (j in c("ceasefire", "escalation", "status_quo")) {
-      si_modelled[["diphtheria"]][[j]][, ages] <- 0.2 * si_modelled[["diphtheria"]][[j]][, ages]
-      sd_modelled[["diphtheria"]][[j]][, ages] <- 0.2 * sd_modelled[["diphtheria"]][[j]][, ages]
-    }
-#####################    
+# #####################
+#     # Correct diphtheria values - implausible
+# 
+#     for (j in c("ceasefire", "escalation", "status_quo")) {
+#       si_modelled[["diphtheria"]][[j]][, ages] <- 0.2 * si_modelled[["diphtheria"]][[j]][, ages]
+#       sd_modelled[["diphtheria"]][[j]][, ages] <- 0.2 * sd_modelled[["diphtheria"]][[j]][, ages]
+#     }
+# #####################    
      
              
   #...................................      

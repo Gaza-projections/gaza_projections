@@ -6,8 +6,6 @@
 ## --- R SCRIPT TO READ DATASETS AND PARAMETERS, AND CALL OTHER SCRIPTS  ---- ##
 #...............................................................................
 
-                          # LSHTM (January 2024)
-                          # francesco.checchi@lshtm_ac.uk 
 
 #...............................................................................
 ### Preparatory steps
@@ -73,8 +71,8 @@
       show_col(palette_periods)
 
     # Set up parallel computing
-    plan(multisession)  # or  plan(multicore) if non-Windows
-
+    plan(multisession) # or  plan(multicore) if non-Windows
+      
 #...............................................................................  
 ### Sourcing other scripts
 #...............................................................................
@@ -94,7 +92,10 @@
   #...................................      
   ## Run simulations
   source(paste(dir_path, "code/04_run_simulations.R", sep =""))
-        
+
+    # Run simulations for period to date (needed for injury model)
+    source(paste(dir_path, "code/04b_run_simulations_to_date.R", sep =""))
+            
   #...................................      
   ## Analyse simulations
   source(paste(dir_path, "code/05_analyse_and_visualise.R", sep =""))
