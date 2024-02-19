@@ -6,8 +6,6 @@
 ## --- R SCRIPT TO FIT MODELS AND PREPARE OTHER COMPONENTS OF SIMULATION  --- ##
 #...............................................................................
 
-                                # LSHTM (January 2024)
-                                # francesco.checchi@lshtm_ac.uk 
 
 
 #...............................................................................  
