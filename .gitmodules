@@ -1,0 +1,7 @@
+[submodule "gaza_infections/code/immunity_projections_model"]
+	path = gaza_infections/code/immunity_projections_model
+	url = https://github.com/GBarnsley/IVODE
+	branch = february_projections
+[submodule "gaza_infections/code/immunity_projections_scripts"]
+	path = gaza_infections/code/immunity_projections_scripts
+	url = https://github.com/GBarnsley/gaza_immunity_projections.git
