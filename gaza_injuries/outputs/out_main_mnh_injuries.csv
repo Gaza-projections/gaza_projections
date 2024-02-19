@@ -1,0 +1,10 @@
+"scenario","category","mean","lci","uci"
+"ceasefire","maternal",0,0,0
+"status quo","maternal",1363.12995544636,1186.0805570202,1558.40746059806
+"escalation","maternal",1747.58621828605,1535.01867925427,1964.12518277207
+"ceasefire","stillbirths",0,0,0
+"status quo","stillbirths",350.999953254265,305.410513800616,401.283049818902
+"escalation","stillbirths",449.995745802052,395.260541748013,505.753574399864
+"ceasefire","neonatal",0,0,0
+"status quo","neonatal",12.2353259323944,0,74.5830903174754
+"escalation","neonatal",20.1551556310087,0,95.2941466958306
