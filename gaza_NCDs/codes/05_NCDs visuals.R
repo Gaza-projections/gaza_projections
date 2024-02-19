@@ -6,7 +6,6 @@
 ## ----------- R SCRIPT TO VISUALISE OUTPUT AND PRODUCE GRAPHS  ------------- ##
 #...............................................................................
 
-# Francesco Checchi, Zeina Jamaluddine (Febuary 2024)
 
 #...............................................................................
 ### Preparatory steps
