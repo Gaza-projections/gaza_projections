@@ -6,7 +6,7 @@
 ## ------ R SCRIPT TO LOAD PACKAGES AND SOURCE OTHER ANALYSIS SCRIPTS  ------ ##
 #...............................................................................
 
-                          # Francesco Checchi, Zeina Jamaluddine (January 2024)
+
 
 #...............................................................................
 ### Preparatory steps

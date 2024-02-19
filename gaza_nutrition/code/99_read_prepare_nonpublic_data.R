@@ -6,7 +6,6 @@
 ## ----- R SCRIPT TO READ AND PREPARE DATASETS THAT WILL NOT BE PUBLIC  ----- ##
 #...............................................................................
 
-                          # Francesco Checchi, Zeina Jamaluddine (January 2024)
 
 
 #...............................................................................  

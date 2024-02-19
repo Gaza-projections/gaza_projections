@@ -6,7 +6,7 @@
 ## ------ R SCRIPT TO READ DATASETS AND PARAMETERS AND MANAGE DATASETS  ----- ##
 #...............................................................................
 
-                          # Francesco Checchi, Zeina Jamaluddine (January 2024)
+
 
 
 #...............................................................................  

@@ -6,7 +6,7 @@
 ## ----- R SCRIPT TO SPECIFY EXISTING MODELS OF WEIGHT LOSS VS INTAKE  ------ ##
 #...............................................................................
 
-                          # Francesco Checchi, Zeina Jamaluddine (January 2024)
+
 
 
 #...............................................................................  
