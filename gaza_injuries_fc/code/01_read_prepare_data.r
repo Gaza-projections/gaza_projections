@@ -6,9 +6,6 @@
 ## -- R SCRIPT TO READ DATASETS AND PARAMETERS, AND PREPARE FOR ANALYSIS  --- ##
 #...............................................................................
 
-                                # LSHTM (January 2024)
-                                # francesco.checchi@lshtm_ac.uk 
-
 
 #...............................................................................  
 ### Reading in required parameters
