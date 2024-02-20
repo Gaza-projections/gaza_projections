@@ -1,7 +1,7 @@
 ## Scenario-based health impact projections of the war in Gaza (2023-2024)
 ## Repository of analysis scripts and analysis datasets
 
-Contributors: Francesco Checchi, Zhixi Chen, Zeina Jamaluddine, Greg Barnsley, Tak Igusa.
+Contributors: Francesco Checchi, Zhixi Chen, Zeina Jamaluddine, Greg Barnsley, Sebastian Funk, Pratik Gupte, Tak Igusa.
 
 Funding: UK Humanitarian Innovation Hub
 
