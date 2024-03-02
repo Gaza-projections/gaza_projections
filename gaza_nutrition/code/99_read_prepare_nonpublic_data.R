@@ -7,7 +7,58 @@
 #...............................................................................
 
 
+#...............................................................................  
+### Converting the 2019 growth monitoring individual dataset into an aggregate
+#...............................................................................
 
+  #...................................      
+  ## Read data from 2019 [g]rowth [m]onitoring of children in Gaza
+  
+    # Identify file name
+    filename <- paste(dir_path, 'inputs/', 
+      "gaza_GM_UNRWA_reduced_2019_last.dta", sep="")
+    
+    # Read dataframe
+    df_gm <- data.frame(haven::read_dta(filename))
+  
+
+  #...................................      
+  ## Clean the individual dataset
+  
+    # Keep and rename needed columns
+    df_gm <- df_gm[, c("sex", "age_m", "wt", "ht")]
+    colnames(df_gm) <- c("sex", "age_mths", "weight", "height")
+    
+    # Check for missingness and remove missing observations
+    prop.table(table(complete.cases(df_gm)))
+    df_gm <- df_gm[complete.cases(df_gm), ]
+    
+    # Check for ages outside limits
+    range(df_gm$age_mths) # none, all OK
+    
+    # Recode gender
+    df_gm$sex <- ifelse(df_gm$sex == 1, "m", "f")
+
+
+  #...................................      
+  ## Aggregate the dataset by age, gender, height and weight
+    
+    # Generate weight variable
+    df_gm$wt <- 1
+    
+    # Generate integer age in months
+    df_gm$age <- round(df_gm$age_mths, digits = 0)
+    
+    # Aggregate
+    df_gm_agg <- aggregate(list(wt = df_gm$wt), 
+      by = df_gm[, c("sex", "age", "weight", "height")], FUN = sum)
+  
+    # Compute weight variable and save
+    df_gm_agg$wt <- df_gm_agg$wt / sum(df_gm_agg$wt)
+    write_rds(df_gm_agg,
+      paste(dir_path, "inputs/", "gm_anthro_2019_agg.rds", sep=""))
+
+    
 #...............................................................................  
 ### Preparing the 2020 adult NCD survey dataset
 #...............................................................................

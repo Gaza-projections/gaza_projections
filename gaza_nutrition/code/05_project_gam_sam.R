@@ -18,9 +18,10 @@
     
     # Add anthropometric indices
     x <- with(df_gm,
-      anthro::anthro_zscores(sex = sex, age = age_mths, weight = weight,
+      anthro::anthro_zscores(sex = sex, age = age, weight = weight,
           lenhei = height, is_age_in_month = TRUE)
     )
+    x <- cbind(df_gm, x)
     
     # Compute proportion of flagged observations
     prop_flags_base <- prop.table(table(x$fwfl))[["1"]]
@@ -28,49 +29,20 @@
     # Remove flagged WHZ observations (<> 5SD)
     x <- subset(x, fwfl != 1)
       
-    # compute SAM and GAM prevalence
-    sam_base <- prop.table(table(x$zwfl < -3))["TRUE"]
-    gam_base <- prop.table(table(x$zwfl < -2))["TRUE"]    
-
-
-  #...................................      
-  ## Generate a sub-sample of growth monitoring dataset (to expedite processing)
-    
-    # Sample rows in the dataset
-    x <- sample.int(nrow(df_gm), 10000, replace = FALSE)
-
-    # Sample 10,000 observations
-    df_sub <- df_gm[x, ]
-    
-    # Compare SAM and GAM in the full and sub-sample
-      # add anthropometric indices
-      x <- with(df_sub,
-        anthro::anthro_zscores(sex = sex, age = age_mths, weight = weight,
-            lenhei = height, is_age_in_month = TRUE)
-      )
-      
-      # Compute proportion of flagged observations
-      prop_flags_sub <- prop.table(table(x$fwfl))[["1"]]
+    # compute SAM and GAM prevalence (weighted means of categories)
+    x$sam <- ifelse(x$zwfl < - 3, 1, 0)
+    x$gam <- ifelse(x$zwfl < - 2, 1, 0)
         
-      # Remove flagged WHZ observations (<> 5SD)
-      x <- subset(x, fwfl != 1)
-        
-      # compute SAM and GAM prevalence
-      sam_sub <- prop.table(table(x$zwfl < -3))["TRUE"]
-      gam_sub <- prop.table(table(x$zwfl < -2))["TRUE"]    
+    sam_base <- weighted.mean(x$sam, x$wt)
+    gam_base <- weighted.mean(x$gam, x$wt)
     
-      # compare
-      prop_flags_base - prop_flags_sub
-      sam_base - sam_sub
-      gam_base - gam_sub
-        # comparison looks OK!
-          
+
   #...................................      
   ## Initialise or read other objects 
 
     # Read output runs from adult survey analysis, if not already in environment
     if (!exists("out_all") ) {out_all <- read_rds(paste(dir_path, "outputs/", 
-      "out_all_wt_loss_adults.rds", sep=""))}
+      "out_wt_loss_adults_all_runs.rds", sep=""))}
       # rename columns
       colnames(out_all) <- gsub("percent_wt_loss_", "", colnames(out_all))
     
@@ -125,21 +97,25 @@ for (run_i in 1:nrow(runs)) {
      
       # reduce weight of all children (= weight loss in adults +- uncertainty,
         # with uncertainty sampled based on value of rx for run)
-      df_sub$weight_ij <- df_sub$weight *
+      df_gm$weight_ij <- df_gm$weight *
         (1 - out_all[which(out_all$run == run_i & out_all$scenario == i &
           out_all$period == j), "percent_wt_loss"] * rr)
        
       # compute anthropometric indices and flags
-      x <- with(df_sub,
-        anthro::anthro_zscores(sex = sex, age = age_mths, weight = weight_ij,
+      x <- with(df_gm,
+        anthro::anthro_zscores(sex = sex, age = age, weight = weight_ij,
           lenhei = height, is_age_in_month = TRUE) )
-      
+      x <- cbind(df_gm, x)
+            
       # remove flagged WHZ observations (<> 5SD)
       x <- subset(x, fwfl != 1)
       
       # compute SAM and GAM prevalence
-      sam <- prop.table(table(x$zwfl < -3))["TRUE"]
-      gam <- prop.table(table(x$zwfl < -2))["TRUE"]
+      x$sam <- ifelse(x$zwfl < - 3, 1, 0)
+      x$gam <- ifelse(x$zwfl < - 2, 1, 0)
+          
+      sam <- weighted.mean(x$sam, x$wt)
+      gam <- weighted.mean(x$gam, x$wt)
       
       # update output with SAM and GAM prevalence
       out[which(out$run == run_i & out$scenario == i & out$period == j),
