@@ -8,8 +8,6 @@ Funding: UK Humanitarian Innovation Hub
 ### General information
 Welcome to this repository. Every sub-folder on this directory corresponds to a cause-specific module of our report and corresponding Methods Annex, published at www.gaza-projections.org . The sub-folder `gaza_overall` contains code and data required to do final analysis of all the cause-specific modules together.
 
-We will be adding more variable dictionaries and descriptions of code and datasets. Please bear with us while we assemble all of this information.
-
 All of the data contained in this repository are in the public domain, or we have received permission to publish them. The study has received ethics approval from the London School of Hygiene and Tropical Medicine and the Johns Hopkins University Bloomberg School of Public Health.
 
 To replicate the analysis, please download the entire repository and keep the folder structure as it is. Each folder has an inputs-code-outputs structure. All input files are contained in the `/inputs` sub-folder, while all the code is in the `/code` sub-folder and all outputs (data files, tables, graphs) are saved to `/outputs`. Analyses in R can be re-run from `gaza_[xxx]/code/00_master_script.R`, which will load packages and source all other scripts for a given cause-specific module. The directory for reading and outputting files is set automatically when `00_master_script.R` is run. An updated version of R software should be installed (https://www.r-project.org/). We recommend to run the code from the open-source RStudio interface (https://www.rstudio.com/products/rstudio/download/). Both R and RStudio are free and open-source. R package `epidemics`, needed for the infectious diseases analysis, will likely require installing Rtools43 (https://cran.r-project.org/bin/windows/Rtools/rtools43/rtools.html) first. This rather large bundle can be uninstalled once `epidemics` is successfully installed and compiled.
@@ -86,8 +84,10 @@ To replicate the analysis, please download the entire repository and keep the fo
 
 ### Overall analysis (folder `gaza_overall`)
 #### Input files
-(To be added)
+- `gaza_overall_parameters.xlsx` contains key dates (`general` tab), age- and sex-specific population (`pop` tab) and the list of infectious diseases analysed (`list_diseases` tab).
+- `gaza_overall_data.xlsx` contains projected deaths by cause (specific disease for infections and NCDs), scenario, subperiod (months 1-3 and 4-6 of the projection period) and age. Means, medians and lower/upper bounds of the uncertainty interval are provided; 'd_base_[xxx]' means counterfactual baseline estimates, 'd_crisis_[xxx]' projections based on the scenario assumptions, and 'd_excess_[xxx] the difference between 'd_crisis' and 'd_base'. At present this dataset is assembled semi-manually from cause-specific module outputs.
 
 #### Analysis scripts
-(To be added)
-
+- `00_master_script.R` installs/loads packages, sets colour palettes, initialises random numbers, recognises the local directory and calls all the other scripts;
+- `01_read_prepare_data.R` reads parameters and aggregated output from the cause-specific modules; and solves discrepancies in age and sex categories;
+- `02_analyse_data.R` computes and applies adjustment factors for the probability of deaths from concurrent causes, and generates tables and graphs of all-cause mortality. The output `out_adjustment_factors.csv` is then manually copy-pasted into the inputs sub-folders of cause-specific modules, as needed.
