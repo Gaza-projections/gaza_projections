@@ -5,7 +5,7 @@ Contributors: Francesco Checchi, Zhixi Chen, Zeina Jamaluddine, Greg Barnsley, S
 
 Funding: UK Humanitarian Innovation Hub
 
-$${\color{green}### General information}$$
+$${\color{green}Green}$$
 ### General information
 Welcome to this repository. Every sub-folder on this directory corresponds to a cause-specific module of our report and corresponding Methods Annex, published at www.gaza-projections.org . The sub-folder `gaza_overall` contains code and data required to do final analysis of all the cause-specific modules together.
 
