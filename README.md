@@ -55,7 +55,7 @@ To replicate the analysis, please download the entire repository and keep the fo
 - `see_distributions.rds` is produced during the analysis itself and used in subsequent steps, and contains empirical distributions of parameters, derived from expert elicitation.
 - `out_adjustment_factors.csv` is an output of the `gaza_overall` code and is needed here to adjust final injury estimates for the probability of dying from competing causes. See Methods Annex.
 - `fit_model_endemic_deaths.rds` is a model of annual endemic infectious deaths, fit during the analysis itself and used in subsequent steps.
-- 'digaale_pop.rds` and 'digaale_svy.rds` are data from a social mixing survey done among IDPs in Somaliland, used as assumption of the social contact structure for Gaza. These datasets are downloaded by the code from their source online, if not already in the folder.
+- `digaale_pop.rds` and `digaale_svy.rds` are data from a social mixing survey done among IDPs in Somaliland, used as assumption of the social contact structure for Gaza. These datasets are downloaded by the code from their source online, if not already in the folder.
 - the sub-folder `immunity_projections` contains estimates/projections of various immune/susceptible classes, by disease, period and scenario, as produced by the immunity-tracking model. In practice only two of the datasets are used in subsequent steps.
 
 #### Analysis scripts
