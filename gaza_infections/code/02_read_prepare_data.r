@@ -220,10 +220,6 @@
 ### Preparing inputs for SEIR models: susceptibility to infection and disease
 #...............................................................................
 
-#   #...................................      
-#   ## Generate dummy data - ONLY FOR CODE TESTING
-#   source(paste(dir_path, "code/99_generate_dummy_data.R", sep =""))
-
   #...................................      
   ## Read and prepare modelled susceptibility estimates
     
@@ -260,15 +256,6 @@
           sd_modelled[[i]][[j]] <- x
         }
       }
-    
-# #####################
-#     # Correct diphtheria values - implausible
-# 
-#     for (j in c("ceasefire", "escalation", "status_quo")) {
-#       si_modelled[["diphtheria"]][[j]][, ages] <- 0.2 * si_modelled[["diphtheria"]][[j]][, ages]
-#       sd_modelled[["diphtheria"]][[j]][, ages] <- 0.2 * sd_modelled[["diphtheria"]][[j]][, ages]
-#     }
-# #####################    
      
              
   #...................................      
