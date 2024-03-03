@@ -15,7 +15,19 @@ All of the data contained in this repository are in the public domain, or we hav
 To replicate the analysis, please download the entire repository and keep the folder structure as it is. Each folder has an inputs-code-outputs structure. All input files are contained in the `/inputs` sub-folder, while all the code is in the `/code` sub-folder and all outputs (data files, tables, graphs) are saved to `/outputs`. Analyses in R can be re-run from `gaza_[xxx]/code/00_master_script.R`, which will load packages and source all other scripts for a given cause-specific module. The directory for reading and outputting files is set automatically when `00_master_script.R` is run. An updated version of R software should be installed (https://www.r-project.org/). We recommend to run the code from the open-source RStudio interface (https://www.rstudio.com/products/rstudio/download/). Both R and RStudio are free and open-source.
 
 ### Traumatic injuries (folder `gaza_injuries`)
-(please check back for more content)
+#### Input files
+- `gaza_injuries_data.xlsx` contains all the data needed for this module, including daily numbers of deaths and injuries reported by the MoH and UNRWA (worksheet `daily`), line lists of injured persons as provided by the MoH (`moh_list`), extent of internal displacement in shelters (`idps`) and data on deaths and injuries overall and due to unexploded ordnance/mines during the 2014 war (`ordnance`). Each worksheet is one dataset and the `dictionary` worksheet (not needed for analysis) describes each variable.
+- `gaza_injuries_parameters.xlsx` contains parameters needed for the analysis, which can be modified here by the user (worksheet `general`). Worksheet `surv` contains meta-data from a large cohort of injuries, where variable `day` is the number of days since the injury and `p_d` is the proportion of cases who died during the interval since the previous time point.
+- `gaza_noninjury_to_date.xlsx` has been generated manually by binding together deaths due to causes other than traumatic injury, as estimated/projected in all the other cause-specific modules. This is needed here to subtract a non-injury death level from projections based on MoH data.
+- `out_adjustment_factors.csv` is an output of the `gaza_overall` code and is needed here to adjust final injury estimates for the probability of dying from competing causes. See Methods Annex.
+
+#### Analysis scripts
+- `00_master_script.R` installs/loads packages, sets colour palettes, initialises random numbers, recognises the local directory and calls all the other scripts;
+- `01_read_prepare_data.R` reads data and parameters and prepares them for further analysis;
+- `02_prepare_simulations.R` visualises MoH and UNRWA data; fits count models of deaths and injuries, for both the escalation and status quo scenarios; fits a model of the deaths reporting fraction; figures out the age-sex distribution of injury deaths; prepares a template timeline/cohort for further analysis steps; and works out the proportion of injury deaths who die immediately; graphs are produced and outputs saved for next steps;
+- `03_estimate_cf_scenario.R` implements a simulation to project injury deaths and injuries in the ceasefire scenario, including deaths due to injuries sustained previously during the war and due to unexploded ordnance;
+- `04_estimate_sq_es_scenarios.R` implements a simulation to project injury deaths and injuries in the status quo and escalation scenarios;
+- `05_analyse_visualise.R` collects outputs of the above simulations, computes means and uncertainty intervals and tabulates/graphs the findings.
 
 ### Malnutrition (folder `gaza_nutrition`)
 #### Input files
@@ -23,6 +35,7 @@ To replicate the analysis, please download the entire repository and keep the fo
 - `gaza_food_trucks.csv` contains the reported number of food trucks reaching any open crossing into Gaza, per day.
 - `gaza_survey2020_kcal_bmi_agg` contains aggregate (by age, sex) data from a 2020 survey of adults aged 40+ years in Gaza. For each age-sex stratum the dataset reports mean values of the weight, height and daily Kcal intake. The `svy_wt` column contains the relative proportion of survey participants in each age-sex stratum, and is used when averaging results to all age groups.
 - `gm_anthro_2019_agg.rds` contains aggregate (by age in months, sex, height and weight) anthropometric data from systematic growth monitoring of children aged 6-59 months old in Gaza. The data were collected in 2019. The `wt` variable is the proportion of children within the age-sex-height-weight-stratum, and is used when averaging GAM and SAM prevalences for the entire population aged 6-59 momths old.
+- `gaza_nutrition_starvation_lit.xlsx` contains metadata extracted from old studies of people exposed to starvation conditions. The main outcome of interest is weight loss. This dataset is read and analysed by the archived R script `02_fit_wt_loss_model.R` (see below), but is not used for the analysis.
 
 #### Analysis scripts
 - `00_master_script.R` installs/loads packages, sets colour palettes, initialises random numbers, recognises the local directory and calls all the other scripts;
@@ -32,6 +45,6 @@ To replicate the analysis, please download the entire repository and keep the fo
 - `04_estimate_wt_loss.R` applies the estimated/projected nutrient intake to a 2020 survey of adult anthropometry and food intake. A mechanistic model is used to estimate/project percent weight loss. The analysis occurs in a simulation to account for parameter uncertainty; each simulation run is outputted, and graphs are generated.
 - `05_project_gam_sam.R` applies the estimated/projected adult weight loss to pre-war anthropometric data from children 6-59 months old, and computed globald and severe acute malnutrition prevalence. This is also done in a simulation. Graphs and tables are outputted.
 - `06_project_breastfeeding.R` projects the reduction in exclusive breastfeeding based on the pre-war level in Gaza and observed reductions in crisis-affected settings in the region.
-- The `archive` sub-folder includes the scripts (i) `99_read_prepare_nonpublic_data.R` so users can see how we managed datasets that are not released publicly in their original form. This script cannot be implemented as the datasets it relies on are not made public; and (ii) `02_fit_wt_loss_model.R`, which fits a model to old studies of weight loss among people exposed to starvation: this model has not been used in the analysis.
+- The `archive` sub-folder includes the scripts (i) `99_read_prepare_nonpublic_data.R` so users can see how we managed datasets that are not released publicly in their original form. This script cannot be implemented as the datasets it relies on are not made public; and (ii) `02_fit_wt_loss_model.R`, which fits a model to old studies of weight loss among people exposed to starvation (see above, `gaza_nutrition_starvation_lit.xlsx`): this model has not been used in the analysis.
 
 ### Infectious diseases (folder `gaza_infections`)
