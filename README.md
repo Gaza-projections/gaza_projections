@@ -5,6 +5,8 @@ Contributors: Francesco Checchi, Zhixi Chen, Zeina Jamaluddine, Greg Barnsley, S
 
 Funding: UK Humanitarian Innovation Hub
 
+***
+
 ### General information
 Welcome to this repository. Every sub-folder on this directory corresponds to a cause-specific module of our report and corresponding Methods Annex, published at www.gaza-projections.org . The sub-folder `gaza_overall` contains code and data required to do final analysis of all the cause-specific modules together.
 
@@ -12,7 +14,7 @@ All of the data contained in this repository are in the public domain, or we hav
 
 To replicate the analysis, please download the entire repository and keep the folder structure as it is. Each folder has an inputs-code-outputs structure. All input files are contained in the `/inputs` sub-folder, while all the code is in the `/code` sub-folder and all outputs (data files, tables, graphs) are saved to `/outputs`. Analyses in R can be re-run from `gaza_[xxx]/code/00_master_script.R`, which will load packages and source all other scripts for a given cause-specific module. The directory for reading and outputting files is set automatically when `00_master_script.R` is run. An updated version of R software should be installed (https://www.r-project.org/). We recommend to run the code from the open-source RStudio interface (https://www.rstudio.com/products/rstudio/download/). Both R and RStudio are free and open-source. R package `epidemics`, needed for the infectious diseases analysis, will likely require installing Rtools43 (https://cran.r-project.org/bin/windows/Rtools/rtools43/rtools.html) first. This rather large bundle can be uninstalled once `epidemics` is successfully installed and compiled.
 
-*****
+***
 
 ### Traumatic injuries (folder `gaza_injuries`)
 #### Input files
@@ -28,6 +30,8 @@ To replicate the analysis, please download the entire repository and keep the fo
 - `03_estimate_cf_scenario.R` implements a simulation to project injury deaths and injuries in the ceasefire scenario, including deaths due to injuries sustained previously during the war and due to unexploded ordnance;
 - `04_estimate_sq_es_scenarios.R` implements a simulation to project injury deaths and injuries in the status quo and escalation scenarios;
 - `05_analyse_visualise.R` collects outputs of the above simulations, computes means and uncertainty intervals and tabulates/graphs the findings.
+
+***
 
 ### Malnutrition (folder `gaza_nutrition`)
 #### Input files
@@ -46,6 +50,8 @@ To replicate the analysis, please download the entire repository and keep the fo
 - `05_project_gam_sam.R` applies the estimated/projected adult weight loss to pre-war anthropometric data from children 6-59 months old, and computed globald and severe acute malnutrition prevalence. This is also done in a simulation. Graphs and tables are outputted.
 - `06_project_breastfeeding.R` projects the reduction in exclusive breastfeeding based on the pre-war level in Gaza and observed reductions in crisis-affected settings in the region.
 - The `archive` sub-folder includes the scripts (i) `99_read_prepare_nonpublic_data.R` so users can see how we managed datasets that are not released publicly in their original form. This script cannot be implemented as the datasets it relies on are not made public; and (ii) `02_fit_wt_loss_model.R`, which fits a model to old studies of weight loss among people exposed to starvation (see above, `gaza_nutrition_starvation_lit.xlsx`): this model has not been used in the analysis.
+
+***
 
 ### Infectious diseases (folder `gaza_infections`)
 #### Input files
@@ -68,6 +74,8 @@ To replicate the analysis, please download the entire repository and keep the fo
 - `05_analyse_and_visualise.R` analyses outputs, producing graphs and tables.
 - `04b_run_simulations_to_date.R` is not needed for the analysis, but produces estimates of endemic infection deaths for the war period to date.
 
+***
+
 ### Maternal and neonatal health problems (folder `gaza_mnh`)
 #### Input files
 - `gaza_mnh_list_outputs.xlsx` is the output of the LiST model as applied in this project, and is used to produce graphs and tables in R. The file contains four worksheets. Worksheets `maternal`, `neonatal` and `stillbirths` contain LiST-projected maternal deaths, neonatal deaths and stillbirths (excluding those due to traumatic injury), by scenario and period (months 1-3, months 4-6 in the projection period); the columns `mean`, `lci` and `uci` contain point estimates and 95% uncertainty intervals, while column `d_crisis_excess` indicates whether the value refers to the counterfactual baseline ('d_baseline'), the projection under scenario assumptions ('d_crisis'), or excess deaths ('d_crisis' - 'd_baseline'). Worksheet `cum` contains excess maternal deaths, neonatal deaths and stillbirths by month, including pre-war, the period to date and the three scenarios: only the point estimate is included.
@@ -77,12 +85,16 @@ To replicate the analysis, please download the entire repository and keep the fo
 #### Analysis scripts
 - `01_visualise_outputs.R` creates graphs based on `gaza_mnh_list_outputs.xlsx`. Note that the MNH analysis was done using the LiST model, which does not run on R software.
 
+***
+
 ### Non-communicable diseases (folder `gaza_NCDs`)
 #### Input files
 (To be added)
 
 #### Analysis scripts
 (To be added)
+
+***
 
 ### Overall analysis (folder `gaza_overall`)
 #### Input files
