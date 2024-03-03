@@ -68,3 +68,26 @@ To replicate the analysis, please download the entire repository and keep the fo
 - `05_analyse_and_visualise.R` analyses outputs, producing graphs and tables.
 - `04b_run_simulations_to_date.R` is not needed for the analysis, but produces estimates of endemic infection deaths for the war period to date.
 
+### Maternal and neonatal health problems (folder `gaza_mnh`)
+#### Input files
+- `gaza_mnh_list_outputs.xlsx` is the output of the LiST model as applied in this project, and is used to produce graphs and tables in R. The file contains four worksheets. Worksheets `maternal`, `neonatal` and `stillbirths` contain LiST-projected maternal deaths, neonatal deaths and stillbirths (excluding those due to traumatic injury), by scenario and period (months 1-3, months 4-6 in the projection period); the columns `mean`, `lci` and `uci` contain point estimates and 95% uncertainty intervals, while column `d_crisis_excess` indicates whether the value refers to the counterfactual baseline ('d_baseline'), the projection under scenario assumptions ('d_crisis'), or excess deaths ('d_crisis' - 'd_baseline'). Worksheet `cum` contains excess maternal deaths, neonatal deaths and stillbirths by month, including pre-war, the period to date and the three scenarios: only the point estimate is included.
+- `gaza_MNH-LiST_pre war_indicators.xlsx` is a collection of pre-war indicators / data relevant to the MNH module, only included for reference.
+- `gaza_MNH_LiST_final_reduction_2024.xlsx` contains the scenario-specific assumptions fed into the LiST model. For more details on how LiST was used, please see the Methods Annex or write to info@gaza-projections.org .
+
+#### Analysis scripts
+- `01_visualise_outputs.R` creates graphs based on `gaza_mnh_list_outputs.xlsx`. Note that the MNH analysis was done using the LiST model, which does not run on R software.
+
+### Non-communicable diseases (folder `gaza_NCDs`)
+#### Input files
+(To be added)
+
+#### Analysis scripts
+(To be added)
+
+### Overall analysis (folder `gaza_overall`)
+#### Input files
+(To be added)
+
+#### Analysis scripts
+(To be added)
+
