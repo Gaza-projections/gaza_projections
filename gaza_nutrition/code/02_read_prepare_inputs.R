@@ -16,12 +16,9 @@
   #...................................      
   ## Read data on [tr]ucks arriving into Gaza
 
-    # Identify file name
-    filename <- paste(dir_path, 'inputs/', "gaza_calories.dta", sep="")
+  df_tr <- read.csv(paste(dir_path, 'inputs/', "gaza_food_trucks.csv", sep =""))
     
-    # Read dataframe
-    df_tr <- data.frame(haven::read_dta(filename))
-    
+
   #...................................      
   ## Read aggregate data from a 2020 survey of NCDs,
     # containing [ad]ult BMI and diet intake
