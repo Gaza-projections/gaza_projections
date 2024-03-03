@@ -12,7 +12,7 @@ All of the data contained in this repository are in the public domain, or we hav
 
 To replicate the analysis, please download the entire repository and keep the folder structure as it is. Each folder has an inputs-code-outputs structure. All input files are contained in the `/inputs` sub-folder, while all the code is in the `/code` sub-folder and all outputs (data files, tables, graphs) are saved to `/outputs`. Analyses in R can be re-run from `gaza_[xxx]/code/00_master_script.R`, which will load packages and source all other scripts for a given cause-specific module. The directory for reading and outputting files is set automatically when `00_master_script.R` is run. An updated version of R software should be installed (https://www.r-project.org/). We recommend to run the code from the open-source RStudio interface (https://www.rstudio.com/products/rstudio/download/). Both R and RStudio are free and open-source. R package `epidemics`, needed for the infectious diseases analysis, will likely require installing Rtools43 (https://cran.r-project.org/bin/windows/Rtools/rtools43/rtools.html) first. This rather large bundle can be uninstalled once `epidemics` is successfully installed and compiled.
 
-***
+*
 
 ### Traumatic injuries (folder `gaza_injuries`)
 #### Input files
