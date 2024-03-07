@@ -89,8 +89,8 @@ To replicate the analysis, please download the entire repository and keep the fo
 #### Input files
 - `gaza_NCD_baseline_mortality.xlsx` contains annual mortality figures attributable to NCDs along with age-specific mortality data due to NCDs, as reported by the MoH.
 - `gaza_NCD_treated_untreated.xlsx` contains the relative survival rates for patients with NCDs from literature, focusing on the acute phase survival and long-term survival up to 10 years post-diagnosis. It is important to note that the survival rates presented are conditional upon survival of the acute phase for stroke and ischemic heart disease, and acute presentation data for other NCDs have been omitted.
-- `gaza_NCD_coverage.xlsx' contains assumed ranges of treatment coverage for specific NCD-relevant treatment services. The assumptions are based on pre-war data, expert knowledge, and conversations with health actors within Gaza.
-- ‘HR_new_logistic_normal.xlsx’ contains pre-calculated hazard rates (acute phase up to 40 years post-diagnosis) for each NCD  based on survival curves fitted using the Log-normal, Log-logistic, and Exponential survival distributions.
+- `gaza_NCD_coverage.xlsx` contains assumed ranges of treatment coverage for specific NCD-relevant treatment services. The assumptions are based on pre-war data, expert knowledge, and conversations with health actors within Gaza.
+- `HR_new_logistic_normal.xlsx` contains pre-calculated hazard rates (acute phase up to 40 years post-diagnosis) for each NCD  based on survival curves fitted using the Log-normal, Log-logistic, and Exponential survival distributions.
 
 #### Analysis scripts
 (To be added)
