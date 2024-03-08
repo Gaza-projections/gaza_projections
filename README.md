@@ -88,13 +88,17 @@ To replicate the analysis, please download the entire repository and keep the fo
 ### Non-communicable diseases (folder `gaza_NCDs`)
 #### Input files
 - `gaza_NCD_baseline_mortality.xlsx` contains annual mortality figures attributable to NCDs along with age-specific mortality data due to NCDs, as reported by the MoH.
-- `gaza_NCD_treated_untreated.xlsx` contains the relative survival rates for patients with NCDs from literature, focusing on the acute phase survival and long-term survival up to 10 years post-diagnosis. It is important to note that the survival rates presented are conditional upon survival of the acute phase for stroke and ischemic heart disease, and acute presentation data for other NCDs have been omitted.
+- `gaza_NCD_treated_untreated.xlsx` contains the relative survival rates for patients with NCDs from literature, focusing on the acute phase survival and long-term survival up to 10 years post-diagnosis. It is important to note that the survival rates presented are conditional upon survival of the acute phase for stroke and ischemic heart disease, and acute presentation data for other NCDs have been omitted. The column `treated_untreated` displays survival data labels. Labels accompanied by lb or ub indicate a lower bound or upper bound, respectively.
 - `gaza_NCD_coverage.xlsx` contains assumed ranges of treatment coverage for specific NCD-relevant treatment services. The assumptions are based on pre-war data, expert knowledge, and conversations with health actors within Gaza.
 - `HR_new_logistic_normal.xlsx` contains pre-calculated hazard rates (acute phase up to 40 years post-diagnosis) for each NCD  based on survival curves fitted using the Log-normal, Log-logistic, and Exponential survival distributions.
+- `gaza_NCD_treated_untreated_survival.xlsx` includes all the information (`gaza_NCD_baseline_mortality.xlsx`, `gaza_NCD_treated_untreated.xlsx`, `gaza_NCD_coverage.xlsx`) in a format that is readable by code.
 
 #### Analysis scripts
-(To be added)
-
+- `01_survival_curve_fitting.py` contains functions for fitting survival curves using four candidate distributions (i.e., Weibull, log-normal, log-logistic, and gamma). Fitting results were stored for further distribution selection. Detailed distribution selection and parameters can be found in the Methods Annex.
+- `02_hazard_rate_pre_generator.py` contains the process of generating hazard rates for various Non-Communicable Diseases (NCDs) across different survival periods (0-10 years). Results can be found in the input folder with the file name of `HR_new_logistic_normal.xlsx`.
+- `03_ncd_main_simulation.m` contains the main simulation function for NCD projection model. Before run the main simulation please make sure you change the name into valid name for MATLAB and select the NCD for simulation on line 82.
+- `04_sim_out_processing.py` analyses the simulation outputs and processes the data into wanted format.
+- `05_NCDs visuals.R` creates graphs for the outputs.
 ***
 
 ### Overall analysis (folder `gaza_overall`)
