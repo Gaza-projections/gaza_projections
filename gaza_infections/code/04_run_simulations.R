@@ -170,13 +170,14 @@ out_epid <- do.call(bind_rows, flatten(out_epid))
 with_progress({
   p <- progressor(steps = length(sim))
   out_ende <- future_lapply(sim, future.seed = TRUE, function(run_sim) {
-
-    p()
+  p()
+  
   ## For each scenario...
   lapply(scenarios, function(i) {
 
     # Get parameter values for this run and scenario
-    sim_pars <- run_sim[[i]][which(run_sim[[i]]$parameter %in% c("r0_rr", "cfr_rr")),
+    sim_pars <- run_sim[[i]][which(run_sim[[i]]$parameter %in% 
+        c("r0_rr", "cfr_rr")),
       c("disease", "parameter", "subperiod", "value_gen")]
 
     # Initialise fresh timeline

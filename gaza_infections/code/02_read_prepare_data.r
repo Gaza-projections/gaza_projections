@@ -561,11 +561,11 @@
       # add subperiod
       timeline_ende$subperiod <- "pre-war"
       timeline_ende[which(timeline_ende$date %in% 
-        date_crisis : (date_start - 1)), "subperiod"] <- "to date"
+        as.Date(date_crisis : (date_start - 1))), "subperiod"] <- "to date"
       timeline_ende[which(timeline_ende$date %in% 
-        date_start : (date_mid - 1)), "subperiod"] <- "months 1 to 3"
+        as.Date(date_start : (date_mid - 1))), "subperiod"] <- "months 1 to 3"
       timeline_ende[which(timeline_ende$date %in% 
-        date_mid : date_end), "subperiod"] <- "months 4 to 6"
+        as.Date(date_mid : date_end)), "subperiod"] <- "months 4 to 6"
       timeline_ende[which(timeline_ende$date > date_end), "subperiod"] <- "post"
       
       # add population    

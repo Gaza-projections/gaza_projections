@@ -197,7 +197,7 @@ f_seir <- function(disease_f, scenario_f, timeline_f, rx_start_f,
       
     # Define time-varying parameters
     time_dependence = list(
-      transmissibility = function(time, x, x2 = r0_2 / tau_2, 
+      transmission_rate = function(time, x, x2 = r0_2 / tau_2, 
         time_change = time_periods["end_subperiod1"]) {
         if(time > time_change) x2
         else x
@@ -215,9 +215,9 @@ f_seir <- function(disease_f, scenario_f, timeline_f, rx_start_f,
     )
       
     # Run SEIR model to end of sub-period 1
-    run_seir <- epidemics::model_default_cpp(
+    run_seir <- epidemics::model_default(
       population = model_population,
-      transmissibility = r0 / tau,
+      transmission_rate = r0 / tau,
       infectiousness_rate = 1 / pre_tau,
       recovery_rate = 1 / tau,
       time_end = days_subperiod1 + days_subperiod2,
@@ -244,9 +244,9 @@ f_seir <- function(disease_f, scenario_f, timeline_f, rx_start_f,
         "pre_tau"])
       
     # Run SEIR model till the end of sub-period 2
-    run_seir <- epidemics::model_default_cpp(
+    run_seir <- epidemics::model_default(
       population = model_population,
-      transmissibility = r0 / tau,
+      transmission_rate = r0 / tau,
       infectiousness_rate = 1 / pre_tau,
       recovery_rate = 1 / tau,
       time_end = days_subperiod2,

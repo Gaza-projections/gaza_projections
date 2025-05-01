@@ -7,36 +7,6 @@
 #...............................................................................
 
  
-#...............................................................................   
-### Initialising objects needed for the simulations
-#...............................................................................
-
-  #...................................      
-  ## Initialise daily timeline with age groups and population (for epidemics)
-    
-    # Initialise a timeline object
-    timeline_sim <- timeline
-    
-    # Add age groups and convert to long
-    timeline_sim[, ages] <- NA
-    timeline_sim <- reshape(timeline_sim, direction = "long",
-        varying = list(ages),
-        timevar = "age",
-        times = ages
-      )
-    timeline_sim <- timeline_sim[, ! colnames(timeline_sim) %in% c("0mo", "id")]
-
-    # Add age categories used by the model
-    age <- data.frame(age = ages, demography_group = names(demography_vector))
-    timeline_sim <- merge(timeline_sim, age, by = "age", all.x = TRUE)
-
-    # Add population
-    pop <- data.frame(demography_group = names(demography_vector),
-      pop = demography_vector)
-    timeline_sim <- merge(timeline_sim, pop, by = "demography_group", 
-      all.x = TRUE)
-  
- 
 #...............................................................................
 ### Running stable-transmission simulations for to date period
 #...............................................................................
@@ -165,9 +135,34 @@ out_ende <- do.call(bind_rows, flatten(out_ende))
     out$month_start <- ymd(paste(out$year, out$month, "07", sep = "-"))
     
     # Save
-    write.csv(out, paste(dir_path, "outputs/out_ende_to_date.csv", 
+    write.csv(out, paste(dir_path, "outputs/out_ende_to_date_by_age.csv", 
       sep = "/"), row.names = FALSE)    
   
+    
+  #...................................      
+  ## Tabulate deaths by scenario, disease, month and year
+
+    # Aggregate
+    out_ende <- subset(out_ende, scenario == "status quo")
+    out <- aggregate(out_ende[, grep("d_", colnames(out_ende))],
+      by = out_ende[, c("disease", "month", "year", "run")], FUN = sum)
+    out <- aggregate(out[, grep("d_", colnames(out))],
+      by = out[, c("disease", "month", "year")], 
+      FUN = function(x) {return(c(mean(x), quantile(x, c(0.025, 0.975))) )} )
+    out <- data.frame(out[, c("disease", "month", "year")],
+      out$d_base, out$d_crisis)
+    colnames(out) <- c("disease", "month", "year", 
+      paste("base", c("mean", "lci", "uci"), sep = "_"),
+      paste("crisis", c("mean", "lci", "uci"), sep = "_")
+    )
+
+    # Generate start date of month
+    out$month_start <- ymd(paste(out$year, out$month, "07", sep = "-"))
+    
+    # Save
+    write.csv(out, paste(dir_path, "outputs/out_ende_to_date_by_disease.csv", 
+      sep = "/"), row.names = FALSE)    
+    
 #...............................................................................   
 ### ENDS
 #...............................................................................
