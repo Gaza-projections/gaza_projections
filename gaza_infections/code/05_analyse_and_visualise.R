@@ -407,7 +407,7 @@
 #...............................................................................
 
   #...................................      
-  ## Read and format output as needed
+  ## Read and format projection output as needed
 
    # Read simulation output if not already in environment
     if (! exists("out_ende")) {out_ende <- read_rds(paste(dir_path,
@@ -424,6 +424,42 @@
       paste("d_crisis", c("mean", "lci", "uci"), sep = "_"),
       paste("d_excess", c("mean", "lci", "uci"), sep = "_"))
 
+  #...................................      
+  ## Read and format retrospective ('to date') output as needed
+
+   # Read simulation output if not already in environment
+   if (! exists("out_ende_to_date_by_disease")) {
+    out_ende_to_date_by_disease <- read_csv(paste0(dir_path,
+      'outputs/',"out_ende_to_date_by_disease.csv"=))}
+   if (! exists("out_ende_to_date_by_age")) {
+    out_ende_to_date_by_age <- read_csv(paste0(dir_path,
+      'outputs/',"out_ende_to_date_by_age.csv"=))}
+        
+    # Format age
+    out_ende_to_date_by_age$age <- 
+      gsub("to", " to ", out_ende_to_date_by_age$age)
+
+    # Compute excess deaths
+    out_ende_to_date_by_age$excess_mean <- 
+      out_ende_to_date_by_age$crisis_mean - 
+      out_ende_to_date_by_age$base_mean
+    out_ende_to_date_by_age$excess_lci <- 
+      out_ende_to_date_by_age$crisis_lci - 
+      out_ende_to_date_by_age$base_lci
+    out_ende_to_date_by_age$excess_uci <- 
+      out_ende_to_date_by_age$crisis_uci - 
+      out_ende_to_date_by_age$base_uci
+    
+    out_ende_to_date_by_disease$excess_mean <- 
+      out_ende_to_date_by_disease$crisis_mean - 
+      out_ende_to_date_by_disease$base_mean
+    out_ende_to_date_by_disease$excess_lci <- 
+      out_ende_to_date_by_disease$crisis_lci - 
+      out_ende_to_date_by_disease$base_lci
+    out_ende_to_date_by_disease$excess_uci <- 
+      out_ende_to_date_by_disease$crisis_uci - 
+      out_ende_to_date_by_disease$base_uci
+    
   #...................................
   ## If aggregation has already been done, adjust for multiple risks of deaths
     
@@ -446,8 +482,10 @@
 
   }
     
+##### Note: no adjustment for period to date done for paper yet (but negligible)
+    
   #...................................      
-  ## Tabulate deaths by scenario, disease, age group and subperiod
+  ## Tabulate deaths by scenario, disease, age group and projection subperiod
   tab1 <- aggregate(list(out_ende[, grep("d_", colnames(out_ende))]),
     by = out_ende[, c("scenario", "disease", "subperiod", "age")], 
     FUN = function(x) {return(c(mean(x), quantile(x, c(0.5, 0.025, 0.975))) )} )
@@ -464,7 +502,7 @@
     row.names = FALSE)
 
   #...................................      
-  ## Tabulate deaths by scenario, disease, and subperiod
+  ## Tabulate deaths by scenario, disease, and projection subperiod
     
     # Aggregate
     tab2 <- aggregate(out_ende[, grep("d_", colnames(out_ende))],
@@ -507,7 +545,7 @@
       sep = "/"), row.names = FALSE)
     
   #...................................      
-  ## Tabulate deaths by scenario, age, and subperiod
+  ## Tabulate deaths by scenario, age, and projection subperiod
 
     # Aggregate
     tab3 <- aggregate(out_ende[, grep("d_", colnames(out_ende))],
@@ -551,7 +589,7 @@
     
     
   #...................................      
-  ## Tabulate deaths by scenario and subperiod
+  ## Tabulate deaths by scenario and projection subperiod
 
     # Aggregate
     tab4 <- aggregate(out_ende[, grep("d_", colnames(out_ende))],
@@ -593,6 +631,7 @@
       sep = "/"), row.names = FALSE)
   
 
+    
 #...............................................................................   
 ### ENDS
 #...............................................................................
