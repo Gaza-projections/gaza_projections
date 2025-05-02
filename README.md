@@ -28,6 +28,7 @@ To replicate the analysis, please download the entire repository and keep the fo
 - `03_estimate_cf_scenario.R` implements a simulation to project injury deaths and injuries in the ceasefire scenario, including deaths due to injuries sustained previously during the war and due to unexploded ordnance;
 - `04_estimate_sq_es_scenarios.R` implements a simulation to project injury deaths and injuries in the status quo and escalation scenarios;
 - `05_analyse_visualise.R` collects outputs of the above simulations, computes means and uncertainty intervals and tabulates/graphs the findings.
+- `06_estimate_period_to_date.R` estimates injury deaths during the period to date (between 7 Oct 2023 and the start of the projection period). This script was added in May 2025 to support various papers arising from the project.
 
 ***
 
