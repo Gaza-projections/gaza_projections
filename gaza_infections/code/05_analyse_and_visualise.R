@@ -633,5 +633,217 @@
 
     
 #...............................................................................   
+### Visualising immunity / susceptibility estimates
+#...............................................................................
+
+  #...................................      
+  ## Read and prepare immunity to infection/disease outputs
+    
+    # Read datasets
+    to_date <- readRDS(paste0(dir_path, "inputs/immunity_projections/",
+      "output_pre_war_immune.rds"))
+    proj <- read_rds(paste0(dir_path, "inputs/immunity_projections/",
+      "output_immune.rds"))
+    diseases <- names(to_date)
+    
+    # Unlist datasets
+    to_date <- lapply(to_date, rapply, f = c)
+    to_date <- as.data.frame(do.call(cbind, to_date))
+    x <- data.frame(do.call(rbind, strsplit(rownames(to_date), "[.]")))
+    colnames(x) <- c("scenario", "age")
+    x$age <- sapply(x$age, function(xx) {substr(xx, 1, nchar(xx) - 1)})
+    to_date[, c("scenario", "age")] <- x
+    x <- as.Date(c("2023-09-07", "2023-10-07", "2023-11-07", "2023-12-07",
+      "2024-01-07"))
+    to_date$month_start <- x
+    
+    proj <- lapply(proj, rapply, f = c)
+    proj <- as.data.frame(do.call(cbind, proj))
+    x <- data.frame(do.call(rbind, strsplit(rownames(proj), "[.]")))
+    colnames(x) <- c("scenario", "age")
+    x$age <- sapply(x$age, function(xx) {substr(xx, 1, nchar(xx) - 1)})
+    proj[, c("scenario", "age")] <- x
+    x <- as.Date(c("2024-02-07", "2024-03-07", "2024-04-07", "2024-05-07",
+      "2024-06-07", "2024-07-07"))
+    proj$month_start <- x
+    
+    # Bind datasets together and reshape
+    immu_inf <- rbind(to_date, proj)
+    immu_inf <- reshape(immu_inf, direction = "long", varying = diseases,
+      v.names = "prop_imm", timevar = "disease", times = diseases, 
+      idvar = c("age", "scenario", "month_start"))
+    
+    # Add age proportions out of all population
+    pop1 <- pop[1:10]
+    pop1 <- c(pop1, sum(pop[11:13]))
+    names(pop1)[length(pop1)] <- "60to100yo"
+    pop1 <- data.frame(age = names(pop1), prop_age = pop1 / sum(pop1))
+    immu_inf <- merge(immu_inf, pop1, by = "age", all.x = T)
+    
+  #...................................      
+  ## Read and prepare immunity to infection/disease outputs
+    
+    # Read datasets
+    to_date <- readRDS(paste0(dir_path, "inputs/immunity_projections/",
+      "output_pre_war_immune_disease_only.rds"))
+    proj <- read_rds(paste0(dir_path, "inputs/immunity_projections/",
+      "output_immune_disease_only.rds"))
+    diseases <- names(to_date)
+    
+    # Unlist datasets
+    to_date <- lapply(to_date, rapply, f = c)
+    to_date <- as.data.frame(do.call(cbind, to_date))
+    x <- data.frame(do.call(rbind, strsplit(rownames(to_date), "[.]")))
+    colnames(x) <- c("scenario", "age")
+    x$age <- sapply(x$age, function(xx) {substr(xx, 1, nchar(xx) - 1)})
+    to_date[, c("scenario", "age")] <- x
+    x <- as.Date(c("2023-09-07", "2023-10-07", "2023-11-07", "2023-12-07",
+      "2024-01-07"))
+    to_date$month_start <- x
+    
+    proj <- lapply(proj, rapply, f = c)
+    proj <- as.data.frame(do.call(cbind, proj))
+    x <- data.frame(do.call(rbind, strsplit(rownames(proj), "[.]")))
+    colnames(x) <- c("scenario", "age")
+    x$age <- sapply(x$age, function(xx) {substr(xx, 1, nchar(xx) - 1)})
+    proj[, c("scenario", "age")] <- x
+    x <- as.Date(c("2024-02-07", "2024-03-07", "2024-04-07", "2024-05-07",
+      "2024-06-07", "2024-07-07"))
+    proj$month_start <- x
+    
+    # Bind datasets together and reshape
+    immu_dis <- rbind(to_date, proj)
+    immu_dis <- reshape(immu_dis, direction = "long", varying = diseases,
+      v.names = "prop_imm_dis", timevar = "disease", times = diseases, 
+      idvar = c("age", "scenario", "month_start"))
+    
+    # Add age proportions out of all population
+    pop1 <- pop[1:10]
+    pop1 <- c(pop1, sum(pop[11:13]))
+    names(pop1)[length(pop1)] <- "60to100yo"
+    pop1 <- data.frame(age = names(pop1), prop_age = pop1 / sum(pop1))
+    immu_dis <- merge(immu_dis, pop1, by = "age", all.x = T)
+
+  #...................................      
+  ## Visualise immunity estimates
+    
+    # Bind both infection and disease datasets together
+    immu_inf$against <- "infection"
+    immu_dis$against <- "disease"
+    colnames(immu_dis)[colnames(immu_dis) == "prop_imm_dis"] <- "prop_imm"
+    immu <- rbind(immu_inf, immu_dis)
+    immu[which(immu$month_start == as.Date("2023-09-07")), "scenario"] <- 
+      "pre-war"
+    immu[which(immu$month_start %in% as.Date(c("2023-10-07", "2023-11-07", 
+      "2023-12-07", "2024-01-07"))), "scenario"] <- "to date"
+    immu[which(immu$scenario == "status_quo"), "scenario"] <- "status quo"
+    
+    # Compute weighted proportion immune - all ages
+    immu_all <- immu
+    immu_all$wt <- immu_all$prop_imm * immu_all$prop_age
+    immu_all <- aggregate(immu_all[, c("wt", "prop_age")], 
+      by = immu_all[, c("scenario", "month_start", "disease", "against")],
+      FUN = sum)
+    immu_all$prop_imm <- immu_all$wt / immu_all$prop_age
+    immu_all$prop_imm_min <- NA
+    immu_all$prop_imm_max <- NA
+    for (i in unique(immu_all$against)) {
+      for (j in unique(immu_all$disease)) {
+        for (k in unique(immu_all$month_start)) {
+          x <- which(immu_all$against == i & immu_all$disease == j &
+            immu_all$month_start == k)
+          immu_all[x, "prop_imm_min"] <- min(immu_all[x, "prop_imm"])
+          immu_all[x, "prop_imm_max"] <- max(immu_all[x, "prop_imm"])
+        }
+      }
+    }
+    immu_all <- subset(immu_all, 
+      scenario %in% c("pre-war", "to date", "status quo"))
+    immu_all[which(immu_all$scenario != "status quo"), c("prop_imm_min",
+      "prop_imm_max")] <- NA
+    
+    # Compute weighted proportion immune - under 5y
+    immu_u5 <- immu[which(immu$age %in% c("0mo", "1to11mo", "12to59mo")), ]
+    immu_u5$wt <- immu_u5$prop_imm * immu_u5$prop_age
+    immu_u5 <- aggregate(immu_u5[, c("wt", "prop_age")], 
+      by = immu_u5[, c("scenario", "month_start", "disease", "against")],
+      FUN = sum)
+    immu_u5$prop_imm <- immu_u5$wt / immu_u5$prop_age
+    immu_u5$prop_imm_min <- NA
+    immu_u5$prop_imm_max <- NA
+    for (i in unique(immu_u5$against)) {
+      for (j in unique(immu_u5$disease)) {
+        for (k in unique(immu_u5$month_start)) {
+          x <- which(immu_u5$against == i & immu_u5$disease == j &
+            immu_u5$month_start == k)
+          immu_u5[x, "prop_imm_min"] <- min(immu_u5[x, "prop_imm"])
+          immu_u5[x, "prop_imm_max"] <- max(immu_u5[x, "prop_imm"])
+        }
+      }
+    }
+    immu_u5 <- subset(immu_u5, 
+      scenario %in% c("pre-war", "to date", "status quo"))
+    immu_u5[which(immu_u5$scenario != "status quo"), c("prop_imm_min",
+      "prop_imm_max")] <- NA
+    
+    # Graph immunity among all ages, by disease and type
+    plot1 <- ggplot(immu_all, aes(x = month_start, y = prop_imm, colour = against,
+      fill = against)) +
+      # geom_point(alpha = 0.5, size = 2, position = position_dodge(width = 5)) +
+      geom_line(alpha = 0.75, linewidth = 1, 
+        position = position_dodge(width = 10)) +
+      geom_errorbar(alpha = 0.75, aes(ymin = prop_imm_min, ymax = prop_imm_max),
+        width = 25, linewidth = 0.5, position = position_dodge(width = 10)) +
+      # geom_ribbon(alpha = 0.75, aes(ymin = prop_imm_min, ymax = prop_imm_max),
+      #   colour = NA, position = position_dodge(width = 10)) +
+      scale_x_date("month starting", breaks = unique(immu_all$month_start),
+        labels = unique(immu_all$month_start), date_labels = "%d-%m-%Y") +
+      scale_y_continuous("percent immune", labels = percent, 
+        breaks = seq(0, 1, 0.2), expand = c(0,0), limits = c(0,1)) +
+      # scale_shape_manual("immune to", values = c(0,2)) +
+      facet_wrap(disease ~ ., ncol = 4) +
+      theme_bw() +
+      theme(legend.position = "top", axis.text.x = element_text(angle = 45,
+        hjust = 1, vjust = 1)) +
+      scale_colour_manual("immune to", values = palette_gen[c(7,12)]) +
+      scale_fill_manual("immune to", values = palette_gen[c(7,12)]) +
+      geom_vline(xintercept = as.Date(c("2023-10-07", "2024-02-07")),
+        linetype = "11", linewidth = 0.5, colour = palette_gen[1])
+ 
+    # Graph immunity among children under 5yo, by disease and type
+    plot2 <- ggplot(immu_u5, aes(x = month_start, y = prop_imm, colour = against,
+      fill = against)) +
+      # geom_point(alpha = 0.5, size = 2, position = position_dodge(width = 5)) +
+      geom_line(alpha = 0.75, linewidth = 1, 
+        position = position_dodge(width = 10)) +
+      geom_errorbar(alpha = 0.75, aes(ymin = prop_imm_min, ymax = prop_imm_max),
+        width = 25, linewidth = 0.5, position = position_dodge(width = 10)) +
+      # geom_ribbon(alpha = 0.75, aes(ymin = prop_imm_min, ymax = prop_imm_max),
+      #   colour = NA, position = position_dodge(width = 10)) +
+      scale_x_date("month starting", breaks = unique(immu_u5$month_start),
+        labels = unique(immu_u5$month_start), date_labels = "%d-%m-%Y") +
+      scale_y_continuous("percent immune", labels = percent, 
+        breaks = seq(0, 1, 0.2), expand = c(0,0), limits = c(0,1)) +
+      # scale_shape_manual("immune to", values = c(0,2)) +
+      facet_wrap(disease ~ ., ncol = 4) +
+      theme_bw() +
+      theme(legend.position = "top", axis.text.x = element_text(angle = 45,
+        hjust = 1, vjust = 1)) +
+      scale_colour_manual("immune to", values = palette_gen[c(7,12)]) +
+      scale_fill_manual("immune to", values = palette_gen[c(7,12)]) +
+      geom_vline(xintercept = as.Date(c("2023-10-07", "2024-02-07")),
+        linetype = "11", linewidth = 0.5, colour = palette_gen[1])
+    
+    # Combined graph
+    ggarrange(plot1, plot2, nrow = 2, ncol = 1, hjust = -0.1,
+      labels = c("all ages", "children under 5yo"), font.label = list(size=11))
+    ggsave(paste(dir_path, 'outputs/' , "prop_immune_combi.png", sep=""),
+      dpi = "print", units = "cm", width = 20, height = 28)
+
+    
+    
+    
+    
+#...............................................................................   
 ### ENDS
 #...............................................................................
