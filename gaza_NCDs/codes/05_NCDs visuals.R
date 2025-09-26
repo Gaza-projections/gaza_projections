@@ -1,5 +1,5 @@
 #...............................................................................
-### + GAZA CRISIS: HEALTH IMPACT PROJECTIONS - NCD ++ ###
+### ++++++++++++ GAZA CRISIS: HEALTH IMPACT PROJECTIONS - NCD ++++++++++++++ ###
 #...............................................................................
 
 #...............................................................................
@@ -39,7 +39,7 @@ dir_path <- paste(dirname(rstudioapi::getActiveDocumentContext()$path  )
                   , "/", sep = "")
 setwd(dir_path)
 print( getwd() )
-dir_path <- gsub("/code", "", dir_path)
+dir_path <- gsub("/gaza_NCDs/codes", "", dir_path)
 
 # Initialise random numbers
 set.seed(123)
@@ -48,8 +48,8 @@ set.seed(123)
 
 #...................................      
 ## Prepare for plotting
-# Set working directory to where this file is stored
-NCD <- read_excel("20240212_long_modules_new.xlsx")
+# Read output
+NCD <- read_excel(paste0(dir_path, "/out/gaza_overall_data.xlsx"))
 
 # Colour-blind palette for graphing
 # general palette
@@ -162,4 +162,5 @@ print(plot)
 
 # Save
 
-ggsave("/output/NCD_excess.png", plot, width = 20, height = 20, units = "cm", bg = "white")
+ggsave("/Gaza_NCDs/outputs/NCD_excess.png", plot, width = 20, height = 20, units = "cm", bg = "white")
+
