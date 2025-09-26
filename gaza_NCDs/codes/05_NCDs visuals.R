@@ -158,10 +158,9 @@ plot <- ggplot(data = df1,
             aes(y = mean + mean_base, x = scenario, label = labels),
             nudge_x = 0.3, nudge_y = (df1$mean[!is.na(df1$labels)] + df1$mean_base[!is.na(df1$labels)]) * 0.05, size = 3.5)
 
-print(plot)
-
 # Save
 
 ggsave("/Gaza_NCDs/outputs/NCD_excess.png", plot, width = 20, height = 20, units = "cm", bg = "white")
+
 
 
