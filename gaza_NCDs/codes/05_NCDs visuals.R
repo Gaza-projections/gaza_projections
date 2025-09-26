@@ -49,7 +49,7 @@ set.seed(123)
 #...................................      
 ## Prepare for plotting
 # Read output
-NCD <- read_excel(paste0(dir_path, "/out/gaza_overall_data.xlsx"))
+NCD <- read_excel(paste0(dir_path, "/gaza_overall/outputs/gaza_overall_data.xlsx"))
 
 # Colour-blind palette for graphing
 # general palette
@@ -163,4 +163,5 @@ print(plot)
 # Save
 
 ggsave("/Gaza_NCDs/outputs/NCD_excess.png", plot, width = 20, height = 20, units = "cm", bg = "white")
+
 
